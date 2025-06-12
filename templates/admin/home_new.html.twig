@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter une nouvelle maison{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="h3 mb-0">Ajouter une nouvelle maison</h1>
+                    </div>
+                    {% if form.vars.errors|length > 0 %}
+                        <div class="alert alert-danger">
+                            {% for error in form.vars.errors %}
+                                {{ error.message }}<br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        {{ form_start(form) }}
+
+                            <div class="mb-3">
+                                {{ form_label(form.region, 'Région') }}
+                                {{ form_widget(form.region, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.region) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.residence, 'Résidence') }}
+                                {{ form_widget(form.residence, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.residence) }}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.nombreChambres, 'Nombre de chambres') }}
+                                    {{ form_widget(form.nombreChambres, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.nombreChambres) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.distancePlage, 'Distance de la plage (km)') }}
+                                    {{ form_widget(form.distancePlage, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.distancePlage) }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.prix, 'Prix') }}
+                                {{ form_widget(form.prix, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.prix) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.maxUsers, 'Nombre de maisons') }}
+                                {{ form_widget(form.maxUsers, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.maxUsers) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.description, 'Description') }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+
+                            <div class="mb-4">
+                                {{ form_label(form.imageFiles, 'Images de la maison') }}
+                                {{ form_widget(form.imageFiles, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'accept': 'image/*',
+                                        'multiple': 'multiple',
+                                        'data-bs-toggle': 'tooltip',
+                                        'title': 'Vous pouvez sélectionner plusieurs images'
+                                    }
+                                }) }}
+                                {{ form_errors(form.imageFiles) }}
+                                <small class="form-text text-muted">
+                                    Formats acceptés: JPG, PNG. Taille maximale: 2MB par image.
+                                </small>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ path('admin_homes') }}" class="btn btn-secondary me-md-2">Annuler</a>
+                                <button type="submit" class="btn btn-primary">Créer la maison</button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Preview images before upload
+    document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+        var preview = document.createElement('div');
+        preview.className = 'mt-2';
+        preview.id = 'imagePreview';
+        
+        // Remove existing preview
+        var existingPreview = document.getElementById('imagePreview');
+        if (existingPreview) {
+            existingPreview.remove();
+        }
+
+        if (this.files) {
+            preview.innerHTML = '<h6>Aperçu des images:</h6><div class="row g-2">';
+            Array.from(this.files).forEach(file => {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.querySelector('.row').innerHTML += `
+                        <div class="col-md-4">
+                            <div class="card">
+                                <img src="${e.target.result}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                            </div>
+                        </div>
+                    `;
+                }
+                reader.readAsDataURL(file);
+            });
+            preview.innerHTML += '</div>';
+            this.parentElement.appendChild(preview);
+        }
+    });
+});
+</script>
+{% endblock %}

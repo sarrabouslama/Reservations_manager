@@ -1,0 +1,166 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des adhérents{% endblock %}
+
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Gestion des adhérents</h1>
+        <a href="{{ path('admin_user_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Ajouter un adhérent
+        </a>
+    </div>
+
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Filtrer les adhérents</h5>
+                        <form method="get" class="row g-3">
+                            <div class="col-md-5">
+                                <label for="matricule" class="form-label">Matricule adhérent</label>
+                                <input class="form-control" type="text" id="matricule" name="matricule" value="{{ app.request.get('matricule') }}">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                            </div>
+                        </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Matricule</th>
+                    <th>Nom</th>
+                    <th>CIN</th>
+                    <th>Actif</th>
+                    <th>Téléphone</th>
+                    <th>SIT</th>
+                    <th>Nombre d'enfants</th>
+                    <th>Emploi</th>
+                    <th>Matricule CNSS</th>
+                    <th>Direction</th>
+                    <th>Email</th>
+                    <th>2024</th>
+                    <th>Rôle</th>
+                    <th>Voir Profile</th>
+                    <th>Voir Réservation</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if users is empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">Aucun adhérent trouvé.</td>
+                    </tr>
+                {% else %}
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.matricule }}</td>
+                            <td>{{ user.nom }}</td>
+                            <td>{{ user.cin }}</td>
+                            <td>{{ user.actif }}</td>
+                            <td>{{ user.tel }}</td>
+                            <td>{{ user.sit }}</td>
+                            <td>{{ user.NbEnfants }}</td>
+                            <td>{{ user.emploi }}</td>
+                            <td>{{ user.MatriculeCnss }}</td>
+                            <td>{{ user.direction }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.lastYear }}</td>
+                            <td>
+                                {% if 'ROLE_ADMIN' in user.roles %}
+                                    <span class="badge bg-danger">ADMIN</span>
+                                {% else %}
+                                    <span class="badge bg-primary">ADHERENT</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>
+                                    <a href="{{ path('app_user_profile', {'id': user.id}) }}"><i class="fa-solid fa-circle-user fa-xl"></i></a>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <a class="nav-link" href="{{ path('app_user_reservation' , {'id':user.id })  }}"><i class="fa-regular fa-calendar fa-xl"></i></a>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ path('admin_user_delete', {'id': user.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet adhérent ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage > 1 %}{{ path('admin_users', {page: currentPage-1}) }}{% else %}#{% endif %}" tabindex="-1">Previous</a>
+                </li>
+
+                {# Always show first page #}
+                <li class="page-item {% if 1 == currentPage %}active{% endif %}">
+                    <a class="page-link" href="{{ path('admin_users', {page: 1}) }}">1</a>
+                </li>
+
+                {# Show ... if needed #}
+                {% if currentPage > 3 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+
+                {# Show currentPage-1 if it's not 1 or last #}
+                {% if currentPage-1 > 1 and currentPage-1 < totalPages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('admin_users', {page: currentPage-1}) }}">{{ currentPage-1 }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show currentPage if it's not 1 or last #}
+                {% if currentPage != 1 and currentPage != totalPages %}
+                    <li class="page-item active">
+                        <a class="page-link" href="{{ path('admin_users', {page: currentPage}) }}">{{ currentPage }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show currentPage+1 if it's not 1 or last #}
+                {% if currentPage+1 < totalPages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('admin_users', {page: currentPage+1}) }}">{{ currentPage+1 }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show ... if needed #}
+                {% if currentPage < totalPages-2 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+
+                {# Always show last page if more than 1 #}
+                {% if totalPages > 1 %}
+                    <li class="page-item {% if totalPages == currentPage %}active{% endif %}">
+                        <a class="page-link" href="{{ path('admin_users', {page: totalPages}) }}">{{ totalPages }}</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage < totalPages %}{{ path('admin_users', {page: currentPage+1}) }}{% else %}#{% endif %}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+{% endblock %} 

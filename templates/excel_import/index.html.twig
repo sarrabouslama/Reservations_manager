@@ -1,0 +1,24 @@
+{# templates/excel_import/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Import Excel{% endblock %}
+
+{% block body %}
+    <h1>Import Excel File</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    {{ form_start(form, {'attr': {'class': 'mb-3'}}) }}
+        <div class="mb-3">
+            {{ form_label(form.excelFile) }}
+            {{ form_widget(form.excelFile, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.excelFile) }}
+        </div>
+        {{ form_widget(form.submit, {'attr': {'class': 'btn btn-primary'}}) }}
+    {{ form_end(form) }}
+{% endblock %}

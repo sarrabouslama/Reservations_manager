@@ -1,0 +1,129 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'adhérent {% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="h3 mb-0">Modifier l'adhérent {{user.nom}}</h1>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form_label(form.matricule, 'Matricule') }}
+                                        {{ form_widget(form.matricule, {'attr': {'class': 'form-control'}}) }}
+                                        {{ form_errors(form.matricule) }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form_label(form.cin, 'CIN') }}
+                                        {{ form_widget(form.cin, {'attr': {'class': 'form-control'}}) }}
+                                        {{ form_errors(form.cin) }}
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <div class="mb-3">
+                                {{ form_label(form.nom, 'Nom') }}
+                                {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.nom) }}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.email, 'Email') }}
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.email) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.tel, 'Téléphone') }}
+                                    {{ form_widget(form.tel, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.tel) }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.sit, 'Situation') }}
+                                    {{ form_widget(form.sit, {'attr': {'class': 'form-select'}}) }}
+                                    {{ form_errors(form.sit) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.Nb_enfants, "Nombre d'enfants") }}
+                                    {{ form_widget(form.Nb_enfants, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.Nb_enfants) }}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.emploi, 'Emploi') }}
+                                    {{ form_widget(form.emploi, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.emploi) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.Matricule_cnss, 'Matricule CNSS') }}
+                                    {{ form_widget(form.Matricule_cnss, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.Matricule_cnss) }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.direction, 'Direction') }}
+                                {{ form_widget(form.direction, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.direction) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.imageFile, 'Photo') }}
+                                {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.imageFile) }}
+                            </div>
+
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <div class="form-check mb-3">
+                                    {{ form_widget(form.lastYear, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(form.lastYear, "L'adhérent est-il sélectionné la dernière année ?", {'label_attr': {'class': 'form-check-label'}}) }}
+                                    {{ form_errors(form.lastYear) }}
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    {{ form_widget(form.actif, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(form.actif, 'Actif', {'label_attr': {'class': 'form-check-label'}}) }}
+                                    {{ form_errors(form.actif) }}
+                                </div>
+                            {% endif %}
+
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ path('admin_users') }}" class="btn btn-secondary me-md-2">Annuler</a>
+                                <button type="submit" class="btn btn-primary">Modifier</button>
+                            </div>
+                        {{ form_end(form) }}
+
+                        {% if user.image %}
+                            <div class="mb-2">
+                                <h5>Photo de profil</h5>
+                                <img src="{{ asset('uploads/user_images/' ~ user.image) }}" 
+                                    alt="Photo de profil"
+                                    class="card-img-top" 
+                                    style="height: 150px; object-fit: cover;">
+                                <div class="card-body p-2 text-center">
+                                    <form method="post" action="{{ path('user_delete_image', {'id': user.id}) }}" style="display:inline;" onsubmit="return confirm('Supprimer la photo ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_image' ~ user.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

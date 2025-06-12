@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="fa-regular fa-bell"></i> Notifications</h2>
+    {% if notifications is not empty %}
+        <ul class="list-group">
+            {% for notification in notifications %}
+                <li class="list-group-item d-flex justify-content-between align-items-center
+                    {% if not notification.isRead %}list-group-item-info{% endif %}">
+                    <div>
+                        {% if not notification.isRead %}
+                            <i class="fa-solid fa-circle text-primary me-2" title="Non lu"></i>
+                        {% else %}
+                            <i class="fa-regular fa-circle text-secondary me-2" title="Lu"></i>
+                        {% endif %}
+                        {{ notification.message }}
+                        <br>
+                        <small class="text-muted">{{ notification.createdAt|date('d/m/Y H:i') }}</small>
+                    </div>
+                    <div>
+                        {% if not notification.isRead %}
+                            <form action="{{ path('notification_mark_read', {'id': notification.id}) }}" method="post" style="display:inline;">
+                                <button class="btn btn-sm btn-outline-success" title="Marquer comme lue">
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                            </form>
+                        {% else %}
+                            <form action="{{ path('notification_mark_unread', {'id': notification.id}) }}" method="post" style="display:inline;">
+                                <button class="btn btn-sm btn-outline-secondary" title="Marquer comme non lue">
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-info mt-3">Aucune notification pour le moment.</div>
+    {% endif %}
+</div>
+{% endblock %}

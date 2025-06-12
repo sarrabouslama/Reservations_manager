@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Complétez vos informations{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow border-0">
+                <div class="card-body p-4">
+                    <h4 class="mb-4 text-primary text-center">
+                        Veuillez compléter vos informations de contact
+                    </h4>
+                    {{ form_start(form) }}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.email.vars.id }}">
+                                <i class="fas fa-envelope me-1 text-secondary"></i>
+                                Email
+                            </label>
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Votre email'}}) }}
+                            {{ form_errors(form.email) }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.tel.vars.id }}">
+                                <i class="fas fa-phone me-1 text-secondary"></i>
+                                Téléphone
+                            </label>
+                            {{ form_widget(form.tel, {'attr': {'class': 'form-control', 'placeholder': 'Votre numéro de téléphone'}}) }}
+                            {{ form_errors(form.tel) }}
+                        </div>
+                        <input type="hidden" name="dateDebut" value="{{ app.request.get('dateDebut') }}">
+                        <input type="hidden" name="dateFin" value="{{ app.request.get('dateFin') }}">
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check me-1"></i> Valider
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

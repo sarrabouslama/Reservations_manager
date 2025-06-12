@@ -1,0 +1,143 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ home.nom }} - Détails{% endblock %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                {% if home.images|length > 1 %}
+                    <div id="homeImagesCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for image in home.images %}
+                                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height:500px;">
+                                        <img src="{{ asset('uploads/home_images/' ~ image.filename) }}"
+                                            class="img-fluid rounded"
+                                            style="max-height:100%; max-width:100%;"
+                                            alt="Image {{ loop.index }}">
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#homeImagesCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color : grey"></span>
+                            <span class="visually-hidden">Précédent</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#homeImagesCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true" style="background-color : grey"></span>
+                            <span class="visually-hidden">Suivant</span>
+                        </button>
+                        <div class="carousel-indicators">
+                            {% for image in home.images %}
+                                <button type="button" data-bs-target="#homeImagesCarousel" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %} aria-current="true" aria-label="Image {{ loop.index }}"></button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% elseif home.images|length == 1 %}
+                    <div class="mb-4 text-center">
+                        <img src="{{ asset('uploads/home_images/' ~ home.images|first.filename) }}" class="img-fluid rounded" style="max-height:350px;object-fit:cover;" alt="Image">
+                    </div>
+                {% else %}
+                    <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center mb-4" style="height: 220px;">
+                        <i class="fas fa-home fa-3x"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h2 class="card-title">{{ home.nom }}</h2>
+                    <br>
+                    <div class="row mb-4 justify-content-center">
+                        <div class="col-md-4">
+                            <p class="mb-2 fs-5">
+                                <i class="fas fa-map-marker-alt text-danger"></i> <strong>Région:</strong> {{ home.region }}<br>
+                            </p>
+                            <p class="mb-2 fs-5">
+                                <i class="fa-solid fa-house text-primary"></i> <strong>Résidence:</strong> {{ home.residence }}<br>
+                            </p>
+                            <p class="mb-2 fs-5">
+                                <i class="fas fa-bed text-info"></i> <strong>Chambres:</strong> {{ home.nombreChambres }}<br>
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p class="mb-2 fs-5">
+                                <i class="fas fa-umbrella-beach text-warning"></i> <strong>Distance de la plage:</strong> {{ home.distancePlage }} km<br>
+                            </p>
+                            <p class="mb-2 fs-5">
+                                <i class="fa-solid fa-money-bill text-success"></i> <strong>Prix:</strong> {{ home.prix }} dt
+                            </p>
+                        </div>
+                    </div>
+                    {% if home.description %}
+                        <h5>Description</h5>
+                        <p class="card-text">{{ home.description|nl2br }}</p>
+                    {% endif %}
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mt-4">Périodes disponibles</h5>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <a href="{{ path('admin_new_period', {'id': home.id}) }}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Ajouter une Période
+                                </a>
+                            {% endif %}
+                        </div>
+
+            
+                    {% if home.homePeriods|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Période</th>
+                                        <th>Nombre de réservations</th>
+                                        <th>Nombre de maisons</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for period in home.homePeriods|sort((a, b) => a.dateDebut <=> b.dateDebut) %}
+                                        <tr>
+                                            <td>
+                                                {{ period.dateDebut|date('d/m/Y') }} - {{ period.dateFin|date('d/m/Y') }}
+                                            </td>
+                                            <td id="reservation-count-{{ period.id }}">
+                                                {{ period.reservations|length }} 
+                                            </td>
+                                            <td>
+                                                {{ home.getMaxUsers() }}
+                                            </td>
+                                            <td>
+                                            {% if is_granted('ROLE_ADMIN') %}
+                                                    <div class="btn-group">
+                                                        <a href="{{path('admin_edit_period', {'id' : period.id}) }}" class="btn btn-sm btn-outline-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <form action="{{ path('admin_delete_period', {'id': period.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette période ?');">
+                                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ period.id) }}">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                {% else %}
+                                                    <form method="post" action="{{ path('app_reservation_new', {'id': home.id}) }}" class="d-inline reserve-form" data-period-id="{{ period.id }}">
+                                                        <input type="hidden" name="dateDebut" value="{{ period.dateDebut|date('Y-m-d') }}">
+                                                        <input type="hidden" name="dateFin" value="{{ period.dateFin|date('Y-m-d') }}">
+                                                        <button type="submit" class="btn btn-sm btn-primary">Réserver</button>
+                                                    </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Aucune période n'est actuellement disponible pour cette maison.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+{% endblock %}

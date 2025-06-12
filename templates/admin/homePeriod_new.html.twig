@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter une nouvelle Période{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="h3 mb-0">Ajouter une nouvelle Période pour {% if home is defined %}{{ home.nom }}{% else %}toutes les maisons{% endif %}</h1>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            <div class="mb-3">
+                                {{ form_label(form.dateDebut, 'Date de début') }}
+                                <div class="input-group" id="dateDebutPicker" data-td-target-input="nearest" data-td-target="#dateDebut">
+                                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control', 'data-td-target': '#dateDebut', 'id': 'dateDebut', 'autocomplete': 'off'}}) }}
+                                    <span class="input-group-text" data-td-target="#dateDebut" data-td-toggle="datetimepicker">
+                                        <i class="fa-regular fa-calendar"></i>
+                                    </span>
+                                </div>
+                                {{ form_errors(form.dateDebut) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(form.dateFin, 'Date de fin') }}
+                                <div class="input-group" id="dateFinPicker" data-td-target-input="nearest" data-td-target="#dateFin">
+                                    {{ form_widget(form.dateFin, {'attr': {'class': 'form-control', 'data-td-target': '#dateFin', 'id': 'dateFin', 'autocomplete': 'off'}}) }}
+                                    <span class="input-group-text" data-td-target="#dateFin" data-td-toggle="datetimepicker">
+                                        <i class="fa-regular fa-calendar"></i>
+                                    </span>
+                                </div>
+                                {{ form_errors(form.dateFin) }}
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                {% if home is defined %}
+                                    <a href="{{ path('admin_new_period', {'id':home.id}) }}" class="btn btn-secondary me-md-2">Annuler</a>
+                                {% else %}
+                                    <a href="{{ path('admin_homes') }}" class="btn btn-secondary me-md-2">Annuler</a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary">Ajouter la période</button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the DOM elements for the pickers
+    const dateDebutElement = document.getElementById('dateDebutPicker');
+    const dateFinElement = document.getElementById('dateFinPicker');
+
+    // Common options for the pickers
+    const pickerOptions = {
+        localization: {
+            format: 'dd/MM/yyyy'
+        },
+        display: {
+            components: {
+                clock: false
+            }
+        },
+        // Important: This allows the picker to correctly parse dates
+        // that are passed to it as standard JS Date objects.
+        useCurrent: false 
+    };
+
+    // Initialize both pickers
+    const dateDebutPicker = new tempusDominus.TempusDominus(dateDebutElement, pickerOptions);
+    const dateFinPicker = new tempusDominus.TempusDominus(dateFinElement, pickerOptions);
+
+    // Add an event listener to the start date picker's element
+    dateDebutElement.addEventListener('change.td', function(event) {
+        // The selected date object from the first picker
+        const startDateObject = event.detail.date;
+
+        // Check if a date was selected (it's null if cleared)
+        if (startDateObject) {
+            // 1. Convert the picker's date object to a standard JS Date.
+            const nativeStartDate = new Date(startDateObject);
+
+            // 2. Create the new end date using standard JS Date methods.
+            const nativeEndDate = new Date(nativeStartDate.getTime());
+            nativeEndDate.setDate(nativeEndDate.getDate() + 7);
+
+            // 3. IMPORTANT: Create a *new* TempusDominus DateTime object from our native date.
+            // This is the object that the second picker's setValue function expects.
+            const newEndDateForPicker = new tempusDominus.DateTime(nativeEndDate);
+
+            // 4. Set the value on the second picker.
+            dateFinPicker.dates.setValue(newEndDateForPicker);
+            
+        } else {
+            // If the start date was cleared, clear the end date too.
+            dateFinPicker.dates.clear();
+        }
+    });
+});
+</script>
+{% endblock %}

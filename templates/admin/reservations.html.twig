@@ -1,0 +1,207 @@
+{% extends 'filtre.html.twig' %}
+
+{% block title %}Gestion des Réservations{% endblock %}
+
+{% block body %}
+    <h1 class="mb-4">Gestion des Réservations</h1>
+
+    {{ parent() }}
+
+    {% if region and residence and nombreChambres %}
+        <div class="col-md-12">
+            <a href="{{ path('admin_random_selection', {
+                residence: residence,
+                region: region,
+                nombreChambres: nombreChambres
+            }) }}" class="btn btn-outline-danger w-100">
+                <i class="fa-solid fa-shuffle"></i>Tirage au sort
+            </a>        
+        </div>
+        <br>
+    {% endif %}
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Statut</th>
+                    <th>ID</th>
+                    <th>Maison</th>
+                    <th>Matricule Utilisateur</th>
+                    <th>Date de début</th>
+                    <th>Date de fin</th>
+                    <th>Maison 2024</th>
+                    <th>Actions</th>
+                    <th>Supprimer réservation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set lastHome = null %}
+                {% set lastPeriod = null %}
+                {% for reservation in reservations %}
+                    {# Separator between homes (smaller) #}
+                    {% if lastHome is not same as(reservation.homePeriod.home.id) and lastHome is not null %}
+                        <tr>
+                            <td colspan="8" style="height: 10px; background: #f8f9fa; padding: 0;"></td>
+                        </tr>
+                    {% endif %}
+                    {# Separator between periods (smaller) #}
+                    {% if lastPeriod is not same as(reservation.homePeriod.id) and lastPeriod is not null and lastHome == reservation.homePeriod.home.id %}
+                        <tr>
+                            <td colspan="8" style="height: 3px; background: #ececec; padding: 0;"></td>
+                        </tr>
+                    {% endif %}
+
+
+                    <tr>
+                        <td>
+                            {% if reservation.isConfirmed %}
+                                <span class="badge bg-primary">Payée</span>
+                            {% elseif reservation.isSelected %}
+                                <span class="badge bg-success">Réservée</span>
+                            {% else %}
+                                <span class="badge bg-warning">En attente</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div>
+                                <a href="{{ path('app_user_reservation' , {'id': reservation.user.id })  }}" class="link-secondary">{{ reservation.id }}</a>
+                            </div>
+                        </td>
+                        <td>
+                            {% if reservation.homePeriod is defined and reservation.homePeriod.home is defined %}
+                                <a href="{{ path('app_home_show', {'id': reservation.homePeriod.home.id}) }}" class="link-secondary">
+                                    {{ reservation.homePeriod.home.nom }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if reservation.user is defined %}
+                                <a href="{{ path('app_user_profile', {'id': reservation.user.id}) }}" class="link-secondary">
+                                    {{ reservation.user.matricule }} 
+                                </a>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if reservation.homePeriod is defined and reservation.homePeriod.dateDebut is defined %}
+                                {{ reservation.homePeriod.dateDebut|date('d/m/Y') }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if reservation.homePeriod is defined and reservation.homePeriod.dateFin is defined %}
+                                {{ reservation.homePeriod.dateFin|date('d/m/Y') }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if reservation.user.lastYear %}
+                                Oui
+                            {% else %}
+                                Non
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                {% if not reservation.isSelected %}
+                                    <form action="{{ path('app_reservation_select', {'id': reservation.id, residence: residence, region: region, nombreChambres: nombreChambres }) }}" method="post" onsubmit="return confirm('sélectionner cette réservation ?');">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm ">
+                                            <i class="fa-solid fa-plus"></i> Sélectionner
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    {% if not reservation.isConfirmed %}
+                                        <form action="{{ path('app_reservation_confirm', {'id': reservation.id, residence: residence, region: region, nombreChambres: nombreChambres }) }}" method="post" onsubmit="return confirm('confirmer cette réservation ?');">
+                                            <button type="submit" class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-check"></i> Confirmer
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    <form action="{{ path('app_reservation_reject', {'id': reservation.id, residence: residence, region: region, nombreChambres: nombreChambres}) }}" method="post" onsubmit="return confirm('Annuler cette réservation ?');">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="fa-solid fa-xmark"></i> Annuler
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                
+                            </div>
+                        </td>
+                        <td>
+                            <form action="{{ path('app_reservation_cancel', {'id': reservation.id, residence: residence, region: region, nombreChambres: nombreChambres}) }}" method="post" onsubmit="return confirm('Supprimer définitivement cette réservation ?');">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% set lastHome = reservation.homePeriod.home.id %}
+                    {% set lastPeriod = reservation.homePeriod.id %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">Aucune réservation.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage > 1 %}{{ path('admin_reservations', {page: currentPage-1, residence: residence, region: region, nombreChambres: nombreChambres}) }}{% else %}#{% endif %}" tabindex="-1">Previous</a>
+                </li>
+
+                {# Always show first page #}
+                <li class="page-item {% if 1 == currentPage %}active{% endif %}">
+                    <a class="page-link" href="{{ path('admin_reservations', {page: 1, residence: residence, region: region, nombreChambres: nombreChambres}) }}">1</a>
+                </li>
+
+                {# Show ... if needed #}
+                {% if currentPage > 3 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+
+                {# Show currentPage-1 if it's not 1 or last #}
+                {% if currentPage-1 > 1 and currentPage-1 < totalPages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('admin_reservations', {page: currentPage-1, residence: residence, region: region, nombreChambres: nombreChambres}) }}">{{ currentPage-1 }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show currentPage if it's not 1 or last #}
+                {% if currentPage != 1 and currentPage != totalPages %}
+                    <li class="page-item active">
+                        <a class="page-link" href="{{ path('admin_reservations', {page: currentPage, residence: residence, region: region, nombreChambres: nombreChambres}) }}">{{ currentPage }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show currentPage+1 if it's not 1 or last #}
+                {% if currentPage+1 < totalPages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('admin_reservations', {page: currentPage+1, residence: residence, region: region, nombreChambres: nombreChambres}) }}">{{ currentPage+1 }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show ... if needed #}
+                {% if currentPage < totalPages-2 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+
+                {# Always show last page if more than 1 #}
+                {% if totalPages > 1 %}
+                    <li class="page-item {% if totalPages == currentPage %}active{% endif %}">
+                        <a class="page-link" href="{{ path('admin_reservations', {page: totalPages, residence: residence, region: region, nombreChambres: nombreChambres}) }}">{{ totalPages }}</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage < totalPages %}{{ path('admin_reservations', {page: currentPage+1, residence: residence, region: region, nombreChambres: nombreChambres}) }}{% else %}#{% endif %}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+{% endblock %}

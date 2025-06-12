@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réservation{% endblock %}
+
+{% block body %}
+    <div class="container my-5">
+        {% if reservations is not empty %}
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    {% for reservation in reservations %}
+                        <div class="card shadow-lg mb-5 border-0" style="font-size: 1.2rem;">
+                            <div class="card-body p-5">
+                                <div class="d-flex align-items-center mb-4">
+                                    <i class="fa-solid fa-house fa-3x text-primary me-4"></i>
+                                    <div>
+                                        <h3 class="mb-1 fw-bold">{{ reservation.homePeriod.home.nom }}</h3>
+                                        <span class="text-muted fs-5">{{ reservation.homePeriod.home.region }}</span>
+                                    </div>
+                                </div>
+                                <ul class="list-group list-group-flush mb-4 fs-5">
+                                    <li class="list-group-item px-0 py-2">
+                                        <strong>Période :</strong>
+                                        {{ reservation.homePeriod.dateDebut|date('d/m/Y') }} - {{ reservation.homePeriod.dateFin|date('d/m/Y') }}
+                                    </li>
+                                    <li class="list-group-item px-0 py-2">
+                                        <strong>État :</strong>
+                                        {% if reservation.isConfirmed %}
+                                            <span class="badge bg-success fs-6 py-2 px-3">Confirmée</span>
+                                        {% elseif reservation.isSelected %}
+                                            <span class="badge bg-primary fs-6 py-2 px-3">Réservée</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark fs-6 py-2 px-3">En attente</span>
+                                        {% endif %}
+                                    </li>
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <li class="list-group-item px-0 py-2">
+                                            <strong>Adhérent :</strong>
+                                            <a href="{{ path('app_user_profile', {'id': reservation.user.id}) }}" class="fw-bold">
+                                                {{ reservation.user.nom }}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                                <div class="d-flex flex-wrap gap-3 justify-content-end mt-4">
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        {% if not reservation.isSelected %}
+                                            <form action="{{ path('app_reservation_select', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('sélectionner cette réservation ?');">
+                                                <button type="submit" class="btn btn-outline-primary btn-lg">
+                                                    <i class="fa-solid fa-plus"></i> Sélectionner
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            {% if not reservation.isConfirmed %}
+                                                <form action="{{ path('app_reservation_confirm', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('confirmer cette réservation ?');">
+                                                    <button type="submit" class="btn btn-outline-success btn-lg">
+                                                        <i class="fas fa-check"></i> Confirmer
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                            <form action="{{ path('app_reservation_reject', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Annuler cette réservation ?');">
+                                                <button type="submit" class="btn btn-outline-danger btn-lg">
+                                                    <i class="fa-solid fa-xmark"></i> Annuler
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    {% endif %}
+                                    <form action="{{ path('app_reservation_cancel', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Supprimer définitivement cette réservation ?');">
+                                        <button type="submit" class="btn btn-danger btn-lg">
+                                            <i class="fa-solid fa-trash"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info mt-5 text-center fs-4">Vous n'avez pas de réservation en cours.</div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow border-0">
+                    <div class="card-body p-5">
+                        <div class="d-flex align-items-center mb-5">
+                            {% if user.image %}
+                                <img src="{{ asset('uploads/user_images/' ~ user.image) }}"
+                                    alt="{{ user.nom }}"
+                                    class="rounded-circle me-4 "
+                                    style="width: 180px; height: 180px; object-fit: cover;">
+                            {% else %}
+                                <div class="me-4 d-flex align-items-center justify-content-center rounded-circle bg-light "
+                                    style="width: 180px; height: 180px;">
+                                    <i class="fa-solid fa-user-circle fa-4x text-primary"></i>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <h1 class="card-title mb-2 fw-bold fs-2">{{ user.nom }}</h1>
+                                {% if 'ROLE_ADMIN' in user.roles %}
+                                    <span class="badge bg-primary fs-5">Profil admin</span>
+                                {% else %}
+                                    <span class="badge bg-secondary fs-5">Profil adhérent</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <ul class="list-group list-group-flush mb-5 fs-4">
+                            <li class="list-group-item"><strong>Matricule :</strong> {{ user.matricule }}</li>
+                            <li class="list-group-item"><strong>CIN :</strong> {{ user.cin }}</li>
+                            <li class="list-group-item"><strong>Téléphone :</strong> {{ user.tel }}</li>
+                            <li class="list-group-item"><strong>Email :</strong> {{ user.email }}</li>
+                            <li class="list-group-item"><strong>Direction :</strong> {{ user.direction }}</li>
+                        </ul>
+                        <div class="d-flex justify-content-end gap-3">
+                            <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-outline-primary btn-lg d-flex align-items-center px-4">
+                                <i class="fa-solid fa-pen me-2"></i> Modifier
+                            </a>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <form action="{{ path('admin_user_delete', {'id': user.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet adhérent ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-lg d-flex align-items-center px-4">
+                                        <i class="fas fa-trash me-2"></i> Supprimer
+                                    </button>
+                                </form>
+                            {% endif %}
+                            {% if 'ROLE_ADMIN' not in user.roles %}
+                                <a href="{{ path('app_user_reservation', {'id': user.id}) }}" class="btn btn-outline-secondary btn-lg d-flex align-items-center px-4">
+                                    <i class="fa-regular fa-calendar me-2"></i> Réservation
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

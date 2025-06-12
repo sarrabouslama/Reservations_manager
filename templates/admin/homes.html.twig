@@ -1,0 +1,124 @@
+{% extends 'filtre.html.twig' %}
+
+{% block title %}Gestion des maisons{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Gestion des maisons</h1>
+            <div class='btn-group gap-3'>
+                <a href="{{ path('admin_home_new') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-plus"></i> Ajouter une maison
+                </a>
+                <a href="{{ path('admin_add_all_periods') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-plus"></i> Ajouter une période pour toutes les maisons
+                </a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Région</th>
+                        <th>Résidence</th>
+                        <th>Chambres</th>
+                        <th>Nombre de maisons</th>
+                        <th>Distance plage</th>
+                        <th>Prix</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for home in homes %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('app_home_show', {'id': home.id}) }}">{{ home.nom }}</a>
+                            </td>
+                            <td>{{ home.region }}</td>
+                            <td>{{ home.residence }}</td>
+                            <td>S+ {{ home.nombreChambres }}</td>
+                            <td>{{ home.maxUsers }}</td>
+                            <td>{{ home.distancePlage }} km</td>
+                            <td>{{ home.prix }}TND</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ path('admin_home_edit', {'id': home.id}) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ path('admin_home_delete', {'id': home.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette maison ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ home.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">Aucune maison trouvée</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage > 1 %}{{ path('admin_homes', {page: currentPage-1}) }}{% else %}#{% endif %}" tabindex="-1">Previous</a>
+                </li>
+
+                {# Always show first page #}
+                <li class="page-item {% if 1 == currentPage %}active{% endif %}">
+                    <a class="page-link" href="{{ path('admin_homes', {page: 1}) }}">1</a>
+                </li>
+
+                {# Show ... if needed #}
+                {% if currentPage > 3 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+
+                {# Show currentPage-1 if it's not 1 or last #}
+                {% if currentPage-1 > 1 and currentPage-1 < totalPages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('admin_homes', {page: currentPage-1}) }}">{{ currentPage-1 }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show currentPage if it's not 1 or last #}
+                {% if currentPage != 1 and currentPage != totalPages %}
+                    <li class="page-item active">
+                        <a class="page-link" href="{{ path('admin_homes', {page: currentPage}) }}">{{ currentPage }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show currentPage+1 if it's not 1 or last #}
+                {% if currentPage+1 < totalPages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('admin_homes', {page: currentPage+1}) }}">{{ currentPage+1 }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show ... if needed #}
+                {% if currentPage < totalPages-2 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+
+                {# Always show last page if more than 1 #}
+                {% if totalPages > 1 %}
+                    <li class="page-item {% if totalPages == currentPage %}active{% endif %}">
+                        <a class="page-link" href="{{ path('admin_homes', {page: totalPages}) }}">{{ totalPages }}</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage < totalPages %}{{ path('admin_homes', {page: currentPage+1}) }}{% else %}#{% endif %}">Next</a>
+                </li>
+            </ul>
+        </nav>
+        </div>
+    </div>
+{% endblock %}

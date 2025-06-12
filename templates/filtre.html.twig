@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="row mb-4">  
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Filtrer les Maisons</h5>
+                    <form method="get" class="row g-3" id="filterform">
+                        <div class="col-md-3">
+                            <label for="region" class="form-label">Region</label>
+                                <select class="form-select" id="region" name="region">
+                                <option value="">Tous</option>
+                                {% for Region in allRegions %}
+                                    <option value="{{ Region|join('') }}" {% if app.request.get('region') == Region|join('') %}selected{% endif %}>{{ Region|join('') }}</option>
+
+                                {% endfor %}
+                            </select>                        
+                        </div>
+                        <div class="col-md-3">
+                            <label for="residence" class="form-label">Résidence</label>
+                                <select class="form-select" id="residence" name="residence">
+                                <option value="">Tous</option>
+                                {% for Residence in allResidences %}
+                                    <option value="{{ Residence|join('') }}" {% if app.request.get('residence') == Residence|join('') %}selected{% endif %}>{{ Residence|join('') }}</option>
+                                {% endfor %}
+                            </select>                        
+                        </div>
+                        <div class="col-md-3">
+                            <label for="nombreChambres" class="form-label">Nombre de Chambres</label>
+                            <select class="form-select" id="nombreChambres" name="nombreChambres">
+                                <option value="">Tous</option>
+                                {% for NbChambres in allNbChambres %}
+                                    <option value="{{ NbChambres|join('') }}" {% if app.request.get('nombreChambres') == NbChambres|join('') %}selected{% endif %}>{{ NbChambres|join('') }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-secondary w-100" onclick="window.location.href='{{ path(app.request.attributes.get('_route')) }}'">
+                            Réinitialiser
+                        </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.querySelectorAll('#filterform select').forEach(function(select) {
+            select.addEventListener('change', function() {
+                document.getElementById('filterform').submit();
+            });
+        });
+    </script>
+{% endblock %}
