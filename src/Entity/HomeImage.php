@@ -20,6 +20,9 @@ class HomeImage
     #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
     private ?Home $home = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $type = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +48,18 @@ class HomeImage
     public function setHome(?Home $home): static
     {
         $this->home = $home;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }

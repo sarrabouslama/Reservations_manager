@@ -38,6 +38,19 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
+    public function findAllMatriculesIndexedById(): array
+    {
+        $results = $this->createQueryBuilder('u')
+            ->select('u.id, u.matricule')
+            ->getQuery()
+            ->getArrayResult();
+
+        $map = [];
+        foreach ($results as $row) {
+            $map[$row['matricule']] = $row['id'];
+        }
+        return $map;
+    }
    
 
     

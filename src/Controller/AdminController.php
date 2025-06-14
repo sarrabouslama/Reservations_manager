@@ -137,6 +137,10 @@ class AdminController extends AbstractController
             $this->addFlash('danger','adhérent non trouvé');
             return $this->redirectToRoute('admin_users');
         }
+        if (in_array('ROLE_ADMIN', $user->getRoles())) {
+            $this->addFlash('danger','Vous ne pouvez pas supprimer un administrateur');
+            return $this->redirectToRoute('admin_users');
+        }
         if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
             // Delete user image if exists
             if ($user->getImage()) {
@@ -159,7 +163,7 @@ class AdminController extends AbstractController
 
 
 
-        #[Route('/reservations', name: 'admin_reservations', methods: ['GET'])]
+    #[Route('/reservations', name: 'admin_reservations', methods: ['GET'])]
     public function Reservations(Request $request, ReservationRepository $reservationRepository, HomeRepository $homeRepository): Response
     {
         $page = max(1, $request->query->getInt('page', 1));
@@ -204,6 +208,7 @@ class AdminController extends AbstractController
 
         return $this->render('admin/reservations.html.twig', [
             'reservations' => $reservations,
+            'homes' => $homeRepository->findByFilters($filters),
             'allResidences' => $homeRepository->findAllResidences($filters),
             'allRegions' => $homeRepository->findAllRegions($filters),
             'allNbChambres' => $homeRepository->findAllNbChambres($filters),
@@ -219,6 +224,7 @@ class AdminController extends AbstractController
     public function randomSelection(
         Request $request,
         HomePeriodRepository $homePeriodRepository,
+        HomeRepository $homeRepository,
         ReservationRepository $reservationRepository,
         EntityManagerInterface $entityManager
     ): Response {
@@ -239,6 +245,20 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_reservations', $filters);
         }
 
+        $home = $homeRepository->findByFilters($filters);
+
+        if (empty($home)) {
+            $this->addFlash('info', 'Aucune maison trouvée pour les filtres sélectionnés.');
+            return $this->redirectToRoute('admin_reservations', $filters);
+        }
+
+        foreach ($home as $h) {
+            if ($h->isBloqued()) {
+                $this->addFlash('danger', 'La maison sélectionnée est bloquée. Veuillez choisir une autre maison.');
+                return $this->redirectToRoute('admin_reservations', $filters);
+            }
+        }
+
         $allReservationsForPeriods = $reservationRepository->findBy(['homePeriod' => $homePeriods]);
 
         $reservationsByPeriod = [];
@@ -256,22 +276,25 @@ class AdminController extends AbstractController
 
             $periodReservations = $reservationsByPeriod[$period->getId()] ?? [];
 
-            $alreadySelected = array_filter($periodReservations, fn($r) => $r->isSelected());
-            $notSelected = array_filter($periodReservations, fn($r) => !$r->isSelected());
+            foreach ($periodReservations as $reservation) {
+                $reservation ->setIsSelected(false);
+                $reservation ->setDateSelection(null);
+                $reservation ->setIsConfirmed(false);
+                $entityManager -> persist($reservation);
+            }
             
-            $poolNotLastYear = array_filter($notSelected, fn($r) => !$r->getUser()->isLastYear());
-            $poolLastYear = array_filter($notSelected, fn($r) => $r->getUser()->isLastYear());
+            $poolNotLastYear = array_filter($periodReservations, fn($r) => !$r->getUser()->isLastYear());
+            $poolLastYear = array_filter($periodReservations, fn($r) => $r->getUser()->isLastYear());
 
             shuffle($poolNotLastYear);
             shuffle($poolLastYear);
 
-            $spotsToFill = $maxUsers - count($alreadySelected);
-            if ($spotsToFill <= 0) {
+            if ($maxUsers <= 0) {
                 continue;
             }
 
-            $newlySelected = array_slice($poolNotLastYear, 0, $spotsToFill);
-            $spotsRemaining = $spotsToFill - count($newlySelected);
+            $newlySelected = array_slice($poolNotLastYear, 0, $maxUsers);
+            $spotsRemaining = $maxUsers - count($newlySelected);
 
             if ($spotsRemaining > 0) {
                 $newlySelectedFromLastYear = array_slice($poolLastYear, 0, $spotsRemaining);
@@ -304,6 +327,47 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('admin_reservations', $filters);
     }
 
+    #[Route('/reservations/block-selection/{id}', name: 'admin_block_selection', methods: ['GET'])]
+    public function blockSelection(int $id, HomeRepository $homeRepository, EntityManagerInterface $entityManager,Request $request) : Response
+    {
+        $filters = [
+            'residence' => $request->query->get('residence'),
+            'region' => $request->query->get('region'),
+            'nombreChambres' => $request->query->get('nombreChambres'),
+        ];
+
+        $home = $homeRepository->find($id);
+        if (!$home) {
+            $this->addFlash('danger', 'Maison non trouvée.');
+            return $this->redirectToRoute('admin_reservations');
+        }
+        $home->setBloqued(true);
+        $entityManager->persist($home);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('admin_reservations', $filters);
+    }
+
+    #[Route('/reservations/unblock-selection/{id}', name: 'admin_unblock_selection', methods: ['GET'])]
+    public function unblockSelection(int $id, HomeRepository $homeRepository, EntityManagerInterface $entityManager,Request $request) : Response
+    {
+        $filters = [
+            'residence' => $request->query->get('residence'),
+            'region' => $request->query->get('region'),
+            'nombreChambres' => $request->query->get('nombreChambres'),
+        ];
+
+        $home = $homeRepository->find($id);
+        if (!$home) {
+            $this->addFlash('danger', 'Maison non trouvée.');
+            return $this->redirectToRoute('admin_reservations');
+        }
+        $home->setBloqued(false);
+        $entityManager->persist($home);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('admin_reservations', $filters);
+    }
     
     private function getFinalShuffledIds(array $reservations): array
     {
@@ -596,6 +660,7 @@ class AdminController extends AbstractController
             $imageFiles = $form->get('imageFiles')->getData();
             if ($imageFiles) {
                 foreach ($imageFiles as $imageFile) {
+                    $mimeType = $imageFile->getMimeType();
                     $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                     $safeFilename = preg_replace('/[^a-zA-Z0-9_\-]/', '', $originalFilename);
                     $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
@@ -606,13 +671,14 @@ class AdminController extends AbstractController
                             $newFilename
                         );
                     } catch (FileException $e) {
-                        $this->addFlash('error', 'Erreur lors du téléchargement d\'une image');
+                        $this->addFlash('error', 'Erreur lors du téléchargement d\'une image/vidéo');
                         continue;
                     }
 
                     $homeImage = new HomeImage();
                     $homeImage->setFilename($newFilename);
-                    $homeImage->setHome($home);
+                    $homeImage->setType(str_starts_with($mimeType, 'video/') ? 'video' : 'image');
+                    $home->addImage($homeImage);
                     $entityManager->persist($homeImage);
                 }
                 $entityManager->flush();
@@ -643,14 +709,17 @@ class AdminController extends AbstractController
             $home->setNom($form->get('residence')->getData(). ' - S+' . $form->get('nombreChambres')->getData());
             
             if($form->isValid()) {
-                if (count($reservationRepository->findActiveReservationByHome($home)) > $form->get('maxUsers')->getData()) {
-                    $this->addFlash('danger', 'Cette maison contient des réservations sélectionnées. Vous ne pouvez pas décrémenter le nombre de maisons.');
-                    return $this->redirectToRoute('app_home_show', ['id' => $home->getId()]);
+                foreach ($home->getHomePeriods() as $period) {
+                    if (count($reservationRepository->findActiveReservationByHomePeriod($period)) > $form->get('maxUsers')->getData()) {
+                        $this->addFlash('danger', 'Cette maison contient des réservations sélectionnées. Vous ne pouvez pas décrémenter le nombre de maisons.');
+                        return $this->redirectToRoute('app_home_show', ['id' => $home->getId()]);
+                    }
                 }
                 // Then handle the images
                 $imageFiles = $form->get('imageFiles')->getData();
                 if ($imageFiles) {
                     foreach ($imageFiles as $imageFile) {
+                        $mimeType = $imageFile->getMimeType();
                         $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
                         $safeFilename = preg_replace('/[^a-zA-Z0-9_\-]/', '', $originalFilename);
                         $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
@@ -676,6 +745,7 @@ class AdminController extends AbstractController
                         $homeImage = new HomeImage();
                         $homeImage->setFilename($newFilename);
                         $homeImage->setHome($home);
+                        $homeImage->setType(str_starts_with($mimeType, 'video/') ? 'video' : 'image');
                         $home->addImage($homeImage);
                         $entityManager->persist($homeImage);
                     }
@@ -861,6 +931,12 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_homes');
         }
 
+        $home = $homePeriod->getHome();
+        if (!$home) {
+            $this->addFlash('danger','Maison associée à la période non trouvée');
+            return $this->redirectToRoute('admin_homes');
+        }
+
         $form = $this->createForm(HomePeriodType::class, $homePeriod);
         $form->handleRequest($request);
         
@@ -872,7 +948,7 @@ class AdminController extends AbstractController
             // Check if the period overlaps with existing periods
             $existingPeriods = $home->getHomePeriods();
             foreach ($existingPeriods as $period) {
-                if ($homePeriod->getDateDebut() < $period->getDateFin() && $homePeriod->getDateFin() > $period->getDateDebut()) {
+                if ($period->getId()!=$id &&$homePeriod->getDateDebut() < $period->getDateFin() && $homePeriod->getDateFin() > $period->getDateDebut()) {
                     $this->addFlash('danger', 'La période saisie chevauche une période existante.');
                     return $this->redirectToRoute('app_home_show', ['id' => $home->getId()]);
                 }

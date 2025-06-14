@@ -12,10 +12,16 @@
                             {% for image in home.images %}
                                 <div class="carousel-item {% if loop.first %}active{% endif %}">
                                     <div class="bg-light d-flex align-items-center justify-content-center" style="height:500px;">
-                                        <img src="{{ asset('uploads/home_images/' ~ image.filename) }}"
-                                            class="img-fluid rounded"
-                                            style="max-height:100%; max-width:100%;"
-                                            alt="Image {{ loop.index }}">
+                                        {% if image.type == 'video' %}
+                                            <video controls style="max-height:100%; max-width:100%;">
+                                                <source src="{{ asset('uploads/home_images/' ~ image.filename) }}" type="video/mp4">
+                                            </video>
+                                        {% else %}
+                                            <img src="{{ asset('uploads/home_images/' ~ image.filename) }}"
+                                                class="img-fluid rounded"
+                                                style="max-height:100%; max-width:100%;"
+                                                alt="Image {{ loop.index }}">
+                                        {% endif %}
                                     </div>
                                 </div>
                             {% endfor %}

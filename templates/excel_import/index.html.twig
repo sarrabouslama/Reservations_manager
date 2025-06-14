@@ -6,13 +6,6 @@
 {% block body %}
     <h1>Import Excel File</h1>
 
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">{{ message }}</div>
-    {% endfor %}
-
     {{ form_start(form, {'attr': {'class': 'mb-3'}}) }}
         <div class="mb-3">
             {{ form_label(form.excelFile) }}

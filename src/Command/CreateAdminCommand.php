@@ -63,7 +63,6 @@ class CreateAdminCommand extends Command
         $user->setNom($nom);
         $user->setPrenom($prenom);
         $user->setRoles(['ROLE_ADMIN']);
-        $user->setIsBlocked(false);
 
         // Hash the password
         $hashedPassword = $this->passwordHasher->hashPassword($user, $password);

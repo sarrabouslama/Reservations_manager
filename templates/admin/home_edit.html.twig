@@ -56,19 +56,19 @@
                             </div>
 
                             <div class="mb-4">
-                                {{ form_label(form.imageFiles, 'Ajouter des images') }}
+                                {{ form_label(form.imageFiles, 'Ajouter des images ou vidéos') }}
                                 {{ form_widget(form.imageFiles, {
                                     'attr': {
                                         'class': 'form-control',
-                                        'accept': 'image/*',
+                                        'accept': 'image/* video/*',
                                         'multiple': 'multiple',
                                         'data-bs-toggle': 'tooltip',
-                                        'title': 'Vous pouvez sélectionner plusieurs images'
+                                        'title': 'Vous pouvez sélectionner plusieurs images ou vidéos'
                                     }
                                 }) }}
                                 {{ form_errors(form.imageFiles) }}
                                 <small class="form-text text-muted">
-                                    Formats acceptés: JPG, PNG. Taille maximale: 2MB par image.
+                                    Formats acceptés: JPG, PNG, MP4.
                                 </small>
                             </div>
 
@@ -84,10 +84,16 @@
                                         {% for image in home.images %}
                                             <div class="col-md-4">
                                                 <div class="card">
-                                                    <img src="{{ asset('uploads/home_images/' ~ image.filename) }}" 
-                                                         class="card-img-top" 
-                                                         alt="Image {{ loop.index }}"
-                                                         style="height: 150px; object-fit: cover;">
+                                                    {% if image.type == 'video' %}
+                                                        <video controls style="height: 150px; object-fit: cover;">
+                                                            <source src="{{ asset('uploads/home_images/' ~ image.filename) }}" type="video/mp4">
+                                                        </video>
+                                                    {% else %}
+                                                        <img src="{{ asset('uploads/home_images/' ~ image.filename) }}" 
+                                                            class="card-img-top" 
+                                                            alt="Image {{ loop.index }}"
+                                                            style="height: 150px; object-fit: cover;">
+                                                    {% endif %}
                                                     <div class="card-body p-2 text-center">
                                                         <form action="{{ path('admin_home_image_delete', {'id': image.id}) }}" 
                                                               method="post" 
@@ -114,31 +120,36 @@
 
 {% block javascripts %}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            });
+        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+            var preview = document.createElement('div');
+            preview.className = 'mt-2';
+            preview.id = 'imagePreview';
 
-            // Preview images before upload
-            document.querySelector('input[type="file"]').addEventListener('change', function(e) {
-                var preview = document.createElement('div');
-                preview.className = 'mt-2';
-                preview.id = 'imagePreview';
-                
-                // Remove existing preview
-                var existingPreview = document.getElementById('imagePreview');
-                if (existingPreview) {
-                    existingPreview.remove();
-                }
+            // Remove existing preview
+            var existingPreview = document.getElementById('imagePreview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
 
-                if (this.files) {
-                    preview.innerHTML = '<h6>Aperçu des images:</h6><div class="row g-2">';
-                    Array.from(this.files).forEach(file => {
-                        var reader = new FileReader();
-                        reader.onload = function(e) {
-                            preview.querySelector('.row').innerHTML += `
+            if (this.files) {
+                preview.innerHTML = '<h6>Aperçu des fichiers:</h6><div class="row g-2"></div>';
+                Array.from(this.files).forEach(file => {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        let content = '';
+                        if (file.type.startsWith('video/')) {
+                            content = `
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <video controls style="height: 150px; width: 100%; object-fit: cover;">
+                                            <source src="${e.target.result}" type="${file.type}">
+                                            Votre navigateur ne supporte pas la vidéo.
+                                        </video>
+                                    </div>
+                                </div>
+                            `;
+                        } else if (file.type.startsWith('image/')) {
+                            content = `
                                 <div class="col-md-4">
                                     <div class="card">
                                         <img src="${e.target.result}" class="card-img-top" style="height: 150px; object-fit: cover;">
@@ -146,12 +157,13 @@
                                 </div>
                             `;
                         }
-                        reader.readAsDataURL(file);
-                    });
-                    preview.innerHTML += '</div>';
-                    this.parentElement.appendChild(preview);
-                }
-            });
+                        preview.querySelector('.row').innerHTML += content;
+                    }
+                    reader.readAsDataURL(file);
+                });
+                preview.innerHTML += '</div>';
+                this.parentElement.appendChild(preview);
+            }
         });
     </script>
 {% endblock %}

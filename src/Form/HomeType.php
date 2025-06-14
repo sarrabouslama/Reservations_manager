@@ -85,21 +85,20 @@ class HomeType extends AbstractType
                 'required' => false,
                 'multiple' => true,
                 'attr' => [
-                    'accept' => 'image/*',
+                    'accept' => 'image/* video/*',
                     'data-bs-toggle' => 'tooltip',
-                    'title' => 'Vous pouvez sélectionner plusieurs images'
+                    'title' => 'Vous pouvez sélectionner plusieurs images ou vidéos (JPEG, PNG, MP4)',
                 ],
                 'constraints' => [
                     new All([
                         'constraints' => [
                             new File([
-                                'maxSize' => '2M',
                                 'mimeTypes' => [
                                     'image/jpeg',
                                     'image/png',
+                                    'video/mp4',
                                 ],
-                                'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPEG ou PNG)',
-                                'maxSizeMessage' => 'L\'image est trop grande ({{ size }} {{ suffix }}). La taille maximale autorisée est {{ limit }} {{ suffix }}.',
+                                'mimeTypesMessage' => 'Veuillez télécharger une image ou vidéo valide (JPEG ou PNG ou MP4)',
                             ])
                         ]
                     ])

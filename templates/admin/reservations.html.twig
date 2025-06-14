@@ -7,16 +7,38 @@
 
     {{ parent() }}
 
+    <a href="{{ path('export_excel_reservations') }}" class="btn btn-outline-success col-md-12">Télécharger Excel</a>
     {% if region and residence and nombreChambres %}
-        <div class="col-md-12">
-            <a href="{{ path('admin_random_selection', {
-                residence: residence,
-                region: region,
-                nombreChambres: nombreChambres
-            }) }}" class="btn btn-outline-danger w-100">
-                <i class="fa-solid fa-shuffle"></i>Tirage au sort
-            </a>        
-        </div>
+        {% for home in homes %}
+            {% if not home.bloqued %}
+                <div class="col-md-12 d-flex align-items-end">
+                    <a id="random-selection-btn" href="{{ path('admin_random_selection', {
+                        residence: residence,
+                        region: region,
+                        nombreChambres: nombreChambres
+                    }) }}" class="btn btn-outline-danger w-100">
+                        <i class="fa-solid fa-shuffle"></i>Tirage au sort
+                    </a>        
+                    <div class="col-md-2">
+                        <a href="{{ path('admin_block_selection', {
+                            id: home.id,
+                            residence: residence,
+                            region: region,
+                            nombreChambres: nombreChambres
+                        }) }}" class="btn btn-danger w-100">Bloquer</a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-md-12">
+                    <a href="{{ path('admin_unblock_selection', {
+                        id: home.id,
+                        residence: residence,
+                        region: region,
+                        nombreChambres: nombreChambres
+                    }) }}" class="btn btn-danger w-100">Débloquer</a>
+                </div>
+            {% endif %}
+        {% endfor %}
         <br>
     {% endif %}
 

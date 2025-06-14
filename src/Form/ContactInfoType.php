@@ -15,17 +15,25 @@ class ContactInfoType extends AbstractType
     {
         $builder
             ->add('email', EmailType::class, [
-                'label' => 'Email'
+                'label' => 'Email',
+                'attr' => ['placeholder' => 'Entrer email address'],
+                'required' => false,
+                'constraints' => [
+                    new EmailConstraint(['message' => 'Adresse email invalide']),
+                ],
             ])
             ->add('tel', TextType::class, [
-                'required' => true,
                 'label' => 'Téléphone',
+                'attr' => ['placeholder' => 'Entrer numéro de téléphone'],
+                'required' => false,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Veuillez entrer un numéro de téléphone',
+                    new length([
+                        'min' => 8,
+                        'max' => 8,
+                        'minMessage' => 'Le numéro de téléphone doit comporter 8 chiffres',
+                        'maxMessage' => 'Le numéro de téléphone doit comporter 8 chiffres',
                     ]),
                 ],
-
             ]);
     }
 }

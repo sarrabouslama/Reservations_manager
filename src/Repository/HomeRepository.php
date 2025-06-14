@@ -14,16 +14,16 @@ class HomeRepository extends ServiceEntityRepository
         parent::__construct($registry, Home::class);
     }
     
-    public function findByFilters(array $filters = [], int $page = 1, int $limit = 9): array
+    public function findByFilters(array $filters = []): array
     {
         $query = $this->createQueryBuilder('h');
         
         foreach ($filters as $key => $value) {
-        if ($value) {
-            $query->andWhere("h.{$key} = :{$key}")
-               ->setParameter($key, $value );
+            if ($value) {
+                $query->andWhere("h.{$key} = :{$key}")
+                    ->setParameter($key, $value );
+            }
         }
-    }
         
         return $query->getQuery()
             ->getResult();

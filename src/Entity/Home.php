@@ -44,6 +44,9 @@ class Home
 
     #[ORM\Column]
     private ?int $maxUsers = 0;
+
+    #[ORM\Column]
+    private ?bool $bloqued = false;
     
     /**
      * @ORM\OneToMany(targetEntity=HomePeriod::class, mappedBy="home")
@@ -211,6 +214,18 @@ class Home
     public function setMaxUsers(int $maxUsers): static
     {
         $this->maxUsers = $maxUsers;
+
+        return $this;
+    }
+
+    public function isBloqued(): ?bool
+    {
+        return $this->bloqued;
+    }
+
+    public function setBloqued(bool $bloqued): static
+    {
+        $this->bloqued = $bloqued;
 
         return $this;
     }

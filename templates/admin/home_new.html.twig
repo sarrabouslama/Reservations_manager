@@ -64,19 +64,19 @@
                             </div>
 
                             <div class="mb-4">
-                                {{ form_label(form.imageFiles, 'Images de la maison') }}
+                                {{ form_label(form.imageFiles, 'Ajouter des images ou vidéos') }}
                                 {{ form_widget(form.imageFiles, {
                                     'attr': {
                                         'class': 'form-control',
-                                        'accept': 'image/*',
+                                        'accept': 'image/* video/*',
                                         'multiple': 'multiple',
                                         'data-bs-toggle': 'tooltip',
-                                        'title': 'Vous pouvez sélectionner plusieurs images'
+                                        'title': 'Vous pouvez sélectionner plusieurs images ou vidéos'
                                     }
                                 }) }}
                                 {{ form_errors(form.imageFiles) }}
                                 <small class="form-text text-muted">
-                                    Formats acceptés: JPG, PNG. Taille maximale: 2MB par image.
+                                    Formats acceptés: JPG, PNG, MP4.
                                 </small>
                             </div>
 
@@ -94,19 +94,11 @@
 
 {% block javascripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
-
-    // Preview images before upload
     document.querySelector('input[type="file"]').addEventListener('change', function(e) {
         var preview = document.createElement('div');
         preview.className = 'mt-2';
         preview.id = 'imagePreview';
-        
+
         // Remove existing preview
         var existingPreview = document.getElementById('imagePreview');
         if (existingPreview) {
@@ -114,17 +106,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (this.files) {
-            preview.innerHTML = '<h6>Aperçu des images:</h6><div class="row g-2">';
+            preview.innerHTML = '<h6>Aperçu des fichiers:</h6><div class="row g-2"></div>';
             Array.from(this.files).forEach(file => {
                 var reader = new FileReader();
                 reader.onload = function(e) {
-                    preview.querySelector('.row').innerHTML += `
-                        <div class="col-md-4">
-                            <div class="card">
-                                <img src="${e.target.result}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                    let content = '';
+                    if (file.type.startsWith('video/')) {
+                        content = `
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <video controls style="height: 150px; width: 100%; object-fit: cover;">
+                                        <source src="${e.target.result}" type="${file.type}">
+                                        Votre navigateur ne supporte pas la vidéo.
+                                    </video>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    } else if (file.type.startsWith('image/')) {
+                        content = `
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <img src="${e.target.result}" class="card-img-top" style="height: 150px; object-fit: cover;">
+                                </div>
+                            </div>
+                        `;
+                    }
+                    preview.querySelector('.row').innerHTML += content;
                 }
                 reader.readAsDataURL(file);
             });
@@ -132,6 +139,5 @@ document.addEventListener('DOMContentLoaded', function() {
             this.parentElement.appendChild(preview);
         }
     });
-});
 </script>
 {% endblock %}

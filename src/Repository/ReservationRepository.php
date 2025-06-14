@@ -43,6 +43,17 @@ class ReservationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findActiveReservationByHomePeriod(HomePeriod $homePeriod): array
+    {
+        return $this->createQueryBuilder('r')
+            ->leftJoin('r.homePeriod', 'hp')
+            ->where('hp = :homePeriod')
+            ->andWhere('r.isSelected = :selected')
+            ->setParameter('homePeriod', $homePeriod)
+            ->setParameter('selected', true)
+            ->getQuery()
+            ->getResult();
+    }
 
 
     public function deleteUserReservations(User $user): void
@@ -112,7 +123,7 @@ class ReservationRepository extends ServiceEntityRepository
         return $query->getQuery()->getResult();
     }
 
-    public function findPaginatedByFilters(array $filters = [], int $page, int $pageSize): Paginator
+    public function findPaginatedByFilters(array $filters = [], int $page=1, int $pageSize=10): Paginator
     {
         $queryBuilder = $this->createFilteredQueryBuilder();
         $this->applyFilters($queryBuilder, $filters);

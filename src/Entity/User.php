@@ -79,7 +79,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->reservation = new ArrayCollection();
         $this->notifications = new ArrayCollection();
     }
 
