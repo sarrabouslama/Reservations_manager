@@ -7,6 +7,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
+use Symfony\Component\Validator\Constraints\Length as length;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 
 class ContactInfoType extends AbstractType
@@ -17,15 +20,17 @@ class ContactInfoType extends AbstractType
             ->add('email', EmailType::class, [
                 'label' => 'Email',
                 'attr' => ['placeholder' => 'Entrer email address'],
-                'required' => false,
+                'required' => true,
                 'constraints' => [
-                    new EmailConstraint(['message' => 'Adresse email invalide']),
+                    new NotBlank(['message' => 'Veuillez entrer une adresse e-mail']),
+                    new EmailConstraint(['message' => 'Veuillez entrer une adresse e-mail valide']),
                 ],
+                'empty_data' => '', 
             ])
             ->add('tel', TextType::class, [
                 'label' => 'Téléphone',
                 'attr' => ['placeholder' => 'Entrer numéro de téléphone'],
-                'required' => false,
+                'required' => true,
                 'constraints' => [
                     new length([
                         'min' => 8,

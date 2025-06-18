@@ -6,6 +6,7 @@
 parameters:
     homes_images_directory: '%kernel.project_dir%/public/uploads/home_images'
     users_images_directory: '%kernel.project_dir%/public/uploads/user_images'
+    receipts_directory: '%kernel.project_dir%/public/uploads/receipts'
 
 services:
     # default configuration for services in *this* file

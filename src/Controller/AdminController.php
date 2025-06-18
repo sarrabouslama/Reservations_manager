@@ -25,6 +25,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use App\Service\GoogleMapsEmbedService;
 
 
 
@@ -410,8 +411,9 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function select(int $id,Request $request, EntityManagerInterface $entityManager, ReservationRepository $reservationRepository,LoggerInterface $logger): Response
     {
+        $page = max(1, $request->query->getInt('page', 1));
+        $pageSize = 10;
 
-        $logger->info('AdminController: select method called', ['id' => $id]);
         $residence = $request->query->get('residence');
         $region = $request->query->get('region');
         $nombreChambres = $request->query->get('nombreChambres');
@@ -423,6 +425,7 @@ class AdminController extends AbstractController
                 'residence' => $residence,
                 'region' => $region,
                 'nombreChambres' => $nombreChambres,
+                'page' => $page,
             ]);
         }
         if ($reservation->isSelected()) {
@@ -431,6 +434,7 @@ class AdminController extends AbstractController
                 'residence' => $residence,
                 'region' => $region,
                 'nombreChambres' => $nombreChambres,
+                'page' => $page,
             ]);
         }
         if ($reservation->isConfirmed()) {
@@ -439,14 +443,16 @@ class AdminController extends AbstractController
                 'residence' => $residence,
                 'region' => $region,
                 'nombreChambres' => $nombreChambres,
+                'page' => $page,
             ]);
         }
-        if ($reservation->getHomePeriod()->getHome()->getMaxUsers() < count($reservation->getHomePeriod()->getReservations())) {
+        if ($reservation->getHomePeriod()->getHome()->getMaxUsers() <= count($reservation->getHomePeriod()->getReservations()->filter(fn($r) => $r->isSelected()))) {
             $this->addFlash('danger','Cette période de réservation est déjà complète.');
             return $this->redirectToRoute('admin_reservations', [
                 'residence' => $residence,
                 'region' => $region,
                 'nombreChambres' => $nombreChambres,
+                'page' => $page,
             ]);
         }
 
@@ -465,11 +471,22 @@ class AdminController extends AbstractController
 
         $entityManager->flush();
 
+        // Update shuffled_reservation_ids session after any change
+        $filters = [
+            'residence' => $residence,
+            'region' => $region,
+            'nombreChambres' => $nombreChambres,
+        ];
+        $allReservationsAfterChange = $reservationRepository->findByFilters($filters);
+        $finalShuffledIds = $this->getFinalShuffledIds($allReservationsAfterChange);
+        $request->getSession()->set('shuffled_reservation_ids', $finalShuffledIds);
+
         $this->addFlash('success', 'Le réservation a été sélectionnée.');
         return $this->redirectToRoute('admin_reservations', [
             'residence' => $residence,
             'region' => $region,
             'nombreChambres' => $nombreChambres,
+            'page' => $page,
         ]);
     }
 
@@ -477,6 +494,9 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function confirm(int $id,Request $request, EntityManagerInterface $entityManager, ReservationRepository $reservationRepository): Response
     {
+        $page = max(1, $request->query->getInt('page', 1));
+        $pageSize = 10;
+
         $residence = $request->query->get('residence');
         $region = $request->query->get('region');
         $nombreChambres = $request->query->get('nombreChambres');
@@ -488,6 +508,7 @@ class AdminController extends AbstractController
                 'residence' => $residence,
                 'region' => $region,
                 'nombreChambres' => $nombreChambres,
+                'page' => $page,
             ]);
         }
         if (!$reservation->isSelected()) {
@@ -496,6 +517,7 @@ class AdminController extends AbstractController
                 'residence' => $residence,
                 'region' => $region,
                 'nombreChambres' => $nombreChambres,
+                'page' => $page,
             ]);
         }
         if ($reservation->isConfirmed()) {
@@ -504,6 +526,7 @@ class AdminController extends AbstractController
                 'residence' => $residence,
                 'region' => $region,
                 'nombreChambres' => $nombreChambres,
+                'page' => $page,
             ]);
         }
         $reservation->setIsConfirmed(true);
@@ -520,11 +543,22 @@ class AdminController extends AbstractController
 
         $entityManager->flush();
 
+        // Update shuffled_reservation_ids session after any change
+        $filters = [
+            'residence' => $residence,
+            'region' => $region,
+            'nombreChambres' => $nombreChambres,
+        ];
+        $allReservationsAfterChange = $reservationRepository->findByFilters($filters);
+        $finalShuffledIds = $this->getFinalShuffledIds($allReservationsAfterChange);
+        $request->getSession()->set('shuffled_reservation_ids', $finalShuffledIds);
+
         $this->addFlash('success', 'Le réservation a été confirmée.');
         return $this->redirectToRoute('admin_reservations', [
             'residence' => $residence,
             'region' => $region,
             'nombreChambres' => $nombreChambres,
+            'page' => $page,
         ]);
     }
 
@@ -536,6 +570,9 @@ class AdminController extends AbstractController
         ReservationRepository $reservationRepository,
         Request $request
     ): Response {
+        $page = max(1, $request->query->getInt('page', 1));
+        $pageSize = 10;
+
         $residence = $request->query->get('residence');
         $region = $request->query->get('region');
         $nombreChambres = $request->query->get('nombreChambres');
@@ -547,6 +584,7 @@ class AdminController extends AbstractController
                 'residence' => $residence,
                 'region' => $region,
                 'nombreChambres' => $nombreChambres,
+                'page' => $page,
             ]);
 
         }
@@ -557,6 +595,7 @@ class AdminController extends AbstractController
                 'residence' => $residence,
                 'region' => $region,
                 'nombreChambres' => $nombreChambres,
+                'page' => $page,
             ]);
         }
 
@@ -575,11 +614,22 @@ class AdminController extends AbstractController
 
         $entityManager->flush();
 
+        // Update shuffled_reservation_ids session after any change
+        $filters = [
+            'residence' => $residence,
+            'region' => $region,
+            'nombreChambres' => $nombreChambres,
+        ];
+        $allReservationsAfterChange = $reservationRepository->findByFilters($filters);
+        $finalShuffledIds = $this->getFinalShuffledIds($allReservationsAfterChange);
+        $request->getSession()->set('shuffled_reservation_ids', $finalShuffledIds);
+
         $this->addFlash('success', 'La réservation a été rejetée.');
         return $this->redirectToRoute('admin_reservations',[
             'residence' => $residence,
             'region' => $region,
             'nombreChambres' => $nombreChambres,
+            'page' => $page,
         ]);
     }
 
@@ -641,17 +691,24 @@ class AdminController extends AbstractController
     }
     
     #[Route('/home/new', name: 'admin_home_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, LoggerInterface $logger): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, LoggerInterface $logger, GoogleMapsEmbedService $mapsEmbedService): Response
     {
         $home = new Home();
         $form = $this->createForm(HomeType::class, $home);
         $form->handleRequest($request);
         
         if ($form->isSubmitted() && $form->isValid()) {
-            
-            // Set the home name first
             $home->setNom($form->get('residence')->getData(). ' - S+' . $form->get('nombreChambres')->getData());
-
+            // Convert mapsUrl if it's a short URL
+            $mapsUrl = $form->get('mapsUrl')->getData();
+            if ($mapsUrl) {
+                $embedUrl = $mapsEmbedService->getEmbedUrlFromShortUrl($mapsUrl);
+                if ($embedUrl) {
+                    $home->setMapsUrl($embedUrl);
+                } else {
+                    $home->setMapsUrl($mapsUrl); // fallback
+                }
+            }
             // Persist the home entity first
             $entityManager->persist($home);
             $entityManager->flush();
@@ -695,7 +752,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/home/{id}/edit', name: 'admin_home_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, int $id, HomeRepository $homeRepository, ReservationRepository $reservationRepository, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+    public function edit(Request $request, int $id, HomeRepository $homeRepository, ReservationRepository $reservationRepository, EntityManagerInterface $entityManager, SluggerInterface $slugger, GoogleMapsEmbedService $mapsEmbedService): Response
     {
         $home = $homeRepository->find($id);
         if (!$home) {
@@ -707,7 +764,16 @@ class AdminController extends AbstractController
 
         if ($form->isSubmitted()){
             $home->setNom($form->get('residence')->getData(). ' - S+' . $form->get('nombreChambres')->getData());
-            
+            // Convert mapsUrl if it's a short URL
+            $mapsUrl = $form->get('mapsUrl')->getData();
+            if ($mapsUrl) {
+                $embedUrl = $mapsEmbedService->getEmbedUrlFromShortUrl($mapsUrl);
+                if ($embedUrl) {
+                    $home->setMapsUrl($embedUrl);
+                } else {
+                    $home->setMapsUrl($mapsUrl); 
+                }
+            }
             if($form->isValid()) {
                 foreach ($home->getHomePeriods() as $period) {
                     if (count($reservationRepository->findActiveReservationByHomePeriod($period)) > $form->get('maxUsers')->getData()) {
@@ -1029,4 +1095,4 @@ class AdminController extends AbstractController
 
     
 
-} 
+}

@@ -41,6 +41,25 @@
                                         </li>
                                     {% endif %}
                                 </ul>
+                                {% if reservation.receiptFilename %}
+                                    <div class="mb-3">
+                                        <strong>Reçu :</strong>
+                                        {% set ext = reservation.receiptFilename|split('.')|last|lower %}
+                                        {% if ext in ['jpg','jpeg','png','gif','bmp','webp'] %}
+                                            <a href="/uploads/receipts/{{ reservation.receiptFilename }}" target="_blank">
+                                                <img src="/uploads/receipts/{{ reservation.receiptFilename }}" alt="Reçu" style="max-width:200px;max-height:200px;" class="img-thumbnail mt-2">
+                                            </a>
+                                        {% elseif ext == 'pdf' %}
+                                            <a href="/uploads/receipts/{{ reservation.receiptFilename }}" target="_blank" class="btn btn-outline-secondary mt-2">
+                                                <i class="fa-solid fa-file-pdf"></i> Voir le reçu PDF
+                                            </a>
+                                        {% else %}
+                                            <a href="/uploads/receipts/{{ reservation.receiptFilename }}" target="_blank" class="btn btn-outline-secondary mt-2">
+                                                <i class="fa-solid fa-file"></i> Télécharger le reçu
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
                                 <div class="d-flex flex-wrap gap-3 justify-content-end mt-4">
                                     {% if is_granted('ROLE_ADMIN') %}
                                         {% if not reservation.isSelected %}
@@ -70,6 +89,17 @@
                                         </button>
                                     </form>
                                 </div>
+                                {% if reservation.isSelected and not is_granted('ROLE_ADMIN') %}
+                                    <form action="{{ path('app_upload_receipt', {'id': reservation.id}) }}" method="post" enctype="multipart/form-data" class="mb-3">
+                                        <div class="mb-2">
+                                            <label for="receipt_{{ reservation.id }}" class="form-label fw-bold">Importer le reçu de paiement (PDF ou image) :</label>
+                                            <input type="file" name="receipt" id="receipt_{{ reservation.id }}" accept="application/pdf,image/*" class="form-control" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-upload"></i> Envoyer
+                                        </button>
+                                    </form>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}

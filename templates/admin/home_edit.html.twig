@@ -55,6 +55,25 @@
                                 {{ form_errors(form.description) }}
                             </div>
 
+                            <div class="mb-3">
+                                {{ form_label(form.mapsUrl, 'Lien Google Maps') }}
+                                {{ form_widget(form.mapsUrl, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.mapsUrl) }}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.nomProp, 'Nom du propriétaire') }}
+                                    {{ form_widget(form.nomProp, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.nomProp) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.telProp, 'Téléphone du propriétaire') }}
+                                    {{ form_widget(form.telProp, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.telProp) }}
+                                </div>
+                            </div>
+
                             <div class="mb-4">
                                 {{ form_label(form.imageFiles, 'Ajouter des images ou vidéos') }}
                                 {{ form_widget(form.imageFiles, {

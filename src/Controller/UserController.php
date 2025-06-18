@@ -124,30 +124,6 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/user/reservation/{id}', name: 'app_user_reservation')]
-    #[IsGranted('ROLE_USER')]
-    public function reservation(int $id, ReservationRepository $reservationRepository, UserRepository $userRepository): Response
-    {
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $user = $userRepository->find($id);
-            if (!$user) {
-                throw $this->createNotFoundException('User not found');
-            }
-        }
-        else{
-            $user = $this->getUser();
-            if (!$user) {
-                throw $this->createNotFoundException('User not found');
-            }
-            if ($user->getId() !== $id) {
-                throw $this->createAccessDeniedException('You do not have access to this page.');
-            }
-        }
-        $reservations = $reservationRepository->findBy(['user' => $user]);
-        return $this->render('user/reservation.html.twig', [
-            'reservations' => $reservations,
-        ]);
-    }
 
     #[Route('/user/edit-password/{id}', name: 'app_user_edit-password')]
     #[IsGranted('ROLE_ADMIN')]

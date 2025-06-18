@@ -36,7 +36,7 @@ class Home
     private ?float $distancePlage = null;
 
     #[ORM\Column]
-    #[Assert\Positive]
+    #[Assert\PositiveOrZero]
     private ?float $prix = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
@@ -57,6 +57,15 @@ class Home
 
     #[ORM\OneToMany(targetEntity: HomeImage::class, mappedBy: 'home', cascade: ['remove'], orphanRemoval: true)]
     private Collection $images;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $mapsUrl = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $nomProp = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $telProp = null;
 
 
     public function __construct()
@@ -226,6 +235,42 @@ class Home
     public function setBloqued(bool $bloqued): static
     {
         $this->bloqued = $bloqued;
+
+        return $this;
+    }
+
+    public function getMapsUrl(): ?string
+    {
+        return $this->mapsUrl;
+    }
+
+    public function setMapsUrl(?string $mapsUrl): static
+    {
+        $this->mapsUrl = $mapsUrl;
+
+        return $this;
+    }
+
+    public function getNomProp(): ?string
+    {
+        return $this->nomProp;
+    }
+
+    public function setNomProp(?string $nomProp): static
+    {
+        $this->nomProp = $nomProp;
+
+        return $this;
+    }
+
+    public function getTelProp(): ?string
+    {
+        return $this->telProp;
+    }
+
+    public function setTelProp(?string $telProp): static
+    {
+        $this->telProp = $telProp;
 
         return $this;
     }

@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Repository\HomePeriodRepository;
+use Psr\Log\LoggerInterface;
 
 
 #[Route('/homes')]
@@ -60,12 +62,13 @@ class HomeController extends AbstractController
     }
 
     #[Route('/detail/{id}', name: 'app_home_show')]
-    public function show(int $id, ReservationRepository $reservationRepository, HomeRepository $homeRepository): Response
+    public function show(int $id, ReservationRepository $reservationRepository, HomeRepository $homeRepository, LoggerInterface $logger): Response
     {
         $home = $homeRepository->find($id);
         if (!$home) {
             throw $this->createNotFoundException('Home not found');
         }
+        $logger->info('MAPS URL: ' . $home->getMapsUrl());
 
         return $this->render('home/show.html.twig', [
             'home' => $home,

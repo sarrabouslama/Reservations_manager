@@ -24,6 +24,31 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 #[IsGranted('ROLE_User','ROLE_ADMIN')]
 class ReservationController extends AbstractController
 {
+    #[Route('/user/reservation/{id}', name: 'app_user_reservation')]
+    #[IsGranted('ROLE_USER')]
+    public function reservation(int $id, ReservationRepository $reservationRepository, UserRepository $userRepository): Response
+    {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $user = $userRepository->find($id);
+            if (!$user) {
+                throw $this->createNotFoundException('User not found');
+            }
+        }
+        else{
+            $user = $this->getUser();
+            if (!$user) {
+                throw $this->createNotFoundException('User not found');
+            }
+            if ($user->getId() !== $id) {
+                throw $this->createAccessDeniedException('You do not have access to this page.');
+            }
+        }
+        $reservations = $reservationRepository->findBy(['user' => $user]);
+        return $this->render('user/reservation.html.twig', [
+            'reservations' => $reservations,
+        ]);
+    }
+
     #[Route('/new/{id}', name: 'app_reservation_new', methods: ['POST','GET'])]
     public function new(
         Request $request, 
@@ -172,5 +197,33 @@ class ReservationController extends AbstractController
         return $this->redirectToRoute('app_home_index');
     }
 
-    
-} 
+    #[Route('/{id}/upload-receipt', name: 'app_upload_receipt', methods: ['POST'])]
+    public function uploadReceipt(int $id, Request $request, ReservationRepository $reservationRepository, EntityManagerInterface $entityManager): Response
+    {
+        $reservation = $reservationRepository->find($id);
+        if (!$reservation || $reservation->getUser() !== $this->getUser()) {
+            throw $this->createNotFoundException('Réservation non trouvée ou accès refusé.');
+        }
+        if (!$reservation->isSelected()) {
+            $this->addFlash('error', 'Vous ne pouvez importer un reçu que pour une réservation sélectionnée.');
+            return $this->redirectToRoute('user_reservations');
+        }
+        $file = $request->files->get('receipt');
+        if ($file) {
+            $allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+            if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
+                $this->addFlash('error', 'Format de fichier non supporté.');
+                return $this->redirectToRoute('user_reservations');
+            }
+            $filename = 'receipt_' . $reservation->getId() . '_' . uniqid() . '.' . $file->guessExtension();
+            $file->move($this->getParameter('receipts_directory'), $filename);
+            $reservation->setReceiptFilename($filename);
+            $entityManager->persist($reservation);
+            $entityManager->flush();
+            $this->addFlash('success', 'Reçu importé avec succès.');
+        } else {
+            $this->addFlash('error', 'Aucun fichier reçu.');
+        }
+        return $this->redirectToRoute('app_user_reservation', ['id' => $this->getUser()->getId()]);
+    }
+}

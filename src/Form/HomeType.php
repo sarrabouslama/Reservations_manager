@@ -17,6 +17,9 @@ use Symfony\Component\Validator\Constraints\All;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Positive;
+use App\Validator\ZeroToOne;
+use Symfony\Component\Validator\Constraints\PositiveOrZero;
+
 
 class HomeType extends AbstractType
 {
@@ -53,7 +56,7 @@ class HomeType extends AbstractType
                     new NotBlank([
                         'message' => 'Veuillez entrer la distance de la plage',
                     ]),
-                    new Positive([
+                    new PositiveOrZero([
                         'message' => 'La distance doit être positive',
                     ]),
                 ],
@@ -64,9 +67,10 @@ class HomeType extends AbstractType
                     new NotBlank([
                         'message' => 'Veuillez entrer un prix',
                     ]),
-                    new Positive([
-                        'message' => 'Le prix doit être positif',
+                    new PositiveOrZero([
+                        'message' => 'Le prix doit être positif ou zéro',
                     ]),
+                    
                 ],
             ])
             ->add('maxUsers', IntegerType::class, [
@@ -87,7 +91,7 @@ class HomeType extends AbstractType
                 'attr' => [
                     'accept' => 'image/* video/*',
                     'data-bs-toggle' => 'tooltip',
-                    'title' => 'Vous pouvez sélectionner plusieurs images ou vidéos (JPEG, PNG, MP4)',
+                    'title' => 'Vous pouvez sélectionner plusieurs images ou vidéos (JPG, JPEG, PNG, MP4)',
                 ],
                 'constraints' => [
                     new All([
@@ -96,14 +100,32 @@ class HomeType extends AbstractType
                                 'mimeTypes' => [
                                     'image/jpeg',
                                     'image/png',
+                                    'image/jpg',
                                     'video/mp4',
+                                    'application/octet-stream', 
                                 ],
-                                'mimeTypesMessage' => 'Veuillez télécharger une image ou vidéo valide (JPEG ou PNG ou MP4)',
+                                'mimeTypesMessage' => 'Veuillez télécharger une image ou vidéo valide (JPG, JPEG, PNG, MP4)',
                             ])
                         ]
                     ])
                 ],
             ])
+            ->add('mapsUrl', TextType::class, [
+                'label' => 'Lien Google Maps',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Collez ici le lien Google Maps de la localisation de la maison',
+                ],
+            ])
+            ->add('telProp', TextType::class, [
+                'label' => 'Téléphone',
+                'required' => false,
+            ])
+            ->add('nomProp', TextType::class, [
+                'label' => 'Nom du propriétaire',
+                'required' => false,
+            ])
+
         ;
     }
 
@@ -113,4 +135,4 @@ class HomeType extends AbstractType
             'data_class' => Home::class,
         ]);
     }
-} 
+}

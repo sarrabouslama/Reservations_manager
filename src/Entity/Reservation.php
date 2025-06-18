@@ -43,6 +43,9 @@ class Reservation
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $receiptFilename = null;
+
     public function __construct()
     {
         $this->dateReservation = new \DateTime();
@@ -146,4 +149,15 @@ class Reservation
 
         return $this;
     }
-} 
+
+    public function getReceiptFilename(): ?string
+    {
+        return $this->receiptFilename;
+    }
+
+    public function setReceiptFilename(?string $filename): self
+    {
+        $this->receiptFilename = $filename;
+        return $this;
+    }
+}
