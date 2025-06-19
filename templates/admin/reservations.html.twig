@@ -9,6 +9,22 @@
 
     <a href="{{ path('export_excel_reservations') }}" class="btn btn-outline-success col-md-12">Télécharger Excel</a>
     {% if region and residence and nombreChambres %}
+        <div class="mb-4">
+            <strong>Choisir une période :</strong>
+            {% for period in allPeriods %}
+                <a href="{{ path('admin_reservations', {
+                    residence: residence,
+                    region: region,
+                    nombreChambres: nombreChambres,
+                    homePeriod: period.id
+                }) }}"
+                class="btn btn-sm {% if period.id == selectedHomePeriodId|default('') %}btn-primary{% else %}btn-outline-primary{% endif %} m-1">
+                    {{ period.dateDebut|date('d/m/Y') }} - {{ period.dateFin|date('d/m/Y') }}
+                </a>
+            {% else %}
+                <span class="text-muted">Aucune période disponible</span>
+            {% endfor %}
+        </div>
         {% for home in homes %}
             {% if not home.bloqued %}
                 <div class="col-md-12 d-flex align-items-end">
@@ -41,6 +57,7 @@
         {% endfor %}
         <br>
     {% endif %}
+
 
     <div class="table-responsive">
         <table class="table">
