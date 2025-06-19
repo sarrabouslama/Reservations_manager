@@ -36,7 +36,7 @@
                                         <li class="list-group-item px-0 py-2">
                                             <strong>Adhérent :</strong>
                                             <a href="{{ path('app_user_profile', {'id': reservation.user.id}) }}" class="fw-bold">
-                                                {{ reservation.user.nom }}
+                                                {{ reservation.user.nom }} {{ reservation.user.matricule }}
                                             </a>
                                         </li>
                                     {% endif %}

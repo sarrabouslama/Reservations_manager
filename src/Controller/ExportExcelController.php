@@ -34,31 +34,33 @@ class ExportExcelController extends AbstractController
         $sheet = $spreadsheet->getActiveSheet();
 
         $sheet->setCellValue('A1', 'Matricule Adhérent');
-        $sheet->setCellValue('B1', 'Region');
-        $sheet->setCellValue('C1', 'Maison');
-        $sheet->setCellValue('D1', 'Date de début');
-        $sheet->setCellValue('E1', 'Date de fin');
-        $sheet->setCellValue('F1', 'Maison 2024');
-        $sheet->setCellValue('G1', 'Statut de réservation');
-        $sheet->getStyle('A1:G1')->getFont()->setBold(true);     
+        $sheet->setCellValue('B1', 'Nom Adhérent');
+        $sheet->setCellValue('C1', 'Region');
+        $sheet->setCellValue('D1', 'Maison');
+        $sheet->setCellValue('E1', 'Date de début');
+        $sheet->setCellValue('F1', 'Date de fin');
+        $sheet->setCellValue('G1', 'Maison 2024');
+        $sheet->setCellValue('H1', 'Statut de réservation');
+        $sheet->getStyle('A1:H1')->getFont()->setBold(true);     
 
         $row = 2;
         foreach ($data as $item) {
             $sheet->setCellValue('A' . $row, $item->getUser()->getMatricule());
-            $sheet->setCellValue('B' . $row, $item->getHomePeriod()->getHome()->getRegion());
-            $sheet->setCellValue('C' . $row, $item->getHome()->getNom());
-            $sheet->setCellValue('D' . $row, $item->getHomePeriod()->getDateDebut()->format('d-m-Y'));
-            $sheet->setCellValue('E' . $row, $item->getHomePeriod()->getDateFin()->format('d-m-Y'));
-            $sheet->setCellValue('F' . $row, $item->getUser()->isLastYear() ? 'Oui' : 'Non');
+            $sheet->setCellValue('B' . $row, $item->getUser()->getNom());
+            $sheet->setCellValue('C' . $row, $item->getHomePeriod()->getHome()->getRegion());
+            $sheet->setCellValue('D' . $row, $item->getHome()->getNom());
+            $sheet->setCellValue('E' . $row, $item->getHomePeriod()->getDateDebut()->format('d-m-Y'));
+            $sheet->setCellValue('F' . $row, $item->getHomePeriod()->getDateFin()->format('d-m-Y'));
+            $sheet->setCellValue('G' . $row, $item->getUser()->isLastYear() ? 'Oui' : 'Non');
             $status = $item->isConfirmed() ? 'Payée' : ($item->isSelected() ? 'Réservée' : 'En attente');
-            $sheet->setCellValue('G' . $row, $status);
+            $sheet->setCellValue('H' . $row, $status);
             if ($status === 'Réservée') {
-                $sheet->getStyle('G' . $row)->getFill()
+                $sheet->getStyle('H' . $row)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()
                     ->setARGB('FFADD8E6'); 
             } elseif ($status === 'Payée') {
-                $sheet->getStyle('G' . $row)->getFill()
+                $sheet->getStyle('H' . $row)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()
                     ->setARGB('FF90EE90'); 
@@ -104,7 +106,10 @@ class ExportExcelController extends AbstractController
         $sheet->setCellValue('E1', 'Distance Plage');
         $sheet->setCellValue('F1', 'Prix');
         $sheet->setCellValue('G1', 'Description');
-        $sheet->getStyle('A1:G1')->getFont()->setBold(true);     
+        $sheet->setCellValue('H1', 'Nom Contact');
+        $sheet->setCellValue('I1', 'Telephone Contact');
+        $sheet->setCellValue('J1', 'Google Maps');
+        $sheet->getStyle('A1:J1')->getFont()->setBold(true);     
 
         $row = 2;
         foreach ($data as $item) {
@@ -114,11 +119,10 @@ class ExportExcelController extends AbstractController
             $sheet->setCellValue('D' . $row, $item->getMaxUsers());
             $sheet->setCellValue('E' . $row, $item->getDistancePlage() . ' km');
             $sheet->setCellValue('F' . $row, $item->getPrix() . ' DT');
-            if ($item->getDescription()) {
-                $sheet->setCellValue('G' . $row, $item->getDescription());
-            } else {
-                $sheet->setCellValue('G' . $row, '');
-            }
+            $sheet->setCellValue('G' . $row, $item->getDescription() ?? null);
+            $sheet->setCellValue('H' . $row, $item->getNomProp() ?? null);
+            $sheet->setCellValue('I' . $row, $item->getTelProp() ?? null);
+            $sheet->setCellValue('J' . $row, $item->getMapsUrl()  ?? null);
             $row++;
         }
 

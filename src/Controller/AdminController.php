@@ -165,7 +165,7 @@ class AdminController extends AbstractController
 
 
     #[Route('/reservations', name: 'admin_reservations', methods: ['GET'])]
-    public function Reservations(Request $request, ReservationRepository $reservationRepository, HomeRepository $homeRepository, HomePeriodRepository $homePeriodRepository): Response
+    public function Reservations(Request $request, ReservationRepository $reservationRepository, HomeRepository $homeRepository, HomePeriodRepository $homePeriodRepository, LoggerInterface $logger): Response
     {
         $page = max(1, $request->query->getInt('page', 1));
         $pageSize = 10;
@@ -177,10 +177,18 @@ class AdminController extends AbstractController
         ];
         $filters = array_filter($filters);
         
+        $sort = [
+            'field'  => $request->query->get('sortField'),
+            'direction' => $request->query->get('sortDirection'),
+        ];
+
+        $logger->info('AdminController: Reservations action called with sort: ' . json_encode($sort));
+
+        
         $selectedHomePeriodId = $request->query->get('homePeriod');
         $allPeriods = [];
         if (isset($filters['residence'])  && isset($filters['region']) && isset($filters['nombreChambres'])) {
-            $homes = $homeRepository->findByFilters($filters);
+            $homes = $homeRepository->findByFilters($filters,$sort);
             $homeIds = array_map(fn($h) => $h->getId(), $homes);
             if ($homeIds) {
                 foreach ($homeIds as $hid) {
@@ -190,20 +198,22 @@ class AdminController extends AbstractController
         } else {
             $allPeriods = $homePeriodRepository->findAll();
         }
-
-        $session = $request->getSession();
-        $shuffledIds = $session->get('shuffled_reservation_ids');
+        if (!isset($sort['field']) || !isset($sort['direction'])) {
+            
+            $session = $request->getSession();
+            $shuffledIds = $session->get('shuffled_reservation_ids');
+        }
 
         $reservations = [];
         $totalReservations = 0;
         $totalPages = 1;
-        $allReservations = $reservationRepository->findByFilters($filters);
+        $allReservations = $reservationRepository->findByFilters($filters, $sort);
         if ($selectedHomePeriodId) {
             $allReservations = array_filter($allReservations, function ($reservation) use ($selectedHomePeriodId) {
                 return $reservation->getHomePeriod() && $reservation->getHomePeriod()->getId() == $selectedHomePeriodId;
             });
         }
-        if ($shuffledIds) {
+        if (isset($shuffledIds)) {
             $reservationMap = [];
             foreach ($allReservations as $r) {
                 $reservationMap[$r->getId()] = $r;
@@ -226,13 +236,15 @@ class AdminController extends AbstractController
 
         return $this->render('admin/reservations.html.twig', [
             'reservations' => $reservations,
-            'homes' => $homeRepository->findByFilters($filters),
+            'homes' => $homeRepository->findByFilters($filters,$sort),
             'allResidences' => $homeRepository->findAllResidences($filters),
             'allRegions' => $homeRepository->findAllRegions($filters),
             'allNbChambres' => $homeRepository->findAllNbChambres($filters),
             'residence' => $filters['residence'] ?? null,
             'region' => $filters['region'] ?? null,
             'nombreChambres' => $filters['nombreChambres'] ?? null,
+            'sortField' => $sort['field'],
+            'sortDirection' => $sort['direction'],
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'allPeriods' => $allPeriods,

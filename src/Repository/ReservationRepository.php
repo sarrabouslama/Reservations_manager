@@ -10,12 +10,15 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\ORM\QueryBuilder;
+use Psr\Log\LoggerInterface;
 
 class ReservationRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private LoggerInterface $logger;
+    public function __construct(ManagerRegistry $registry, LoggerInterface $logger)
     {
         parent::__construct($registry, Reservation::class);
+        $this->logger = $logger;
     }
 
     public function findActiveReservationByUser(User $user): ?Reservation
@@ -77,17 +80,27 @@ class ReservationRepository extends ServiceEntityRepository
     }
 
     
-    private function createFilteredQueryBuilder(): QueryBuilder
+    private function createFilteredQueryBuilder(array $sort): QueryBuilder
     {
-        return $this->createQueryBuilder('r')
+        $query = $this->createQueryBuilder('r')
         ->leftJoin('r.homePeriod', 'hp')->addSelect('hp')
         ->leftJoin('hp.home', 'h')->addSelect('h')
-        ->leftJoin('r.user', 'u')->addSelect('u')
-        ->orderBy('h.nom', 'ASC')
-        ->addOrderBy('hp.dateDebut', 'ASC')
-        ->addOrderBy('r.isConfirmed', 'DESC')
-        ->addOrderBy('r.isSelected', 'DESC')
-        ->addOrderBy('u.lastYear', 'ASC');
+        ->leftJoin('r.user', 'u')->addSelect('u');
+
+        // Always order by isConfirmed DESC, then isSelected DESC, unless overridden
+        if (isset($sort['field']) && isset($sort['direction']) && $sort['field'] === 'statut') {
+            $query->addOrderBy('r.isConfirmed', strtoupper($sort['direction']))
+                  ->addOrderBy('r.isSelected', strtoupper($sort['direction']));
+            $this->logger->info('Sorting by statut with direction: ' . strtoupper($sort['direction']));
+        } else {
+            $query->addOrderBy('h.nom', 'ASC')
+                ->addOrderBy('hp.dateDebut', 'ASC')
+                ->addOrderBy('r.isConfirmed', 'DESC')
+                ->addOrderBy('r.isSelected', 'DESC')
+                ->addOrderBy('u.lastYear', 'ASC');
+        }
+        return $query;
+        
     }
     
     private function applyFilters(QueryBuilder $query, array $filters): void
@@ -109,23 +122,23 @@ class ReservationRepository extends ServiceEntityRepository
         }
     }
     
-    public function findAllOrdered()
+    public function findAllOrdered(array $sort)
     {
-        return $this->createFilteredQueryBuilder()
+        return $this->createFilteredQueryBuilder($sort)
             ->getQuery()
             ->getResult();
     }
 
-    public function findByFilters(array $filters = []): array
+    public function findByFilters(array $filters = [], array $sort = []): array
     {
-        $query = $this->createFilteredQueryBuilder();
+        $query = $this->createFilteredQueryBuilder($sort);
         $this->applyFilters($query, $filters);
         return $query->getQuery()->getResult();
     }
 
-    public function findPaginatedByFilters(array $filters = [], int $page=1, int $pageSize=10): Paginator
+    public function findPaginatedByFilters(array $filters = [], array $sort = [], int $page=1, int $pageSize=10): Paginator
     {
-        $queryBuilder = $this->createFilteredQueryBuilder();
+        $queryBuilder = $this->createFilteredQueryBuilder($sort);
         $this->applyFilters($queryBuilder, $filters);
 
         $query = $queryBuilder
@@ -154,4 +167,4 @@ class ReservationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-} 
+}
