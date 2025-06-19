@@ -39,12 +39,16 @@ class Reservation
     #[ORM\Column]
     private ?bool $isConfirmed = false;
 
-    #[ORM\OneToOne(inversedBy: 'reservation')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\OneToOne(inversedBy: 'reservation', targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false, unique: true)]
     private ?User $user = null;
 
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $receiptFilename = null;
+
+    #[ORM\OneToOne(inversedBy: 'reservation', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Payement $payement = null;
 
     public function __construct()
     {
@@ -143,10 +147,9 @@ class Reservation
         return $this->user;
     }
 
-    public function setUser(User $user): static
+    public function setUser(?User $user): self
     {
         $this->user = $user;
-
         return $this;
     }
 
@@ -158,6 +161,28 @@ class Reservation
     public function setReceiptFilename(?string $filename): self
     {
         $this->receiptFilename = $filename;
+        return $this;
+    }
+
+    public function getPayement(): ?Payement
+    {
+        return $this->payement;
+    }
+
+    public function setPayement(?Payement $payement): static
+    {
+        // set the owning side of the relation if necessary
+        if ($payement->getReservation() !== $this) {
+            $payement->setReservation($this);
+        }
+
+        $this->payement = $payement;
+
+        return $this;
+    }
+    public function deletePayement(): static
+    {
+        $this->payement = null;
         return $this;
     }
 }

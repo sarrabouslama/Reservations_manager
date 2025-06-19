@@ -182,7 +182,6 @@ class AdminController extends AbstractController
             'direction' => $request->query->get('sortDirection'),
         ];
 
-        $logger->info('AdminController: Reservations action called with sort: ' . json_encode($sort));
 
         
         $selectedHomePeriodId = $request->query->get('homePeriod');

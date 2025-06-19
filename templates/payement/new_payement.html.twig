@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter Opposition{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="h3 mb-0">Ajouter Opposition pour l'adhérent {{ reservation.user.matricule }}</h1>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            <div class="mb-3">
+                                {{ form_label(form.montantGlobal, 'Montant Global') }}
+                                {{ form_widget(form.montantGlobal, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.montantGlobal) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.avance, 'Avance') }}
+                                {{ form_widget(form.avance, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.avance) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.nbMois, 'Nombre de Mois') }}
+                                {{ form_widget(form.nbMois, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.nbMois) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.modeEcheance, 'Mode d\'Échéance') }}
+                                {{ form_widget(form.modeEcheance, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.modeEcheance) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.codeOpposition, 'Code d\'Opposition') }}
+                                {{ form_widget(form.codeOpposition, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.codeOpposition) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.dateDebut, 'Date de début') }}
+                                <div class="input-group" id="dateDebutPicker" data-td-target-input="nearest" data-td-target="#dateDebut">
+                                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control', 'data-td-target': '#dateDebut', 'id': 'dateDebut', 'autocomplete': 'off'}}) }}
+                                    <span class="input-group-text" data-td-target="#dateDebut" data-td-toggle="datetimepicker">
+                                        <i class="fa-regular fa-calendar"></i>
+                                    </span>
+                                </div>
+                                {{ form_errors(form.dateDebut) }}
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">Ajouter l'opposition</button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the DOM elements for the pickers
+    const dateDebutElement = document.getElementById('dateDebutPicker');
+
+    // Common options for the pickers
+    const pickerOptions = {
+        localization: {
+            format: 'dd/MM/yyyy'
+        },
+        display: {
+            components: {
+                clock: false
+            }
+        },
+        // Important: This allows the picker to correctly parse dates
+        // that are passed to it as standard JS Date objects.
+        useCurrent: false 
+    };
+
+    // Initialize both pickers
+    const dateDebutPicker = new tempusDominus.TempusDominus(dateDebutElement, pickerOptions);
+
+    // Add an event listener to the start date picker's element
+    dateDebutElement.addEventListener('change.td', function(event) {
+        // The selected date object from the first picker
+        const startDateObject = event.detail.date;
+
+        // Check if a date was selected (it's null if cleared)
+        if (startDateObject) {
+            const nativeStartDate = new Date(startDateObject); 
+        } 
+    });
+});
+</script>
+{% endblock %}

@@ -74,7 +74,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $notifications;
 
-    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: Reservation::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?Reservation $reservation = null;
 
     public function __construct()
@@ -321,16 +321,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->reservation;
     }
 
-    public function setReservation(Reservation $reservation): static
+    public function setReservation(?Reservation $reservation): self
     {
-        // set the owning side of the relation if necessary
-        if ($reservation->getUser() !== $this) {
-            $reservation->setUser($this);
-        }
-
         $this->reservation = $reservation;
-
         return $this;
     }
 
-} 
+}

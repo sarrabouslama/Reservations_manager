@@ -43,9 +43,9 @@ class ReservationController extends AbstractController
                 throw $this->createAccessDeniedException('You do not have access to this page.');
             }
         }
-        $reservations = $reservationRepository->findBy(['user' => $user]);
+        $reservation = $reservationRepository->findOneBy(['user' => $user]);
         return $this->render('user/reservation.html.twig', [
-            'reservations' => $reservations,
+            'reservation' => $reservation,
         ]);
     }
 

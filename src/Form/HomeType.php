@@ -83,6 +83,21 @@ class HomeType extends AbstractType
             ->add('description', TextareaType::class, [
                 'required' => false,
             ])
+            ->add('mapsUrl', TextType::class, [
+                'label' => 'Lien Google Maps',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Collez ici le lien Google Maps de la localisation de la maison',
+                ],
+            ])
+            ->add('telProp', TextType::class, [
+                'label' => 'Téléphone',
+                'required' => false,
+            ])
+            ->add('nomProp', TextType::class, [
+                'label' => 'Nom du propriétaire',
+                'required' => false,
+            ])
             ->add('imageFiles', FileType::class, [
                 'label' => 'Images de la maison',
                 'mapped' => false,
@@ -109,21 +124,6 @@ class HomeType extends AbstractType
                         ]
                     ])
                 ],
-            ])
-            ->add('mapsUrl', TextType::class, [
-                'label' => 'Lien Google Maps',
-                'required' => false,
-                'attr' => [
-                    'placeholder' => 'Collez ici le lien Google Maps de la localisation de la maison',
-                ],
-            ])
-            ->add('telProp', TextType::class, [
-                'label' => 'Téléphone',
-                'required' => false,
-            ])
-            ->add('nomProp', TextType::class, [
-                'label' => 'Nom du propriétaire',
-                'required' => false,
             ])
 
         ;

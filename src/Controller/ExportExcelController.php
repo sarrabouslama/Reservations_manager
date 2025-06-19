@@ -52,14 +52,14 @@ class ExportExcelController extends AbstractController
             $sheet->setCellValue('E' . $row, $item->getHomePeriod()->getDateDebut()->format('d-m-Y'));
             $sheet->setCellValue('F' . $row, $item->getHomePeriod()->getDateFin()->format('d-m-Y'));
             $sheet->setCellValue('G' . $row, $item->getUser()->isLastYear() ? 'Oui' : 'Non');
-            $status = $item->isConfirmed() ? 'Payée' : ($item->isSelected() ? 'Réservée' : 'En attente');
+            $status = $item->isConfirmed() ? 'Confirmée' : ($item->isSelected() ? 'Réservée' : 'En attente');
             $sheet->setCellValue('H' . $row, $status);
             if ($status === 'Réservée') {
                 $sheet->getStyle('H' . $row)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()
                     ->setARGB('FFADD8E6'); 
-            } elseif ($status === 'Payée') {
+            } elseif ($status === 'Confirmée') {
                 $sheet->getStyle('H' . $row)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()
@@ -215,6 +215,59 @@ class ExportExcelController extends AbstractController
 
         $response->setContent($content);
 
+        return $response;
+    }
+
+    #[Route('/export/excel/payements', name: 'export_excel_payements')]
+    public function exportExcelPayements(): Response
+    {
+        $repository = $this->entityManager->getRepository('App\Entity\Payement');
+        $data = $repository->findAll();
+        if (!$data) {
+            return new Response('Aucune donnée à exporter.', 404);
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'Matricule Adhérent');
+        $sheet->setCellValue('B1', 'Nom et Prenom');
+        $sheet->setCellValue('C1', 'Aff');
+        $sheet->setCellValue('D1', 'Montant');
+        $sheet->setCellValue('E1', 'Nb mois');
+        $sheet->setCellValue('F1', 'Mensuel');
+        $sheet->setCellValue('G1', 'Mode echéance');
+        $sheet->setCellValue('H1', 'Code Opposition');
+        $sheet->setCellValue('I1', 'Date Début');
+        $sheet->setCellValue('J1', '');
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+
+        $row = 2;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $item->getReservation()->getUser()->getMatricule());
+            $sheet->setCellValue('B' . $row, $item->getReservation()->getUser()->getNom());
+            $sheet->setCellValue('C' . $row, $item->getReservation()->getUser()->getEmploi());
+            $reste = $item->getMontantGlobal() - $item->getAvance();
+            $sheet->setCellValue('D' . $row, number_format($reste, 2, ',', ' ') . ' DT');
+            $sheet->setCellValue('E' . $row, $item->getNbMois());
+            $sheet->setCellValue('F' . $row, number_format($reste / $item->getNbMois(), 2, ',', ' ') . ' DT');
+            $sheet->setCellValue('G' . $row, $item->getModeEcheance());
+            $sheet->setCellValue('H' . $row, $item->getCodeOpposition());
+            $sheet->setCellValue('I' . $row, $item->getDateDebut()->format('d-m-Y'));
+            $row++;
+        }
+        $writer = new Xlsx($spreadsheet);
+        $response = new Response();
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'oppositions.xlsx'
+        );
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', $disposition);
+        ob_start();
+        $writer->save('php://output');
+        $content = ob_get_clean();
+        $response->setContent($content);
         return $response;
     }
 }
