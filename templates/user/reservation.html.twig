@@ -58,31 +58,8 @@
                                             </a>
                                         {% endif %}
                                     </div>
-                                        
                                 {% endif %}
-                                <div class="btn-group">
-                                    {% if reservation.isSelected %}
-                                        {% if not reservation.payement %}
-                                            <form action="{{ path('app_new_payement', {'id': reservation.id}) }}" method="post">
-                                                <button type="submit" class="btn btn-outline-primary">
-                                                    <i class="fa-solid fa-plus"></i> Ajouter Opposition
-                                                </button>
-                                            </form>
-                                        {% else %}
-                                            <form action="{{ path('app_edit_payement', {'id': reservation.id}) }}" method="post" class="d-inline">
-                                                <button type="submit" class="btn btn-outline-primary">
-                                                    <i class="fas fa-edit"></i> Modifier Opposition
-                                                </button>
-                                            </form>
 
-                                            <form action="{{ path('app_delete_payement', {'id': reservation.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette opposition ?');">
-                                                <button type="submit" class="btn btn-outline-danger">
-                                                    <i class="fas fa-trash"></i> Supprimer Paiement
-                                                </button>
-                                            </form>
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
 
                                 <div class="d-flex flex-wrap gap-3 justify-content-end mt-4">
                                     {% if is_granted('ROLE_ADMIN') %}
@@ -94,17 +71,28 @@
                                             </form>
                                         {% else %}
                                             {% if not reservation.isConfirmed %}
-                                                <form action="{{ path('app_reservation_confirm', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('confirmer cette réservation ?');">
+                                                <form action="{{ path('app_new_payement', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('confirmer cette réservation ?');">
                                                     <button type="submit" class="btn btn-outline-success btn-lg">
                                                         <i class="fas fa-check"></i> Confirmer
                                                     </button>
                                                 </form>
+                                                <form action="{{ path('app_reservation_reject', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Annuler cette réservation ?');">
+                                                    <button type="submit" class="btn btn-outline-danger btn-lg">
+                                                        <i class="fa-solid fa-xmark"></i> Annuler
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <form action="{{ path('app_edit_payement', {'id': reservation.id}) }}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-outline-primary btn-lg">
+                                                        <i class="fas fa-edit"></i> Modifier Opposition
+                                                    </button>
+                                                </form>
+                                                <form action="{{ path('app_delete_payement', {'id': reservation.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette opposition ?');">
+                                                    <button type="submit" class="btn btn-outline-danger btn-lg">
+                                                        <i class="fas fa-xmark"></i> Annuler confirmation
+                                                    </button>
+                                                </form>
                                             {% endif %}
-                                            <form action="{{ path('app_reservation_reject', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Annuler cette réservation ?');">
-                                                <button type="submit" class="btn btn-outline-danger btn-lg">
-                                                    <i class="fa-solid fa-xmark"></i> Annuler
-                                                </button>
-                                            </form>
                                         {% endif %}
                                     {% endif %}
                                     <form action="{{ path('app_reservation_cancel', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Supprimer définitivement cette réservation ?');">
@@ -113,7 +101,7 @@
                                         </button>
                                     </form>
                                 </div>
-                                {% if reservation.isSelected %}
+                                {% if reservation.isSelected and not reservation.isConfirmed %}
                                     <form action="{{ path('app_upload_receipt', {'id': reservation.id}) }}" method="post" enctype="multipart/form-data" class="mb-3">
                                         <div class="mb-2">
                                             <label for="receipt_{{ reservation.id }}" class="form-label fw-bold">Importer le reçu de paiement (PDF ou image) :</label>

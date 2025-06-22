@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 
 #[IsGranted('ROLE_User','ROLE_ADMIN')]
@@ -127,8 +128,7 @@ class UserController extends AbstractController
 
     #[Route('/user/edit-password/{id}', name: 'app_user_edit-password')]
     #[IsGranted('ROLE_ADMIN')]
-    public function editPassword(int $id, UserRepository $userRepository, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher
-): Response
+    public function editPassword(int $id, UserRepository $userRepository, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = $userRepository->find($id);
         if (!$user) {
@@ -184,5 +184,11 @@ class UserController extends AbstractController
         return $this->redirectToRoute('app_user_edit', ['id' => $user->getId()]);
     }
 
+    #[Route('/user/nom-by-matricule/{matricule}', name: 'user_nom_by_matricule')]
+    public function nomByMatricule(string $matricule, UserRepository $userRepository): JsonResponse
+    {
+        $user = $userRepository->findOneBy(['matricule' => $matricule]);
+        return new JsonResponse(['nom' => $user ? $user->getNom() : '']);
+    }
     
 }

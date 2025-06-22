@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CarthageLand{% endblock %}
+
+{% block body %}
+    <h1>Gestion des tickets CarthageLand</h1>
+
+    <div class="card text-center">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{path('admin_tickets')}}">Statistiques</a>
+                </li>
+                {% if is_granted('ROLE_ADMIN') %} 
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{path('admin_tickets_responsable')}}">Responsables</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{path('admin_tickets_user')}}">Adhérents</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{path('admin_tickets_responsable', {'matricule': app.user.matricule})}}">Responsables</a>
+                    </li>    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{path('admin_tickets_user', {'matricule_responsable': app.user.matricule})}}">Adhérents</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+        <div class="card-body">
+            {% for ticket in tickets %}
+                <ul class="list-group list-group-flush mb-5 fs-4">
+                    <li class="list-group-item"><strong>Quantité :</strong> {{ ticket.qte }}</li>
+                    <li class="list-group-item"><strong>prix Unitaire :</strong> {{ ticket.prixUnitaire }}</li>
+                    <li class="list-group-item"><strong>Quantité Vendue :</strong> {{ ticket.qteVente }}</li>
+                    <li class="list-group-item"><strong>Total de vente :</strong> {{ ticket.totalVente }}</li>
+                    <li class="list-group-item"><strong>Total d'avance :</strong> {{ ticket.totalAvance }}</li>
+                </ul>
+                {% if is_granted('ROLE_ADMIN') %} 
+                    <a href="{{ path('admin_edit_ticket', {'id': ticket.id}) }}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit"></i>Modifier
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

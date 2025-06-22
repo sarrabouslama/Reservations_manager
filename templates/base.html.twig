@@ -58,7 +58,16 @@
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ path('app_show_payements') }}">Gérer les Oppositions</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('admin_tickets') }}">CarthageLand</a>
+                                </li>
                             {% endif %}
+                            {% if app.user and app.user.responsableTicket is not null %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ path('admin_tickets') }}">CarthageLand</a>
+                                </li>
+                            {% endif %}
+
                         </ul>
                         <ul class="navbar-nav">
                             {% if app.user %}

@@ -2,35 +2,47 @@
 
 namespace App\Form;
 
-use App\Entity\Payement;
+use App\Entity\UserTicket;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\PositiveOrZero;
-use Symfony\Component\Form\Extension\Core\Type\MoneyType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\PositiveOrZero;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-class PayementType extends AbstractType
+
+
+class UserTicketType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('montantGlobal', MoneyType::class, [
-                'currency' => 'TND',
-                'label' => 'Montant Global',
-                'attr' => ['placeholder' => 'Entrer le montant global'],
-                'required' => true,
+            ->add('matricule',TextType::class, [
+                'label' => 'Matricule',
+                'attr' => ['placeholder' => 'Entrer matricule'],
+                'mapped' => false,
+                'data' => $options['matricule'] ?? '',
                 'constraints' => [
-                    new NotBlank(['message' => 'Veuillez entrer un montant global']),
-                    new PositiveOrZero(['message' => 'Le montant doit être positif ou zéro']),
+                    new NotBlank(['message' => 'Veuiller entrer une matricule']),
                 ],
             ])
+            ->add('nombre', IntegerType::class, [
+                'label' => 'Quantité',
+                'attr' => ['placeholder' => 'Entrer la quantité voulue'],
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Veuillez entrer une quantité']),
+                    new PositiveOrZero(['message' => 'La quantité doit être positive ou zéro']),
+                ],
+            ])
+            
             ->add('avance', MoneyType::class, [
                 'currency' => 'TND',
                 'label' => 'Avance',
@@ -39,15 +51,9 @@ class PayementType extends AbstractType
                 'constraints' => [
                     new NotBlank(['message' => 'Veuillez entrer un montant d\'avance']),
                     new PositiveOrZero(['message' => 'L\'avance doit être positive ou zéro']),
-                    new Callback(function($avance, ExecutionContextInterface $context) {
-                        $form = $context->getRoot();
-                        $montantGlobal = $form->get('montantGlobal')->getData();
-                        if ($montantGlobal !== null && $avance !== null && $avance > $montantGlobal) {
-                            $context->addViolation("L'avance ne peut pas dépasser le montant global.");
-                        }
-                    })
                 ],
             ])
+
             ->add('nbMois', IntegerType::class, [
                 'label' => 'Nombre de Mois',
                 'attr' => ['placeholder' => 'Entrer le nombre de mois'],
@@ -109,6 +115,15 @@ class PayementType extends AbstractType
                     'class' => 'form-control datepicker',
                     'autocomplete' => 'off',
                 ],
+                'constraints' => [
+                    new Callback(function($dateDebut, ExecutionContextInterface $context) {
+                        $form = $context->getRoot();
+                        $date = new \DateTime();
+                        if ($dateDebut->format('d-m-Y') < $date->format('d-m-Y')) {
+                            $context->addViolation("La date de début doit être postérieure a la date actuelle.");
+                        }
+                    })
+                ]
             ])
         ;
     }
@@ -116,7 +131,8 @@ class PayementType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Payement::class,
+            'data_class' => UserTicket::class,
+            'matricule' => '', // default value
         ]);
     }
 }

@@ -177,22 +177,28 @@
                                 {% if not reservation.isSelected %}
                                     <form action="{{ path('app_reservation_select', {'id': reservation.id, residence: residence, region: region, nombreChambres: nombreChambres, page : currentPage }) }}" method="post" onsubmit="return confirm('sélectionner cette réservation ?');">
                                         <button type="submit" class="btn btn-outline-primary btn-sm ">
-                                            <i class="fa-solid fa-plus"></i> Sélectionner
+                                            <i class="fa-solid fa-plus"></i>
                                         </button>
                                     </form>
                                 {% else %}
                                     {% if not reservation.isConfirmed %}
-                                        <form action="{{ path('app_reservation_confirm', {'id': reservation.id, residence: residence, region: region, nombreChambres: nombreChambres, page : currentPage }) }}" method="post" onsubmit="return confirm('confirmer cette réservation ?');">
+                                        <form action="{{ path('app_new_payement', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('confirmer cette réservation ?');">
                                             <button type="submit" class="btn btn-outline-success btn-sm">
-                                                <i class="fas fa-check"></i> Confirmer
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                        <form action="{{ path('app_reservation_reject', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Annuler cette réservation ?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <form action="{{ path('app_delete_payement', {'id': reservation.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler la confirmation ?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-xmark"></i>
                                             </button>
                                         </form>
                                     {% endif %}
-                                    <form action="{{ path('app_reservation_reject', {'id': reservation.id, residence: residence, region: region, nombreChambres: nombreChambres, page : currentPage}) }}" method="post" onsubmit="return confirm('Annuler cette réservation ?');">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">
-                                            <i class="fa-solid fa-xmark"></i> Annuler
-                                        </button>
-                                    </form>
                                 {% endif %}
                                 
                             </div>

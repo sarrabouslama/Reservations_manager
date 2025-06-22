@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter Responsable{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="h3 mb-0">Ajouter Responsable Tickets CarthageLand</h1>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            <div class="mb-3">
+                                {{ form_label(form.matricule, 'Matricule du responsable') }}
+                                {{ form_widget(form.matricule, {'attr': {'class': 'form-control', 'id': 'responsable_ticket_matricule'}}) }}
+                                {{ form_errors(form.matricule) }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="nom" class="form-label">Nom de l'adhérent</label>
+                                <input class="form-control" type="text" aria-label="Nom de l'adhérent" disabled readonly id="nom">
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.qte, 'Quantité') }}
+                                {{ form_widget(form.qte, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.qte) }}
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ path('admin_tickets_responsable') }}" class="btn btn-secondary me-md-2">Annuler</a>
+                                <button type="submit" class="btn btn-primary">Ajouter</button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const matriculeInput = document.getElementById('responsable_ticket_matricule');
+            const nomInput =document.getElementById('nom');
+
+            function updateNom() {
+                if (matriculeInput && nomInput){
+                    const matricule = matriculeInput.value || '';
+                    if (matricule.length > 0) {
+                    fetch('/user/nom-by-matricule/' + encodeURIComponent(matricule))
+                        .then(response => response.json())
+                        .then(data => {
+                            nomInput.value = data.nom || '';
+                        })
+                        .catch(() => {
+                            nomInput.value = '';
+                        });
+                } else {
+                    nomInput.value = '';
+                }
+                }
+            }
+
+            if (matriculeInput && nomInput){
+                matriculeInput.addEventListener('input', updateNom);
+                updateNom();
+            }
+        });
+    </script>
+{% endblock %}

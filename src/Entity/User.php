@@ -77,9 +77,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'user', targetEntity: Reservation::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?Reservation $reservation = null;
 
+    #[ORM\OneToOne(mappedBy: 'responsable', cascade: ['persist', 'remove'])]
+    private ?ResponsableTicket $responsableTicket = null;
+
+    #[ORM\OneToMany(targetEntity: UserTicket::class, mappedBy: 'user')]
+    private Collection $userTickets;
+
     public function __construct()
     {
         $this->notifications = new ArrayCollection();
+        $this->userTickets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -324,6 +331,53 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setReservation(?Reservation $reservation): self
     {
         $this->reservation = $reservation;
+        return $this;
+    }
+
+    public function getResponsableTicket(): ?ResponsableTicket
+    {
+        return $this->responsableTicket;
+    }
+
+    public function setResponsableTicket(ResponsableTicket $responsableTicket): static
+    {
+        // set the owning side of the relation if necessary
+        if ($responsableTicket->getResponsable() !== $this) {
+            $responsableTicket->setResponsable($this);
+        }
+
+        $this->responsableTicket = $responsableTicket;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserTicket>
+     */
+    public function getUserTickets(): Collection
+    {
+        return $this->userTickets;
+    }
+
+    public function addUserTicket(UserTicket $userTicket): static
+    {
+        if (!$this->userTickets->contains($userTicket)) {
+            $this->userTickets->add($userTicket);
+            $userTicket->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserTicket(UserTicket $userTicket): static
+    {
+        if ($this->userTickets->removeElement($userTicket)) {
+            // set the owning side to null (unless already changed)
+            if ($userTicket->getUser() === $this) {
+                $userTicket->setUser(null);
+            }
+        }
+
         return $this;
     }
 

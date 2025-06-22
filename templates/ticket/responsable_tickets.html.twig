@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CarthageLand{% endblock %}
+
+{% block body %}
+    <h1>Gestion des tickets CarthageLand</h1>
+
+        <div class="card text-center">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{path('admin_tickets')}}">Statistiques</a>
+                    </li>
+                    {% if is_granted('ROLE_ADMIN') %} 
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{{path('admin_tickets_responsable')}}">Responsables</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{path('admin_tickets_user')}}">Adhérents</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{{path('admin_tickets_responsable', {'matricule_responsable': app.user.matricule})}}">Responsables</a>
+                        </li>    
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{path('admin_tickets_user', {'matricule_responsable': app.user.matricule})}}">Adhérents</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Filtrer les responsables</h5>
+                                        <form method="get" class="row g-3">
+                                            <div class="col-md-5">
+                                                <label for="matricule" class="form-label">Matricule responsable</label>
+                                                <input class="form-control" type="text" id="matricule" name="matricule" value="{{ app.request.get('matricule') }}">
+                                            </div>
+                                            <div class="col-md-2 d-flex align-items-end">
+                                                <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                                            </div>
+                                            <button type="button" class="btn btn-outline-success w-100" onclick="window.location.href='{{ path('admin_tickets_responsable') }}'">
+                                            Tous les responsables
+                                            </button>
+                                        </form>
+                                        
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <div class="row">
+                    {% if is_granted('ROLE_ADMIN') %} 
+                        <a href="{{ path('admin_add_responsable') }}" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-plus"></i>Ajouter
+                        </a>
+                    {% endif %}
+                    {% if not responsableTickets is empty %}
+                        {% for responsableTicket in responsableTickets %}
+                            <div class="col-sm-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <a href="{{ path('admin_tickets_user', {'matricule_responsable': responsableTicket.responsable.matricule }) }}" class="link-primary">
+                                                {{ responsableTicket.responsable.nom }}
+                                            </a>
+                                        </h5>
+                                        <ul class="list-group list-group-flush mb-5 fs-4">
+                                            <li class="list-group-item"><strong>Matricule :</strong> {{ responsableTicket.responsable.matricule }}</li>
+                                            <li class="list-group-item"><strong>Quantité totale :</strong> {{ responsableTicket.qte }}</li>
+                                            <li class="list-group-item"><strong>Quantité vendue :</strong> {{ responsableTicket.qteVente }}</li>
+                                            <li class="list-group-item"><strong>Total de vente :</strong> {{ responsableTicket.totalVente }}</li>
+                                            <li class="list-group-item"><strong>Total d'avances :</strong> {{ responsableTicket.totalAvance }}</li>
+                                        </ul>
+                                        {% if is_granted('ROLE_ADMIN') %} 
+                                            <a href="{{ path('admin_edit_responsable', {'id': responsableTicket.id}) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>Modifier
+                                            </a>
+                                            <a href="{{ path('admin_delete_responsable', {'id': responsableTicket.id}) }}" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>Supprimer
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                            <a class="page-link" href="{% if currentPage > 1 %}{{ path('admin_tickets_user', {page: currentPage-1}) }}{% else %}#{% endif %}" tabindex="-1">Previous</a>
+                        </li>
+
+                        {# Always show first page #}
+                        <li class="page-item {% if 1 == currentPage %}active{% endif %}">
+                            <a class="page-link" href="{{ path('admin_tickets_user', {page: 1}) }}">1</a>
+                        </li>
+
+                        {# Show ... if needed #}
+                        {% if currentPage > 3 %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+
+                        {# Show currentPage-1 if it's not 1 or last #}
+                        {% if currentPage-1 > 1 and currentPage-1 < totalPages %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ path('admin_tickets_user', {page: currentPage-1}) }}">{{ currentPage-1 }}</a>
+                            </li>
+                        {% endif %}
+
+                        {# Show currentPage if it's not 1 or last #}
+                        {% if currentPage != 1 and currentPage != totalPages %}
+                            <li class="page-item active">
+                                <a class="page-link" href="{{ path('admin_tickets_user', {page: currentPage}) }}">{{ currentPage }}</a>
+                            </li>
+                        {% endif %}
+
+                        {# Show currentPage+1 if it's not 1 or last #}
+                        {% if currentPage+1 < totalPages %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ path('admin_tickets_user', {page: currentPage+1}) }}">{{ currentPage+1 }}</a>
+                            </li>
+                        {% endif %}
+
+                        {# Show ... if needed #}
+                        {% if currentPage < totalPages-2 %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+
+                        {# Always show last page if more than 1 #}
+                        {% if totalPages > 1 %}
+                            <li class="page-item {% if totalPages == currentPage %}active{% endif %}">
+                                <a class="page-link" href="{{ path('admin_tickets_user', {page: totalPages}) }}">{{ totalPages }}</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                            <a class="page-link" href="{% if currentPage < totalPages %}{{ path('admin_tickets_user', {page: currentPage+1}) }}{% else %}#{% endif %}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+                </div>
+            </div>
+        </div>
+
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter Opposition Ticket CarthageLand{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="h3 mb-0">Ajouter Opposition Ticket CarthageLand</h1>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            <div class="mb-3">
+                                {{ form_label(form.matricule, 'Matricule adhérent') }}
+                                {{ form_widget(form.matricule, {'attr': {'class': 'form-control', 'id':'user_ticket_matricule'}}) }}
+                                {{ form_errors(form.matricule) }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="nom" class="form-label">Nom de l'adhérent</label>
+                                <input class="form-control" type="text" aria-label="Nom de l'adhérent" disabled readonly id="nom">
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.nombre, 'Nombre de tickets') }}
+                                {{ form_widget(form.nombre, {'attr': {'class': 'form-control', 'id': 'user_ticket_nombre'}}) }}
+                                {{ form_errors(form.nombre) }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="prixUnitaire" class="form-label">Prix Unitaire</label>
+                                <input class="form-control" type="text" value="{{ userTicket.prixUnitaire }}" aria-label="Prix Unitaire" disabled readonly id="prixUnitaire">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="total" class="form-label">Montant Total</label>
+                                <input class="form-control" type="text" value="{{ userTicket.prixUnitaire * (form.nombre.vars.value|default(0) + 0) }}" aria-label="Montant Total" disabled readonly id="total">
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.avance, 'Avance') }}
+                                {{ form_widget(form.avance, {'attr': {'class': 'form-control', 'id' : 'user_ticket_avance'}}) }}
+                                {{ form_errors(form.avance) }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="reliquat" class="form-label">Reliquat</label>
+                                <input class="form-control" type="text" value="{{ userTicket.prixUnitaire * (form.nombre.vars.value|default(0) + 0) - (form.avance.vars.value|default(0) + 0.0) }}" aria-label="Reliquat" disabled readonly id="reliquat">
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.nbMois, 'Nombre de Mois') }}
+                                {{ form_widget(form.nbMois, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.nbMois) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.modeEcheance, 'Mode d\'Échéance') }}
+                                {{ form_widget(form.modeEcheance, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.modeEcheance) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.codeOpposition, 'Code d\'Opposition') }}
+                                {{ form_widget(form.codeOpposition, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.codeOpposition) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.dateDebut, 'Date de début') }}
+                                <div class="input-group" id="dateDebutPicker" data-td-target-input="nearest" data-td-target="#dateDebut">
+                                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control', 'data-td-target': '#dateDebut', 'id': 'dateDebut', 'autocomplete': 'off'}}) }}
+                                    <span class="input-group-text" data-td-target="#dateDebut" data-td-toggle="datetimepicker">
+                                        <i class="fa-regular fa-calendar"></i>
+                                    </span>
+                                </div>
+                                {{ form_errors(form.dateDebut) }}
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">Ajouter l'opposition</button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+{{ parent() }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Tempus Dominus Datepicker Logic ---
+    const dateDebutElement = document.getElementById('dateDebutPicker');
+
+    // Only proceed with picker initialization if the element exists
+    if (dateDebutElement) {
+        const pickerOptions = {
+            localization: {
+                format: 'dd/MM/yyyy'
+            },
+            display: {
+                components: {
+                    clock: false
+                }
+            },
+            useCurrent: false
+        };
+
+        const dateDebutPicker = new tempusDominus.TempusDominus(dateDebutElement, pickerOptions);
+
+        dateDebutElement.addEventListener('change.td', function(event) {
+            const startDateObject = event.detail.date;
+            // Add any logic here if you need to react to date changes
+            if (startDateObject) {
+                // console.log('Date selected:', startDateObject.toDate());
+            }
+        });
+    }
+
+    // --- Total Calculation Logic ---
+    const nombreInput = document.getElementById('user_ticket_nombre');
+    const prixUnitaireInput = document.getElementById('prixUnitaire');
+    const totalInput = document.getElementById('total');
+    const avanceInput = document.getElementById('user_ticket_avance');
+    const reliquatInput = document.getElementById('reliquat');
+
+    function updateTotal() {
+        // Ensure all elements exist before trying to access their values
+        if (nombreInput && prixUnitaireInput && totalInput && avanceInput && reliquatInput) {
+            const nombre = parseFloat(nombreInput.value) || 0;
+            const prixUnitaire = parseFloat(prixUnitaireInput.value) || 0;
+            const total = nombre * prixUnitaire;
+            const avance = parseFloat(avanceInput.value) || 0; 
+            const reliquat = total - avance;
+            totalInput.value = total.toFixed(2); 
+            reliquatInput.value = reliquat.toFixed(2); 
+        }
+    }
+
+    // Attach event listener and perform initial calculation only if required elements exist
+    if (nombreInput && prixUnitaireInput && totalInput && avanceInput && reliquatInput) {
+        nombreInput.addEventListener('input', updateTotal);
+        avanceInput.addEventListener('input', updateTotal);
+        updateTotal(); 
+    }
+
+    const matriculeInput = document.getElementById('user_ticket_matricule');
+    const nomInput =document.getElementById('nom');
+
+    function updateNom() {
+        if (matriculeInput && nomInput){
+            const matricule = matriculeInput.value || '';
+            if (matricule.length > 0) {
+            fetch('/user/nom-by-matricule/' + encodeURIComponent(matricule))
+                .then(response => response.json())
+                .then(data => {
+                    nomInput.value = data.nom || '';
+                })
+                .catch(() => {
+                    nomInput.value = '';
+                });
+        } else {
+            nomInput.value = '';
+        }
+        }
+    }
+
+    if (matriculeInput && nomInput){
+        matriculeInput.addEventListener('input', updateNom);
+        updateNom();
+    }
+});
+</script>
+{% endblock %}
