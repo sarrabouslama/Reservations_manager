@@ -40,6 +40,15 @@
                                                 <label for="matricule" class="form-label">Matricule responsable</label>
                                                 <input class="form-control" type="text" id="matricule" name="matricule" value="{{ app.request.get('matricule') }}">
                                             </div>
+                                            <div class="col-md-4">
+                                                <label for="localisation" class="form-label">localisation</label>
+                                                    <select class="form-select" id="localisation" name="localisation">
+                                                    <option value="">Tous</option>
+                                                    {% for localisation in allLocalisations %}
+                                                        <option value="{{ localisation|join('') }}" {% if app.request.get('localisation') == localisation|join('') %}selected{% endif %}>{{ localisation|join('') }}</option>
+                                                    {% endfor %}
+                                                </select>    
+                                            </div>
                                             <div class="col-md-2 d-flex align-items-end">
                                                 <button type="submit" class="btn btn-primary w-100">Filtrer</button>
                                             </div>
@@ -54,38 +63,50 @@
                     </div>
                 <div class="row">
                     {% if is_granted('ROLE_ADMIN') %} 
-                        <a href="{{ path('admin_add_responsable') }}" class="btn btn-sm btn-outline-danger">
+                        <a href="{{ path('admin_add_responsable') }}" class="btn btn-sm btn-outline-success">
                             <i class="fas fa-plus"></i>Ajouter
                         </a>
+                        <p></p>
                     {% endif %}
-                    {% if not responsableTickets is empty %}
-                        {% for responsableTicket in responsableTickets %}
-                            <div class="col-sm-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <a href="{{ path('admin_tickets_user', {'matricule_responsable': responsableTicket.responsable.matricule }) }}" class="link-primary">
-                                                {{ responsableTicket.responsable.nom }}
-                                            </a>
-                                        </h5>
-                                        <ul class="list-group list-group-flush mb-5 fs-4">
-                                            <li class="list-group-item"><strong>Matricule :</strong> {{ responsableTicket.responsable.matricule }}</li>
-                                            <li class="list-group-item"><strong>Quantité totale :</strong> {{ responsableTicket.qte }}</li>
-                                            <li class="list-group-item"><strong>Quantité vendue :</strong> {{ responsableTicket.qteVente }}</li>
-                                            <li class="list-group-item"><strong>Total de vente :</strong> {{ responsableTicket.totalVente }}</li>
-                                            <li class="list-group-item"><strong>Total d'avances :</strong> {{ responsableTicket.totalAvance }}</li>
-                                        </ul>
-                                        {% if is_granted('ROLE_ADMIN') %} 
-                                            <a href="{{ path('admin_edit_responsable', {'id': responsableTicket.id}) }}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-edit"></i>Modifier
-                                            </a>
-                                            <a href="{{ path('admin_delete_responsable', {'id': responsableTicket.id}) }}" class="btn btn-sm btn-outline-danger">
-                                                <i class="fas fa-trash"></i>Supprimer
-                                            </a>
-                                        {% endif %}
+                    {% if not groupedResponsableTickets is empty %}
+                        {% for localisation, responsables in groupedResponsableTickets %}
+                            <p></p>
+                            <div class="card" style="background-color:rgba(209, 209, 207, 0.72);">
+                                <h2>{{ localisation }}</h2>
+                            </div>
+                            <p></p>
+                            {% for responsableTicket in responsables %}
+                                <div class="col-sm-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <a href="{{ path('admin_tickets_user', {'matricule_responsable': responsableTicket.responsable.matricule }) }}" class="link-primary">
+                                                    {{ responsableTicket.responsable.nom }}
+                                                </a>
+                                            </h5>
+                                            <ul class="list-group list-group-flush mb-5 fs-4">
+                                                <li class="list-group-item"><strong>Matricule :</strong> {{ responsableTicket.responsable.matricule }}</li>
+                                                <li class="list-group-item"><strong>localisation :</strong> {{ responsableTicket.ticket.localisation }}</li>
+                                                <li class="list-group-item"><strong>Quantité totale :</strong> {{ responsableTicket.qte }}</li>
+                                                <li class="list-group-item"><strong>Quantité vendue :</strong> {{ responsableTicket.qteVente }}</li>
+                                                <li class="list-group-item"><strong>Total de vente :</strong> {{ responsableTicket.totalVente }}</li>
+                                                <li class="list-group-item"><strong>Total d'avances :</strong> {{ responsableTicket.totalAvance }}</li>
+                                            </ul>
+                                            {% if is_granted('ROLE_ADMIN') %} 
+                                                <a href="{{ path('admin_edit_responsable', {'id': responsableTicket.id}) }}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>Modifier
+                                                </a>
+                                                <form action="{{ path('admin_delete_responsable', {'id': responsableTicket.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce responsable ?');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>Supprimer
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                                
+                            {% endfor %}
                         {% endfor %}
                     {% endif %}
                     <nav aria-label="Page navigation example">

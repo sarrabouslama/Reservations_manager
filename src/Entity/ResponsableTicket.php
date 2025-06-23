@@ -27,12 +27,16 @@ class ResponsableTicket
     #[ORM\Column]
     private ?float $totalAvance = 0;
 
-    #[ORM\OneToOne(inversedBy: 'responsableTicket', cascade: ['persist'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $responsable = null;
-
     #[ORM\OneToMany(targetEntity: UserTicket::class, mappedBy: 'responsable')]
     private Collection $userTickets;
+
+    #[ORM\ManyToOne(inversedBy: 'responsableTickets')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Ticket $ticket = null;
+
+    #[ORM\ManyToOne(inversedBy: 'responsableTickets')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $responsable = null;
 
     public function __construct()
     {
@@ -80,18 +84,6 @@ class ResponsableTicket
         return $this;
     }
 
-    public function getResponsable(): ?User
-    {
-        return $this->responsable;
-    }
-
-    public function setResponsable(User $responsable): static
-    {
-        $this->responsable = $responsable;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, UserTicket>
      */
@@ -130,6 +122,30 @@ class ResponsableTicket
     public function setTotalAvance(float $totalAvance): static
     {
         $this->totalAvance = $totalAvance;
+
+        return $this;
+    }
+
+    public function getTicket(): ?Ticket
+    {
+        return $this->ticket;
+    }
+
+    public function setTicket(?Ticket $ticket): static
+    {
+        $this->ticket = $ticket;
+
+        return $this;
+    }
+
+    public function getResponsable(): ?User
+    {
+        return $this->responsable;
+    }
+
+    public function setResponsable(?User $responsable): static
+    {
+        $this->responsable = $responsable;
 
         return $this;
     }

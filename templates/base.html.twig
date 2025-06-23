@@ -62,9 +62,9 @@
                                     <a class="nav-link" href="{{ path('admin_tickets') }}">CarthageLand</a>
                                 </li>
                             {% endif %}
-                            {% if app.user and app.user.responsableTicket is not null %}
+                            {% if app.user and app.user.responsableTickets is not empty %}
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ path('admin_tickets') }}">CarthageLand</a>
+                                    <a class="nav-link" href="{{path('admin_tickets_user', {'matricule_responsable': app.user.matricule})}}">CarthageLand</a>
                                 </li>
                             {% endif %}
 

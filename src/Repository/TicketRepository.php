@@ -45,4 +45,12 @@ class TicketRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function findAllLocalisations(): array
+    {
+        $query =  $this->createQueryBuilder('p')
+            ->select('DISTINCT p.localisation');
+        return ($query ->getQuery()
+            ->getResult());
+    }
 }

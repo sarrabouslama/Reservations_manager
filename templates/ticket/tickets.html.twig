@@ -29,20 +29,40 @@
             </ul>
         </div>
         <div class="card-body">
-            {% for ticket in tickets %}
-                <ul class="list-group list-group-flush mb-5 fs-4">
-                    <li class="list-group-item"><strong>Quantité :</strong> {{ ticket.qte }}</li>
-                    <li class="list-group-item"><strong>prix Unitaire :</strong> {{ ticket.prixUnitaire }}</li>
-                    <li class="list-group-item"><strong>Quantité Vendue :</strong> {{ ticket.qteVente }}</li>
-                    <li class="list-group-item"><strong>Total de vente :</strong> {{ ticket.totalVente }}</li>
-                    <li class="list-group-item"><strong>Total d'avance :</strong> {{ ticket.totalAvance }}</li>
-                </ul>
+            <div class="row">
                 {% if is_granted('ROLE_ADMIN') %} 
-                    <a href="{{ path('admin_edit_ticket', {'id': ticket.id}) }}" class="btn btn-outline-primary">
-                        <i class="fas fa-edit"></i>Modifier
+                    <a href="{{ path('admin_add_ticket') }}" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-plus"></i>Ajouter
                     </a>
+                    <br>
                 {% endif %}
-            {% endfor %}
+                {% if tickets is empty %}
+                    <h4>Pas de tickets disponibles!</h4>
+                {% endif %}
+                {% for ticket in tickets %}
+                    <ul class="list-group list-group-flush mb-5 fs-4">
+                        <li class="list-group-item"><strong>Localisation :</strong> {{ ticket.localisation }}</li>
+                        <li class="list-group-item"><strong>Quantité :</strong> {{ ticket.qte }}</li>
+                        <li class="list-group-item"><strong>prix Unitaire :</strong> {{ ticket.prixUnitaire }} TND</li>
+                        <li class="list-group-item"><strong>Quantité Vendue :</strong> {{ ticket.qteVente }}</li>
+                        <li class="list-group-item"><strong>Total de vente :</strong> {{ ticket.totalVente }} TND</li>
+                        <li class="list-group-item"><strong>Total d'avance :</strong> {{ ticket.totalAvance }} TND</li>
+                        <li class="list-group-item"><strong>Total d'oppositions :</strong> {{ ticket.totalVente - ticket.totalAvance }} TND</li>
+                        {% if is_granted('ROLE_ADMIN') %} 
+                            <div class="btn-group w-100" role="group">
+                                <a href="{{ path('admin_edit_ticket', {'id': ticket.id}) }}" class="btn btn-outline-primary flex-fill">
+                                    <i class="fas fa-edit"></i>Modifier
+                                </a>
+                                <form action="{{ path('admin_delete_ticket', {'id': ticket.id}) }}" method="post" class="flex-fill p-0" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette gatégorie ?');">
+                                    <button type="submit" class="btn btn-outline-danger w-100">
+                                        <i class="fas fa-trash"></i>Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </ul>
+                {% endfor %}
+            </div>
         </div>
     </div>
 

@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
@@ -17,6 +18,13 @@ class TicketType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('localisation',TextType::class, [
+                'label' => 'localisation',
+                'attr' => ['placeholder' => 'Entrer localisation'],
+                'constraints' => [
+                    new NotBlank(['message' => 'Veuiller entrer une localisation']),
+                ],
+            ])
             ->add('qte', IntegerType::class, [
                 'label' => 'Quantité totale',
                 'attr' => ['placeholder' => 'Entrer la quantité totale'],

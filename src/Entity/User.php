@@ -77,16 +77,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'user', targetEntity: Reservation::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?Reservation $reservation = null;
 
-    #[ORM\OneToOne(mappedBy: 'responsable', cascade: ['persist', 'remove'])]
-    private ?ResponsableTicket $responsableTicket = null;
-
     #[ORM\OneToMany(targetEntity: UserTicket::class, mappedBy: 'user')]
     private Collection $userTickets;
+
+    #[ORM\OneToMany(targetEntity: ResponsableTicket::class, mappedBy: 'responsable')]
+    private Collection $responsableTickets;
 
     public function __construct()
     {
         $this->notifications = new ArrayCollection();
         $this->userTickets = new ArrayCollection();
+        $this->responsableTickets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -334,23 +335,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getResponsableTicket(): ?ResponsableTicket
-    {
-        return $this->responsableTicket;
-    }
-
-    public function setResponsableTicket(ResponsableTicket $responsableTicket): static
-    {
-        // set the owning side of the relation if necessary
-        if ($responsableTicket->getResponsable() !== $this) {
-            $responsableTicket->setResponsable($this);
-        }
-
-        $this->responsableTicket = $responsableTicket;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, UserTicket>
      */
@@ -375,6 +359,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($userTicket->getUser() === $this) {
                 $userTicket->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ResponsableTicket>
+     */
+    public function getResponsableTickets(): Collection
+    {
+        return $this->responsableTickets;
+    }
+
+    public function addResponsableTicket(ResponsableTicket $responsableTicket): static
+    {
+        if (!$this->responsableTickets->contains($responsableTicket)) {
+            $this->responsableTickets->add($responsableTicket);
+            $responsableTicket->setResponsable($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResponsableTicket(ResponsableTicket $responsableTicket): static
+    {
+        if ($this->responsableTickets->removeElement($responsableTicket)) {
+            // set the owning side to null (unless already changed)
+            if ($responsableTicket->getResponsable() === $this) {
+                $responsableTicket->setResponsable(null);
             }
         }
 

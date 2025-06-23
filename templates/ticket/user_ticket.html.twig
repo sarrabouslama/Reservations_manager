@@ -44,6 +44,15 @@
                                         <label for="matricule_responsable" class="form-label">matricule responsable</label>
                                         <input class="form-control" type="text" id="matricule_responsable" name="matricule_responsable" value="{{ app.request.get('matricule_responsable') }}">
                                     </div>
+                                    <div class="col-md-4">
+                                        <label for="localisation" class="form-label">localisation</label>
+                                            <select class="form-select" id="localisation" name="localisation">
+                                            <option value="">Tous</option>
+                                            {% for localisation in allLocalisations %}
+                                                <option value="{{ localisation|join('') }}" {% if app.request.get('localisation') == localisation|join('') %}selected{% endif %}>{{ localisation|join('') }}</option>
+                                            {% endfor %}
+                                        </select>    
+                                    </div>
                                     <div class="col-md-2 d-flex align-items-end">
                                         <button type="submit" class="btn btn-primary w-100">Filtrer</button>
                                     </div>
@@ -67,6 +76,7 @@
                         <tr>
                             <th>Matricule</th>
                             <th>Nom</th>
+                            <th>Localisation</th>
                             <th>prix Unitaire</th>
                             <th>Quantité</th>
                             <th>Total</th>
@@ -92,6 +102,7 @@
                                         </a>
                                     </td>
                                     <td>{{ userTicket.user.nom }}</td>
+                                    <td>{{ userTicket.responsable.ticket.localisation }}</td>
                                     <td>{{ userTicket.prixUnitaire }}</td>
                                     <td>{{ userTicket.nombre }}</td>
                                     <td>{{ userTicket.total }}</td>
@@ -109,13 +120,15 @@
                                                 </a>
                                                 <form action="{{ path('responsable_delete_user', {'id': userTicket.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette opposition ?');">
                                                     <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                        <i class="fas fa-trash"></i>
+                                                        <i class="fas fa-trash"></i>Supprimer
                                                     </button>
                                                 </form>
                                             </div>
                                         </td>
+                                    {% else %}
+                                        <td></td>
                                     {% endif %}
-                                    <td>{{ userTicket.responsable.responsable.nom }} {{ userTicket.responsable.responsable.matricule }}</td>
+                                    <td>{{ userTicket.responsable.responsable.nom }}</td>
                                 </tr>
                             {% endfor %}
                         {% endif %}

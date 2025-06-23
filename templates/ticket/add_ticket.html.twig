@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier CarthageLand{% endblock %}
+{% block title %}Ajouter CarthageLand{% endblock %}
 
 {% block body %}
     <div class="container">
@@ -8,7 +8,7 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
-                        <h1 class="h3 mb-0">Modifier Tickets CarthageLand</h1>
+                        <h1 class="h3 mb-0">Ajouter Tickets CarthageLand</h1>
                     </div>
                     <div class="card-body">
                         {{ form_start(form) }}
@@ -33,7 +33,7 @@
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                 <a href="{{ path('admin_tickets') }}" class="btn btn-secondary me-md-2">Annuler</a>
-                                <button type="submit" class="btn btn-primary">Modifier</button>
+                                <button type="submit" class="btn btn-primary">Ajouter</button>
                             </div>
                         {{ form_end(form) }}
                     </div>

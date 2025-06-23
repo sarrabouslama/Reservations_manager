@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TicketRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TicketRepository::class)]
@@ -27,6 +29,17 @@ class Ticket
 
     #[ORM\Column]
     private ?float $totalAvance = 0;
+
+    #[ORM\Column(length: 255, unique:true)]
+    private ?string $localisation = null;
+
+    #[ORM\OneToMany(targetEntity: ResponsableTicket::class, mappedBy: 'ticket', orphanRemoval: true)]
+    private Collection $responsableTickets;
+
+    public function __construct()
+    {
+        $this->responsableTickets = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -89,6 +102,48 @@ class Ticket
     public function setTotalAvance(float $totalAvance): static
     {
         $this->totalAvance = $totalAvance;
+
+        return $this;
+    }
+
+    public function getLocalisation(): ?string
+    {
+        return $this->localisation;
+    }
+
+    public function setLocalisation(string $localisation): static
+    {
+        $this->localisation = $localisation;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ResponsableTicket>
+     */
+    public function getResponsableTickets(): Collection
+    {
+        return $this->responsableTickets;
+    }
+
+    public function addResponsableTicket(ResponsableTicket $responsableTicket): static
+    {
+        if (!$this->responsableTickets->contains($responsableTicket)) {
+            $this->responsableTickets->add($responsableTicket);
+            $responsableTicket->setTicket($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResponsableTicket(ResponsableTicket $responsableTicket): static
+    {
+        if ($this->responsableTickets->removeElement($responsableTicket)) {
+            // set the owning side to null (unless already changed)
+            if ($responsableTicket->getTicket() === $this) {
+                $responsableTicket->setTicket(null);
+            }
+        }
 
         return $this;
     }

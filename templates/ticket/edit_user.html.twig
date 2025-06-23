@@ -24,6 +24,16 @@
                             </div>
 
                             <div class="mb-3">
+                                {{ form_label(form.localisation, 'localisation') }}
+                                {% if date|date('d-m-Y') == userTicket.dateSaisie|date('d-m-Y') %}
+                                    {{ form_widget(form.localisation, {'attr': {'class': 'form-control', 'id':'user_ticket_localisation'}}) }}
+                                {% else %} 
+                                    {{ form_widget(form.localisation, {'attr': {'class': 'form-control', 'id':'user_ticket_localisation', 'readonly': 'readonly'}}) }}
+                                {% endif %}
+                                {{ form_errors(form.localisation) }}
+                            </div>
+
+                            <div class="mb-3">
                                 
                                     {{ form_label(form.nombre, 'Nombre de tickets') }}
                                     {% if date|date('d-m-Y') == userTicket.dateSaisie|date('d-m-Y') %}
@@ -158,6 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (nombreInput && prixUnitaireInput && totalInput && avanceInput && reliquatInput) {
         nombreInput.addEventListener('input', updateTotal);
         avanceInput.addEventListener('input', updateTotal);
+        prixUnitaireInput.addEventListener('change', updateTotal);
         updateTotal(); 
     }
 
@@ -185,6 +196,35 @@ document.addEventListener('DOMContentLoaded', function() {
     if (matriculeInput && nomInput){
         matriculeInput.addEventListener('input', updateNom);
         updateNom();
+    }
+
+        
+    const localisationInput = document.getElementById('user_ticket_localisation');
+
+    function updatePrix() {
+        if (localisationInput && prixUnitaireInput){
+            const localisation = localisationInput.value || '';
+            if (localisation.length > 0) {
+            fetch('/ticket/prix-by-localisation/' + encodeURIComponent(localisation))
+                .then(response => response.json())
+                .then(data => {
+                    prixUnitaireInput.value = data.prix || '';
+                    updateTotal();
+
+                })
+                .catch(() => {
+                    prixUnitaireInput.value = '';
+                });
+        } else {
+            prixUnitaireInput.value = '';
+        }
+        }
+    }
+
+    if (localisationInput && prixUnitaireInput){
+        localisationInput.addEventListener('change', updatePrix, updateTotal);
+        updatePrix();
+        updateTotal();
     }
 
 });

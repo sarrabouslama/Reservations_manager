@@ -16,13 +16,25 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use App\Repository\TicketRepository;
 
 
 
 class UserTicketType extends AbstractType
 {
+    private TicketRepository $ticketRepository;
+
+    public function __construct(TicketRepository $ticketRepository)
+    {
+        $this->ticketRepository = $ticketRepository;
+    }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $localisations = $this->ticketRepository->findAll();
+        $choices = [];
+        foreach ($localisations as $ticket) {
+            $choices[$ticket->getLocalisation()] = $ticket->getLocalisation();
+        }
         $builder
             ->add('matricule',TextType::class, [
                 'label' => 'Matricule',
@@ -31,6 +43,18 @@ class UserTicketType extends AbstractType
                 'data' => $options['matricule'] ?? '',
                 'constraints' => [
                     new NotBlank(['message' => 'Veuiller entrer une matricule']),
+                ],
+            ])
+
+            ->add('localisation',ChoiceType::class, [
+                'label' => 'Localisation',
+                'mapped' => false,
+                'data' => $options['localisation'] ?? '',
+                'choices' => $choices,
+                'placeholder' => 'Sélectionner une Localisation',
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Veuillez sélectionner une Localisation']),
                 ],
             ])
             ->add('nombre', IntegerType::class, [
@@ -118,9 +142,9 @@ class UserTicketType extends AbstractType
                 'constraints' => [
                     new Callback(function($dateDebut, ExecutionContextInterface $context) {
                         $form = $context->getRoot();
-                        $date = new \DateTime();
-                        if ($dateDebut->format('d-m-Y') < $date->format('d-m-Y')) {
-                            $context->addViolation("La date de début doit être postérieure a la date actuelle.");
+                        $date = (new \DateTime())->setTime(0, 0, 0);
+                        if ($dateDebut < $date) {
+                            $context->addViolation("La date de début doit être postérieure à la date actuelle.");
                         }
                     })
                 ]
@@ -133,6 +157,7 @@ class UserTicketType extends AbstractType
         $resolver->setDefaults([
             'data_class' => UserTicket::class,
             'matricule' => '', // default value
+            'localisation' => '',
         ]);
     }
 }

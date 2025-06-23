@@ -9,14 +9,27 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
+use App\Repository\TicketRepository;
 
 
 class ResponsableTicketType extends AbstractType
 {
+    private TicketRepository $ticketRepository;
+
+    public function __construct(TicketRepository $ticketRepository)
+    {
+        $this->ticketRepository = $ticketRepository;
+    }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $localisations = $this->ticketRepository->findAll();
+        $choices = [];
+        foreach ($localisations as $ticket) {
+            $choices[$ticket->getLocalisation()] = $ticket->getLocalisation();
+        }
         $builder
             ->add('matricule',TextType::class, [
                 'label' => 'Matricule',
@@ -27,6 +40,19 @@ class ResponsableTicketType extends AbstractType
                     new NotBlank(['message' => 'Veuiller entrer une matricule']),
                 ],
             ])
+            
+            ->add('localisation',ChoiceType::class, [
+                'label' => 'Localisation',
+                'mapped' => false,
+                'data' => $options['localisation'] ?? '',
+                'choices' => $choices,
+                'placeholder' => 'Sélectionner une Localisation',
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'Veuillez sélectionner une Localisation']),
+                ],
+            ])
+
             ->add('qte', IntegerType::class, [
                 'label' => 'Quantité totale',
                 'attr' => ['placeholder' => 'Entrer la quantité totale pour ce responsable'],
@@ -45,6 +71,7 @@ class ResponsableTicketType extends AbstractType
         $resolver->setDefaults([
             'data_class' => ResponsableTicket::class,
             'matricule' => '', // default value
+            'localisation' => '',
         ]);
     }
 }
