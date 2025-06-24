@@ -109,6 +109,15 @@ class PayementType extends AbstractType
                     'class' => 'form-control datepicker',
                     'autocomplete' => 'off',
                 ],
+                'constraints' => [
+                    new Callback(function($dateDebut, ExecutionContextInterface $context) {
+                        $form = $context->getRoot();
+                        $date = (new \DateTime())->setTime(0, 0, 0);
+                        if ($dateDebut < $date) {
+                            $context->addViolation("La date de début doit être postérieure à la date actuelle.");
+                        }
+                    })
+                ]
             ])
         ;
     }

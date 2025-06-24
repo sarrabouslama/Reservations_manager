@@ -26,6 +26,10 @@
                                 <label for="matricule" class="form-label">Matricule adhérent</label>
                                 <input class="form-control" type="text" id="matricule" name="matricule" value="{{ app.request.get('matricule') }}">
                             </div>
+                            <div class="col-md-5">
+                                <label for="nom" class="form-label">Nom adhérent</label>
+                                <input class="form-control" type="text" id="nom" name="nom" value="{{ app.request.get('nom') }}">
+                            </div>
                             <div class="col-md-2 d-flex align-items-end">
                                 <button type="submit" class="btn btn-primary w-100">Filtrer</button>
                             </div>
@@ -59,7 +63,7 @@
             <tbody>
                 {% if users is empty %}
                     <tr>
-                        <td colspan="16" class="text-center">Aucun adhérent trouvé.</td>
+                        <td colspan="100%" class="text-center">Aucun adhérent trouvé.</td>
                     </tr>
                 {% else %}
                     {% for user in users %}

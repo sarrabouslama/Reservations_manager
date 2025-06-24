@@ -59,7 +59,7 @@ class TicketController extends AbstractController
             return $this->redirectToRoute('admin_tickets');
         }
 
-        return $this->render('ticket/edit_ticket.html.twig', [
+        return $this->render('ticket/add_ticket.html.twig', [
             'ticket' => $ticket,
             'form' => $form->createView(),
         ]);

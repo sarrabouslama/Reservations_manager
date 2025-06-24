@@ -152,9 +152,9 @@
                                                         </form>
                                                     </div>
                                                 {% else %}
-                                                    <form method="post" action="{{ path('app_reservation_new', {'id': home.id}) }}" class="d-inline reserve-form" data-period-id="{{ period.id }}">
-                                                        <input type="hidden" name="dateDebut" value="{{ period.dateDebut|date('Y-m-d') }}">
-                                                        <input type="hidden" name="dateFin" value="{{ period.dateFin|date('Y-m-d') }}">
+                                                    <form method="post" action="{{ path('app_reservation_new', {'id': home.id}) }}" class="d-inline reserve-form" data-period-id="{{ period.id }}" onsubmit="return confirm('Êtes-vous sûr de vouloir réserver {{ home.nom }} de {{ period.dateDebut|date('d/m/Y') }} à {{ period.dateFin|date('d/m/Y') }} ?');">
+                                                        <input type="hidden" name="dateDebut" value="{{ period.dateDebut|date('d/m/Y') }}">
+                                                        <input type="hidden" name="dateFin" value="{{ period.dateFin|date('d/m/Y') }}">
                                                         <button type="submit" class="btn btn-sm btn-primary px-2 py-1">Réserver</button>
                                                     </form>
                                                 {% endif %}
@@ -166,7 +166,7 @@
                                                 {{ period.reservations|length }} 
                                             </td>
                                             <td>
-                                                {{ home.getMaxUsers() }}
+                                                {{ period.getMaxUsers() }}
                                             </td>
                                         </tr>
                                     {% endfor %}

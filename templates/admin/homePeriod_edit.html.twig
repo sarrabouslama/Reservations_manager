@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ajouter une nouvelle Période{% endblock %}
+{% block title %}Modifier la Période{% endblock %}
 
 {% block body %}
     <div class="container">
@@ -8,10 +8,17 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
-                        <h1 class="h3 mb-0">Ajouter une nouvelle Période pour {% if home is defined %}{{ home.nom }}{% else %}toutes les maisons{% endif %}</h1>
+                        <h1 class="h3 mb-0">Modifier la Période pour {% if home is defined %}{{ home.nom }}{% endif %}</h1>
                     </div>
                     <div class="card-body">
                         {{ form_start(form) }}
+                        
+                            <div class="mb-3">
+                                {{ form_label(form.maxUsers, 'Nombre de maisons') }}
+                                {{ form_widget(form.maxUsers, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.maxUsers) }}
+                            </div>
+
                             <div class="mb-3">
                                 {{ form_label(form.dateDebut, 'Date de début') }}
                                 <div class="input-group" id="dateDebutPicker" data-td-target-input="nearest" data-td-target="#dateDebut">
@@ -39,7 +46,7 @@
                                 {% else %}
                                     <a href="{{ path('admin_homes') }}" class="btn btn-secondary me-md-2">Annuler</a>
                                 {% endif %}
-                                <button type="submit" class="btn btn-primary">Ajouter la période</button>
+                                <button type="submit" class="btn btn-primary">Modifier la période</button>
                             </div>
                         {{ form_end(form) }}
                     </div>

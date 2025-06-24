@@ -43,9 +43,6 @@ class Home
     private ?string $description = null;
 
     #[ORM\Column]
-    private ?int $maxUsers = 0;
-
-    #[ORM\Column]
     private ?bool $bloqued = false;
     
     /**
@@ -214,19 +211,7 @@ class Home
         }
         return $this;
     }
-
-    public function getMaxUsers(): ?int
-    {
-        return $this->maxUsers;
-    }
-
-    public function setMaxUsers(int $maxUsers): static
-    {
-        $this->maxUsers = $maxUsers;
-
-        return $this;
-    }
-
+    
     public function isBloqued(): ?bool
     {
         return $this->bloqued;

@@ -102,27 +102,25 @@ class ExportExcelController extends AbstractController
         $sheet->setCellValue('A1', 'Région');
         $sheet->setCellValue('B1', 'Résidence');
         $sheet->setCellValue('C1', 'Nombre de chambres');
-        $sheet->setCellValue('D1', 'Nombre de Maisons');
-        $sheet->setCellValue('E1', 'Distance Plage');
-        $sheet->setCellValue('F1', 'Prix');
-        $sheet->setCellValue('G1', 'Description');
-        $sheet->setCellValue('H1', 'Nom Contact');
-        $sheet->setCellValue('I1', 'Telephone Contact');
-        $sheet->setCellValue('J1', 'Google Maps');
-        $sheet->getStyle('A1:J1')->getFont()->setBold(true);     
+        $sheet->setCellValue('D1', 'Distance Plage');
+        $sheet->setCellValue('E1', 'Prix');
+        $sheet->setCellValue('F1', 'Description');
+        $sheet->setCellValue('G1', 'Nom Contact');
+        $sheet->setCellValue('H1', 'Telephone Contact');
+        $sheet->setCellValue('I1', 'Google Maps');
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
 
         $row = 2;
         foreach ($data as $item) {
             $sheet->setCellValue('A' . $row, $item->getRegion());
             $sheet->setCellValue('B' . $row, $item->getResidence());
             $sheet->setCellValue('C' . $row, $item->getNombreChambres());
-            $sheet->setCellValue('D' . $row, $item->getMaxUsers());
-            $sheet->setCellValue('E' . $row, $item->getDistancePlage() . ' km');
-            $sheet->setCellValue('F' . $row, $item->getPrix() . ' DT');
-            $sheet->setCellValue('G' . $row, $item->getDescription() ?? null);
-            $sheet->setCellValue('H' . $row, $item->getNomProp() ?? null);
-            $sheet->setCellValue('I' . $row, $item->getTelProp() ?? null);
-            $sheet->setCellValue('J' . $row, $item->getMapsUrl()  ?? null);
+            $sheet->setCellValue('D' . $row, $item->getDistancePlage() . ' km');
+            $sheet->setCellValue('E' . $row, $item->getPrix() . ' DT');
+            $sheet->setCellValue('F' . $row, $item->getDescription() ?? null);
+            $sheet->setCellValue('G' . $row, $item->getNomProp() ?? null);
+            $sheet->setCellValue('H' . $row, $item->getTelProp() ?? null);
+            $sheet->setCellValue('I' . $row, $item->getMapsUrl()  ?? null);
             $row++;
         }
 
@@ -261,6 +259,64 @@ class ExportExcelController extends AbstractController
         $disposition = $response->headers->makeDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             'oppositions.xlsx'
+        );
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', $disposition);
+        ob_start();
+        $writer->save('php://output');
+        $content = ob_get_clean();
+        $response->setContent($content);
+        return $response;
+    }
+
+    #[Route('/export/excel/tickets', name: 'export_excel_tickets')]
+    public function exportExcelTickets(): Response
+    {
+        $repository = $this->entityManager->getRepository('App\Entity\UserTicket');
+        $data = $repository->findAll();
+        if (!$data) {
+            return new Response('Aucune donnée à exporter.', 404);
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'Matricule Adhérent');
+        $sheet->setCellValue('B1', 'Nom et Prenom');
+        $sheet->setCellValue('C1', 'Localisation');
+        $sheet->setCellValue('D1', 'Prix Unitaire');
+        $sheet->setCellValue('E1', 'quantité');
+        $sheet->setCellValue('F1', 'Total');
+        $sheet->setCellValue('G1', 'Avance');
+        $sheet->setCellValue('H1', 'Reliquat');
+        $sheet->setCellValue('I1', 'Nb mois');
+        $sheet->setCellValue('J1', 'Mode echeance');
+        $sheet->setCellValue('K1', 'Code Opposition');
+        $sheet->setCellValue('L1', 'Date début');
+        $sheet->getStyle('A1:L1')->getFont()->setBold(true);
+
+        $row = 2;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $item->getUser()->getMatricule());
+            $sheet->setCellValue('B' . $row, $item->getUser()->getNom());
+            $sheet->setCellValue('C' . $row, $item->getResponsable()->getTicket()->getLocalisation());
+            $sheet->setCellValue('D' . $row, number_format($item->getPrixUnitaire(), 2, ',', ' ') . ' DT');
+            $sheet->setCellValue('E' . $row, $item->getNombre());
+            $sheet->setCellValue('F' . $row, number_format($item->getTotal(), 2, ',', ' ') . ' DT');
+            $sheet->setCellValue('G' . $row, number_format($item->getAvance(), 2, ',', ' ') . ' DT');
+            $reste = $item->getTotal() - $item->getAvance();
+            $sheet->setCellValue('H' . $row, number_format($reste, 2, ',', ' ') . ' DT');
+            $sheet->setCellValue('I' . $row, $item->getNbMois());
+            $sheet->setCellValue('J' . $row, $item->getModeEcheance());
+            $sheet->setCellValue('K' . $row, $item->getCodeOpposition());
+            $sheet->setCellValue('L' . $row, $item->getDateDebut()->format('d-m-Y'));
+            $row++;
+        }
+        $writer = new Xlsx($spreadsheet);
+        $response = new Response();
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'CarthageLand.xlsx'
         );
         $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         $response->headers->set('Content-Disposition', $disposition);

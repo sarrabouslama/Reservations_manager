@@ -107,13 +107,13 @@
                     {# Separator between homes (smaller) #}
                     {% if lastHome is not same as(reservation.homePeriod.home.id) and lastHome is not null %}
                         <tr>
-                            <td colspan="8" style="height: 10px; background: #f8f9fa; padding: 0;"></td>
+                            <td colspan="100%" style="height: 10px; background: #f8f9fa; padding: 0;"></td>
                         </tr>
                     {% endif %}
                     {# Separator between periods (smaller) #}
                     {% if lastPeriod is not same as(reservation.homePeriod.id) and lastPeriod is not null and lastHome == reservation.homePeriod.home.id %}
                         <tr>
-                            <td colspan="8" style="height: 3px; background: #ececec; padding: 0;"></td>
+                            <td colspan="100%" style="height: 3px; background: #ececec; padding: 0;"></td>
                         </tr>
                     {% endif %}
 
@@ -215,7 +215,7 @@
                     {% set lastPeriod = reservation.homePeriod.id %}
                 {% else %}
                     <tr>
-                        <td colspan="8" class="text-center">Aucune réservation.</td>
+                        <td colspan="100%" class="text-center">Aucune réservation.</td>
                     </tr>
                 {% endfor %}
             </tbody>

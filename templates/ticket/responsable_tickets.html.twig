@@ -89,8 +89,8 @@
                                                 <li class="list-group-item"><strong>localisation :</strong> {{ responsableTicket.ticket.localisation }}</li>
                                                 <li class="list-group-item"><strong>Quantité totale :</strong> {{ responsableTicket.qte }}</li>
                                                 <li class="list-group-item"><strong>Quantité vendue :</strong> {{ responsableTicket.qteVente }}</li>
-                                                <li class="list-group-item"><strong>Total de vente :</strong> {{ responsableTicket.totalVente }}</li>
-                                                <li class="list-group-item"><strong>Total d'avances :</strong> {{ responsableTicket.totalAvance }}</li>
+                                                <li class="list-group-item"><strong>Total de vente :</strong> {{ responsableTicket.totalVente|number_format(2, ',', ' ') }}</li>
+                                                <li class="list-group-item"><strong>Total d'avances :</strong> {{ responsableTicket.totalAvance|number_format(2, ',', ' ') }}</li>
                                             </ul>
                                             {% if is_granted('ROLE_ADMIN') %} 
                                                 <a href="{{ path('admin_edit_responsable', {'id': responsableTicket.id}) }}" class="btn btn-sm btn-outline-primary">

@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Repository\HomePeriodRepository;
 use Psr\Log\LoggerInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 #[Route('/homes')]
@@ -21,7 +22,7 @@ use Psr\Log\LoggerInterface;
 class HomeController extends AbstractController
 {
     #[Route('', name: 'app_home_index')]
-    public function index(Request $request, HomeRepository $homeRepository): Response
+    public function index(Request $request, HomeRepository $homeRepository, EntityManagerInterface $entityManager): Response
     {
         $residence = $request->query->get('residence');
         $region = $request->query->get('region');

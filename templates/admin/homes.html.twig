@@ -26,7 +26,6 @@
                         <th>Région</th>
                         <th>Résidence</th>
                         <th>Chambres</th>
-                        <th>Nombre de maisons</th>
                         <th>Distance plage</th>
                         <th>Prix</th>
                         <th>Actions</th>
@@ -41,7 +40,6 @@
                             <td>{{ home.region }}</td>
                             <td>{{ home.residence }}</td>
                             <td>S+ {{ home.nombreChambres }}</td>
-                            <td>{{ home.maxUsers }}</td>
                             <td>{{ home.distancePlage }} km</td>
                             <td>{{ home.prix }}TND</td>
                             <td>
@@ -60,7 +58,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="8" class="text-center">Aucune maison trouvée</td>
+                            <td colspan="100%" class="text-center">Aucune maison trouvée</td>
                         </tr>
                     {% endfor %}
                 </tbody>

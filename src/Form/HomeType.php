@@ -73,13 +73,6 @@ class HomeType extends AbstractType
                     
                 ],
             ])
-            ->add('maxUsers', IntegerType::class, [
-                'label' => 'Nombre de maisons',
-                'required' => true,
-                'attr' => [
-                    'min' => 0,
-                ],
-            ])
             ->add('description', TextareaType::class, [
                 'required' => false,
             ])

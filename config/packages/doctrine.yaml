@@ -17,6 +17,10 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Entity'
                 prefix: 'App\Entity'
                 alias: App
+        dql:
+            string_functions:
+                SOUNDEX: DoctrineExtensions\Query\Mysql\Soundex
+                MATCH_AGAINST: DoctrineExtensions\Query\Mysql\MatchAgainst
 
 when@test:
     doctrine:

@@ -14,6 +14,13 @@ class HomePeriodType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('maxUsers', IntegerType::class, [
+                'label' => 'Nombre de maisons',
+                'required' => true,
+                'attr' => [
+                    'min' => 0,
+                ],
+            ])
             ->add('dateDebut', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de début',

@@ -33,6 +33,9 @@ class HomePeriod
     #[ORM\OneToMany(mappedBy: 'homePeriod', targetEntity: Reservation::class, orphanRemoval: true)]
     private Collection $reservations;
 
+    #[ORM\Column]
+    private ?int $maxUsers = 0;
+
 
     public function __construct()
     {
@@ -76,8 +79,11 @@ class HomePeriod
         if ($dateFin && $this->dateDebut && $dateFin < $this->dateDebut) {
             throw new \InvalidArgumentException('La date de fin doit être postérieure à la date de début.');
         }
-        else {
+        if (!$dateFin){
             $this->dateFin = $this->dateDebut ? (clone $this->dateDebut)->add(new \DateInterval('P7D')) : null;
+        }
+        else{
+            $this->dateFin = $dateFin;
         }
         return $this;
     }
@@ -129,5 +135,17 @@ class HomePeriod
             }
         }
         return false;
+    }
+
+    public function getMaxUsers(): ?int
+    {
+        return $this->maxUsers;
+    }
+
+    public function setMaxUsers(int $maxUsers): static
+    {
+        $this->maxUsers = $maxUsers;
+
+        return $this;
     }
 } 

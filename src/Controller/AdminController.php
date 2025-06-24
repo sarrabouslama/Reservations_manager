@@ -41,6 +41,7 @@ class AdminController extends AbstractController
         $page = max(1, $request->query->getInt('page', 1));
         $pageSize = 10; 
         $matricule = $request->query->get('matricule');
+        $nom = $request->query->get('nom');
 
         $queryBuilder = $userRepository->createQueryBuilder('u')
             ->orderBy('u.id', 'ASC');
@@ -48,6 +49,15 @@ class AdminController extends AbstractController
         if ($matricule) {
             $queryBuilder->where('u.matricule = :matricule')
                 ->setParameter('matricule', $matricule);
+        }
+        if ($nom) {
+            $words = preg_split('/\s+/', trim($nom));
+            foreach ($words as $idx => $word) {
+                $queryBuilder->andWhere("u.nom LIKE :nomWord$idx");
+                $queryBuilder->setParameter("nomWord$idx", '%' . $word . '%');
+            }
+            $queryBuilder->orWhere('SOUNDEX(u.nom) = SOUNDEX(:nomSoundex)')
+                ->setParameter('nomSoundex', $nom);
         }
 
         $query = $queryBuilder
@@ -300,7 +310,7 @@ class AdminController extends AbstractController
         $now = new \DateTime();
 
         foreach ($homePeriods as $period) {
-            $maxUsers = $period->getHome()->getMaxUsers();
+            $maxUsers = $period->getMaxUsers();
             if ($maxUsers < 1) {
                 continue;
             }
@@ -478,7 +488,7 @@ class AdminController extends AbstractController
                 'page' => $page,
             ]);
         }
-        if ($reservation->getHomePeriod()->getHome()->getMaxUsers() <= count($reservation->getHomePeriod()->getReservations()->filter(fn($r) => $r->isSelected()))) {
+        if ($reservation->getHomePeriod()->getMaxUsers() <= count($reservation->getHomePeriod()->getReservations()->filter(fn($r) => $r->isSelected()))) {
             $this->addFlash('danger','Cette période de réservation est déjà complète.');
             return $this->redirectToRoute('admin_reservations', [
                 'residence' => $residence,
@@ -806,12 +816,6 @@ class AdminController extends AbstractController
                 }
             }
             if($form->isValid()) {
-                foreach ($home->getHomePeriods() as $period) {
-                    if (count($reservationRepository->findActiveReservationByHomePeriod($period)) > $form->get('maxUsers')->getData()) {
-                        $this->addFlash('danger', 'Cette maison contient des réservations sélectionnées. Vous ne pouvez pas décrémenter le nombre de maisons.');
-                        return $this->redirectToRoute('app_home_show', ['id' => $home->getId()]);
-                    }
-                }
                 // Then handle the images
                 $imageFiles = $form->get('imageFiles')->getData();
                 if ($imageFiles) {
@@ -959,7 +963,8 @@ class AdminController extends AbstractController
                 $homePeriod->setHome($home);
                 $homePeriod->setDateDebut($form->get('dateDebut')->getData());
                 $homePeriod->setDateFin($form->get('dateFin')->getData());
-                
+                $homePeriod->setMaxUsers($form->get('maxUsers')->getData());
+
                 // Check if the period overlaps with existing periods
                 foreach ($home->getHomePeriods() as $period) {
                     if ($homePeriod->getDateDebut() < $period->getDateFin() && $homePeriod->getDateFin() > $period->getDateDebut()) {
@@ -983,7 +988,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/period/{id}', name: 'admin_new_period')]
-    public function newPeriod(int $id, Request $request, EntityManagerInterface $entityManager, HomeRepository $homeRepository) : Response {
+    public function newPeriod(int $id, Request $request, EntityManagerInterface $entityManager, HomeRepository $homeRepository, ReservationRepository $reservationRepository) : Response {
         $home = $homeRepository->find($id);
         if (!$home) {
             $this->addFlash('danger','Maison non trouvée');
@@ -1004,7 +1009,8 @@ class AdminController extends AbstractController
                     return $this->redirectToRoute('app_home_show', ['id' => $home->getId()]);
                 }
             }
-            $homePeriod -> setHome($home);
+
+            $homePeriod->setHome($home);
             $entityManager->persist($homePeriod);
             $entityManager->flush();
 
@@ -1050,6 +1056,11 @@ class AdminController extends AbstractController
                     return $this->redirectToRoute('app_home_show', ['id' => $home->getId()]);
                 }
             }
+
+            if (count($reservationRepository->findActiveReservationByHomePeriod($period)) > $form->get('maxUsers')->getData()) {
+                $this->addFlash('danger', 'Cette période contient des réservations sélectionnées. Vous ne pouvez pas décrémenter le nombre de maisons.');
+                return $this->redirectToRoute('admin_new_period', ['id' => $id]);
+            }
             
             // If there are reservations, notify users
             foreach ($reservations as $reservation) {
@@ -1073,6 +1084,7 @@ class AdminController extends AbstractController
         return $this->render('admin/homePeriod_edit.html.twig', [
             'form' => $form->createView(),
             'homePeriod' => $homePeriod,
+            'home' => $home,
         ]);
     }
 

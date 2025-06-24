@@ -62,7 +62,7 @@ class ReservationController extends AbstractController
             throw $this->createAccessDeniedException('Les administrateurs ne peuvent pas faire de réservations.');
         }
         $user = $this->getUser();
-        if (!$user->getTel() || !$user->getEmail()) {
+        if (!$user->getTel()) {
             $form = $this->createForm(ContactInfoType::class, [
                 'email' => $user->getEmail(),
                 'tel' => $user->getTel(),
@@ -90,8 +90,8 @@ class ReservationController extends AbstractController
         $dateDebutStr = $request->get('dateDebut');
         $dateFinStr = $request->get('dateFin');
 
-        $dateDebut = $dateDebutStr ? new \DateTime($dateDebutStr) : null;
-        $dateFin = $dateFinStr ? new \DateTime($dateFinStr) : null;
+        $dateDebut = $dateDebutStr ? \DateTime::createFromFormat('d/m/Y', $dateDebutStr) : null;
+        $dateFin = $dateFinStr ? \DateTime::createFromFormat('d/m/Y', $dateFinStr) : null;
 
         $home = $homeRepository->find($id);
         if (!$home) {

@@ -36,15 +36,15 @@
                             <h5 class="card-title">Filtrer les adhérents</h5>
                             <div class="align-items-center">
                                 <form method="get" class="row g-3">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label for="matricule_adherent" class="form-label">matricule adhérent</label>
                                         <input class="form-control" type="text" id="matricule_adherent" name="matricule_adherent" value="{{ app.request.get('matricule_adherent') }}">
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label for="matricule_responsable" class="form-label">matricule responsable</label>
                                         <input class="form-control" type="text" id="matricule_responsable" name="matricule_responsable" value="{{ app.request.get('matricule_responsable') }}">
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label for="localisation" class="form-label">localisation</label>
                                             <select class="form-select" id="localisation" name="localisation">
                                             <option value="">Tous</option>
@@ -70,6 +70,8 @@
                     <i class="fas fa-plus"></i> Ajouter
                 </a>
             {% endif %}
+            <a href="{{ path('export_excel_tickets')}}" class="btn btn-outline-success col-md-12">Télécharger Excel</a>
+
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
@@ -103,11 +105,11 @@
                                     </td>
                                     <td>{{ userTicket.user.nom }}</td>
                                     <td>{{ userTicket.responsable.ticket.localisation }}</td>
-                                    <td>{{ userTicket.prixUnitaire }}</td>
+                                    <td>{{ userTicket.prixUnitaire|number_format(2, ',', ' ') }}</td>
                                     <td>{{ userTicket.nombre }}</td>
-                                    <td>{{ userTicket.total }}</td>
-                                    <td>{{ userTicket.avance }}</td>
-                                    <td>{{ userTicket.total - userTicket.avance }}</td>
+                                    <td>{{ userTicket.total|number_format(2, ',', ' ') }}</td>
+                                    <td>{{ userTicket.avance|number_format(2, ',', ' ') }}</td>
+                                    <td>{{ (userTicket.total - userTicket.avance)|number_format(2, ',', ' ') }}</td>
                                     <td>{{ userTicket.nbMois }}</td>
                                     <td>{{ userTicket.modeEcheance }}</td>
                                     <td>{{ userTicket.codeOpposition }}</td>

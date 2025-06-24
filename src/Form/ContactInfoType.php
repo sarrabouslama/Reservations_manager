@@ -20,9 +20,8 @@ class ContactInfoType extends AbstractType
             ->add('email', EmailType::class, [
                 'label' => 'Email',
                 'attr' => ['placeholder' => 'Entrer email address'],
-                'required' => true,
+                'required' => false,
                 'constraints' => [
-                    new NotBlank(['message' => 'Veuillez entrer une adresse e-mail']),
                     new EmailConstraint(['message' => 'Veuillez entrer une adresse e-mail valide']),
                 ],
                 'empty_data' => '', 

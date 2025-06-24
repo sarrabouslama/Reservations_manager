@@ -12,6 +12,13 @@
                     </div>
                     <div class="card-body">
                         {{ form_start(form) }}
+                        
+                            <div class="mb-3">
+                                {{ form_label(form.maxUsers, 'Nombre de maisons') }}
+                                {{ form_widget(form.maxUsers, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.maxUsers) }}
+                            </div>
+
                             <div class="mb-3">
                                 {{ form_label(form.dateDebut, 'Date de début') }}
                                 <div class="input-group" id="dateDebutPicker" data-td-target-input="nearest" data-td-target="#dateDebut">
