@@ -34,6 +34,7 @@ class PayementController extends AbstractController
             throw $this->createAccessDeniedException('Formulaire déjà rempli');
         }
         $payement = new Payement();
+        $payement->setDateSaisie(new \DateTime());
         $payement->setReservation($reservation);
         $payement->setMontantGlobal($reservation->getHomePeriod()->getHome()->getPrix());
         $payement->setCodeOpposition('1041');
@@ -73,9 +74,12 @@ class PayementController extends AbstractController
             throw $this->createAccessDeniedException('Aucune opposition trouvée pour cette réservation');
         }
         $payement = $reservation->getPayement();
+        $dateSaisie = $payement->getDateSaisie();
+        $date = (new \DateTime())->setTime(0, 0, 0);
         $form = $this->createForm(PayementType::class, $payement);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $payement->setMontantGlobal($form->get('montantGlobal')->getData());
             $payement->setAvance($form->get('avance')->getData());
             $payement->setNbMois($form->get('nbMois')->getData());
             $payement->setModeEcheance($form->get('modeEcheance')->getData());
@@ -88,6 +92,8 @@ class PayementController extends AbstractController
         }
         
         return $this->render('payement/edit_payement.html.twig', [
+            'date' => $date,
+            'dateSaisie' => $dateSaisie,
             'form' => $form->createView(),
             'reservation' => $reservation,
         ]);

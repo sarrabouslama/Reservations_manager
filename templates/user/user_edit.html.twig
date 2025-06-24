@@ -99,7 +99,7 @@
 
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <a href="{{ path('admin_users') }}" class="btn btn-secondary me-md-2">Annuler</a>
+                                <a href="{{ path('app_user_profile', {'id': user.id}) }}" class="btn btn-secondary me-md-2">Annuler</a>
                                 <button type="submit" class="btn btn-primary">Modifier</button>
                             </div>
                         {{ form_end(form) }}

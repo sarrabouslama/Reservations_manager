@@ -46,8 +46,7 @@ class Reservation
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $receiptFilename = null;
 
-    #[ORM\OneToOne(inversedBy: 'reservation', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\OneToOne(mappedBy: 'reservation', targetEntity: Payement::class, cascade: ['persist', 'remove'])]
     private ?Payement $payement = null;
 
     public function __construct()
@@ -171,17 +170,18 @@ class Reservation
 
     public function setPayement(?Payement $payement): static
     {
-        // set the owning side of the relation if necessary
-        if ($payement->getReservation() !== $this) {
+        $this->payement = $payement;
+        if ($payement && $payement->getReservation() !== $this) {
             $payement->setReservation($this);
         }
-
-        $this->payement = $payement;
-
         return $this;
     }
+
     public function deletePayement(): static
     {
+        if ($this->payement) {
+            $this->payement->setReservation(null);
+        }
         $this->payement = null;
         return $this;
     }

@@ -19,4 +19,11 @@ class MainController extends AbstractController
         }
         return $this->redirectToRoute('app_login');
     }
+
+    #[Route('/hotels', name: 'app_hotels')]
+    #[IsGranted('ROLE_USER', 'ROLE_ADMIN')]
+    public function hotels(): Response
+    {
+        return $this->render('main/hotels.html.twig');
+    }
 } 

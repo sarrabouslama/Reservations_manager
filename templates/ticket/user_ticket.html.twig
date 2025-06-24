@@ -105,11 +105,11 @@
                                     </td>
                                     <td>{{ userTicket.user.nom }}</td>
                                     <td>{{ userTicket.responsable.ticket.localisation }}</td>
-                                    <td>{{ userTicket.prixUnitaire|number_format(2, ',', ' ') }}</td>
+                                    <td>{{ userTicket.prixUnitaire|number_format(0, '', ' ') }}</td>
                                     <td>{{ userTicket.nombre }}</td>
-                                    <td>{{ userTicket.total|number_format(2, ',', ' ') }}</td>
-                                    <td>{{ userTicket.avance|number_format(2, ',', ' ') }}</td>
-                                    <td>{{ (userTicket.total - userTicket.avance)|number_format(2, ',', ' ') }}</td>
+                                    <td>{{ userTicket.total|number_format(0, '', ' ') }}</td>
+                                    <td>{{ userTicket.avance|number_format(0, '', ' ') }}</td>
+                                    <td>{{ (userTicket.total - userTicket.avance)|number_format(0, '', ' ') }}</td>
                                     <td>{{ userTicket.nbMois }}</td>
                                     <td>{{ userTicket.modeEcheance }}</td>
                                     <td>{{ userTicket.codeOpposition }}</td>

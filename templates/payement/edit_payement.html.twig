@@ -14,13 +14,21 @@
                         {{ form_start(form) }}
                             <div class="mb-3">
                                 {{ form_label(form.montantGlobal, 'Montant Global') }}
-                                {{ form_widget(form.montantGlobal, {'attr': {'class': 'form-control'}}) }}
+                                {% if date|date('d-m-Y') == dateSaisie|date('d-m-Y') %}
+                                    {{ form_widget(form.montantGlobal, {'attr': {'class': 'form-control'}}) }}
+                                {% else %}
+                                    {{ form_widget(form.montantGlobal, {'attr': {'class': 'form-control', 'readonly': 'readonly'}}) }}
+                                {% endif %}
                                 {{ form_errors(form.montantGlobal) }}
                             </div>
 
                             <div class="mb-3">
                                 {{ form_label(form.avance, 'Avance') }}
-                                {{ form_widget(form.avance, {'attr': {'class': 'form-control'}}) }}
+                                {% if date|date('d-m-Y') == dateSaisie|date('d-m-Y') %}
+                                    {{ form_widget(form.avance, {'attr': {'class': 'form-control'}}) }}
+                                {% else %}
+                                    {{ form_widget(form.avance, {'attr': {'class': 'form-control', 'readonly': 'readonly'}}) }}
+                                {% endif %}
                                 {{ form_errors(form.avance) }}
                             </div>
 

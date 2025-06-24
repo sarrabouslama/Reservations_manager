@@ -43,11 +43,11 @@
                     <ul class="list-group list-group-flush mb-5 fs-4">
                         <li class="list-group-item"><strong>Localisation :</strong> {{ ticket.localisation }}</li>
                         <li class="list-group-item"><strong>Quantité :</strong> {{ ticket.qte }}</li>
-                        <li class="list-group-item"><strong>prix Unitaire :</strong> {{ ticket.prixUnitaire|number_format(2, ',', ' ') }} TND</li>
+                        <li class="list-group-item"><strong>prix Unitaire :</strong> {{ ticket.prixUnitaire|number_format(0, '', ' ') }} TND</li>
                         <li class="list-group-item"><strong>Quantité Vendue :</strong> {{ ticket.qteVente }}</li>
-                        <li class="list-group-item"><strong>Total de vente :</strong> {{ ticket.totalVente|number_format(2, ',', ' ') }} TND</li>
-                        <li class="list-group-item"><strong>Total d'avance :</strong> {{ ticket.totalAvance|number_format(2, ',', ' ') }} TND</li>
-                        <li class="list-group-item"><strong>Total d'oppositions :</strong> {{ (ticket.totalVente - ticket.totalAvance)|number_format(2, ',', ' ') }} TND</li>
+                        <li class="list-group-item"><strong>Total de vente :</strong> {{ ticket.totalVente|number_format(0, '', ' ') }} TND</li>
+                        <li class="list-group-item"><strong>Total d'avance :</strong> {{ ticket.totalAvance|number_format(0, '', ' ') }} TND</li>
+                        <li class="list-group-item"><strong>Total d'oppositions :</strong> {{ (ticket.totalVente - ticket.totalAvance)|number_format(0, '', ' ') }} TND</li>
                         {% if is_granted('ROLE_ADMIN') %} 
                             <div class="btn-group w-100" role="group">
                                 <a href="{{ path('admin_edit_ticket', {'id': ticket.id}) }}" class="btn btn-outline-primary flex-fill">

@@ -17,76 +17,109 @@
         {% block stylesheets %}
             <style>
                 body {
-                    background: #f8f9fa;
+                    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+                }
+                .navbar {
+                    box-shadow: 0 2px 12px rgba(99,102,241,0.08);
+                    border-radius: 0;
+                }
+                .navbar-brand {
+                    font-weight: 700;
+                    font-size: 1.5rem;
+                    letter-spacing: 1px;
+                }
+                .navbar-nav .nav-link {
+                    font-size: 1.08rem;
+                    font-weight: 500;
+                    padding: 0.7rem 1.2rem;
+                    border-radius: 1.5rem;
+                    transition: background 0.2s, color 0.2s;
+                }
+                .navbar-nav .nav-link.active, .navbar-nav .nav-link:hover {
+                    background:rgb(60, 63, 214);
+                    color: #fff !important;
+                }
+                .navbar-nav .nav-item {
+                    margin-right: 0.5rem;
                 }
                 .card, .table-responsive {
                     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                    border-radius: 1rem;
                 }
                 .table thead th {
                     vertical-align: middle;
                 }
                 .btn {
                     min-width: 120px;
+                    border-radius: 2rem;
+                    font-weight: 500;
+                }
+                .alert {
+                    border-radius: 1rem;
+                }
+                .container {
+                    margin-bottom: 2rem;
                 }
             </style>
         {% endblock %}    
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-            <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm w-100" style="border-radius:0;">
+            <div class="container-fluid px-4">
                 {% if app.user %}
-                    <a class="navbar-brand" href="{{ path('app_home_main') }}">Maisons de Vacances</a>
+                    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ path('app_home_main') }}">
+                        Amicale CNSS
+                    </a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav me-auto">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ path('app_home_index') }}">Maisons</a>
+                                <a class="nav-link {% if app.request.attributes.get('_route') == 'app_home_index' %}active{% endif %}" href="{{ path('app_home_index') }}">Maisons</a>
                             </li>
                 {% endif %}
                             {% if is_granted('ROLE_ADMIN') %}
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ path('admin_homes') }}">Gérer les Maisons</a>
+                                    <a class="nav-link {% if app.request.attributes.get('_route') == 'admin_homes' %}active{% endif %}" href="{{ path('admin_homes') }}">Gérer les Maisons</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ path('admin_users') }}">Gérer les Utilisateurs</a>
+                                    <a class="nav-link {% if app.request.attributes.get('_route') == 'admin_users' %}active{% endif %}" href="{{ path('admin_users') }}">Gérer les Utilisateurs</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ path('admin_reservations') }}">Gérer les Réservations</a>
+                                    <a class="nav-link {% if app.request.attributes.get('_route') == 'admin_reservations' %}active{% endif %}" href="{{ path('admin_reservations') }}">Gérer les Réservations</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ path('app_show_payements') }}">Gérer les Oppositions</a>
+                                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_show_payements' %}active{% endif %}" href="{{ path('app_show_payements') }}">Gérer les Oppositions</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ path('admin_tickets') }}">CarthageLand</a>
+                                    <a class="nav-link {% if app.request.attributes.get('_route') == 'admin_tickets' %}active{% endif %}" href="{{ path('admin_tickets') }}">CarthageLand</a>
                                 </li>
                             {% endif %}
                             {% if app.user and app.user.responsableTickets is not empty %}
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{path('admin_tickets_user', {'matricule_responsable': app.user.matricule})}}">CarthageLand</a>
+                                    <a class="nav-link {% if app.request.attributes.get('_route') == 'admin_tickets_user' %}active{% endif %}" href="{{path('admin_tickets_user', {'matricule_responsable': app.user.matricule})}}">CarthageLand</a>
                                 </li>
                             {% endif %}
-
                         </ul>
-                        <ul class="navbar-nav">
+                        <ul class="navbar-nav align-items-center gap-2 mb-2 mb-lg-0">
                             {% if app.user %}
                                 <li class="nav-item" title="Profile" >
-                                    <a class="nav-link" href="{{ path('app_user_profile' , {'id':app.user.id })}}"><i class="fa-solid fa-circle-user fa-xl"></i>Profil</a>
+                                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_user_profile' %}active{% endif %}" href="{{ path('app_user_profile' , {'id':app.user.id })}}"><i class="fa-solid fa-circle-user fa-xl"></i> Profil</a>
                                 </li>
                                 {% if 'ROLE_ADMIN' not in app.user.roles %}  
                                     <li class="nav-item" title="Réservation" >
-                                        <a class="nav-link" href="{{ path('app_user_reservation' , {'id':app.user.id })  }}"><i class="fa-regular fa-calendar fa-xl"></i>Réservation</a>
+                                        <a class="nav-link {% if app.request.attributes.get('_route') == 'app_user_reservation' %}active{% endif %}" href="{{ path('app_user_reservation' , {'id':app.user.id })  }}"><i class="fa-regular fa-calendar fa-xl"></i> Réservation</a>
                                     </li>
                                 {% endif %}
                         </ul>
-                        <ul class="navbar-nav">
+                        <ul class="navbar-nav mb-2 mb-lg-0">
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ path('app_logout') }}">Déconnexion</a>
                                 </li>
                             {% else %}
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ path('app_login') }}">Connexion</a>
+                                    <a class="nav-link {% if app.request.attributes.get('_route') == 'app_login' %}active{% endif %}" href="{{ path('app_login') }}">Connexion</a>
                                 </li>
                             {% endif %}
                         </ul>

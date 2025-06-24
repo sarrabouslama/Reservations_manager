@@ -32,8 +32,12 @@ class Payement
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateDebut = null;
 
-    #[ORM\OneToOne(mappedBy: 'payement', targetEntity: Reservation::class)]
+    #[ORM\OneToOne(inversedBy: 'payement', targetEntity: Reservation::class)]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?Reservation $reservation = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTimeInterface $dateSaisie = null;
 
     public function getId(): ?int
     {
@@ -117,9 +121,24 @@ class Payement
         return $this->reservation;
     }
 
-    public function setReservation(Reservation $reservation): static
+    public function setReservation(?Reservation $reservation): static
     {
         $this->reservation = $reservation;
+        if ($reservation && $reservation->getPayement() !== $this) {
+            $reservation->setPayement($this);
+        }
+        return $this;
+    }
+
+    public function getDateSaisie(): ?\DateTimeInterface
+    {
+        return $this->dateSaisie;
+    }
+
+    public function setDateSaisie(\DateTimeInterface $dateSaisie): static
+    {
+        $this->dateSaisie = $dateSaisie;
+
         return $this;
     }
 }

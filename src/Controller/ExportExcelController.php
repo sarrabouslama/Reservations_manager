@@ -237,8 +237,9 @@ class ExportExcelController extends AbstractController
         $sheet->setCellValue('G1', 'Mode echéance');
         $sheet->setCellValue('H1', 'Code Opposition');
         $sheet->setCellValue('I1', 'Date Début');
-        $sheet->setCellValue('J1', '');
-        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->setCellValue('J1', 'Date Saisie');
+        $sheet->setCellValue('K1', '');
+        $sheet->getStyle('A1:J1')->getFont()->setBold(true);
 
         $row = 2;
         foreach ($data as $item) {
@@ -252,6 +253,7 @@ class ExportExcelController extends AbstractController
             $sheet->setCellValue('G' . $row, $item->getModeEcheance());
             $sheet->setCellValue('H' . $row, $item->getCodeOpposition());
             $sheet->setCellValue('I' . $row, $item->getDateDebut()->format('d-m-Y'));
+            $sheet->setCellValue('J' . $row, $item->getDateSaisie()->format('d-m-Y'));
             $row++;
         }
         $writer = new Xlsx($spreadsheet);
@@ -293,7 +295,8 @@ class ExportExcelController extends AbstractController
         $sheet->setCellValue('J1', 'Mode echeance');
         $sheet->setCellValue('K1', 'Code Opposition');
         $sheet->setCellValue('L1', 'Date début');
-        $sheet->getStyle('A1:L1')->getFont()->setBold(true);
+        $sheet->setCellValue('M1', 'Date Saisie');
+        $sheet->getStyle('A1:M1')->getFont()->setBold(true);
 
         $row = 2;
         foreach ($data as $item) {
@@ -310,6 +313,7 @@ class ExportExcelController extends AbstractController
             $sheet->setCellValue('J' . $row, $item->getModeEcheance());
             $sheet->setCellValue('K' . $row, $item->getCodeOpposition());
             $sheet->setCellValue('L' . $row, $item->getDateDebut()->format('d-m-Y'));
+            $sheet->setCellValue('M' . $row, $item->getDateSaisie()->format('d-m-Y'));
             $row++;
         }
         $writer = new Xlsx($spreadsheet);
