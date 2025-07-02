@@ -28,15 +28,12 @@ class Home
     private ?string $residence = null;
 
     #[ORM\Column]
-    #[Assert\Positive]
     private ?int $nombreChambres = null;
 
     #[ORM\Column]
-    #[Assert\PositiveOrZero]
     private ?float $distancePlage = null;
 
     #[ORM\Column]
-    #[Assert\PositiveOrZero]
     private ?float $prix = null;
 
     #[ORM\Column(type: 'text', nullable: true)]

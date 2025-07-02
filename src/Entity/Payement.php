@@ -18,10 +18,10 @@ class Payement
     private ?float $montantGlobal = null;
 
     #[ORM\Column]
-    private ?float $avance = null;
+    private ?float $avance = 0.0;
 
     #[ORM\Column]
-    private ?int $nbMois = null;
+    private ?int $nbMois = 0;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $modeEcheance = null;

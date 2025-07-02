@@ -2,6 +2,16 @@
 
 {% block title %}Modifier l'adhérent {% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220,53,69,.15);
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <div class="container">
         <div class="row justify-content-center">
@@ -16,87 +26,147 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         {{ form_label(form.matricule, 'Matricule') }}
-                                        {{ form_widget(form.matricule, {'attr': {'class': 'form-control'}}) }}
-                                        {{ form_errors(form.matricule) }}
+                                        {{ form_widget(form.matricule, {
+                                            'attr': {
+                                                'class': 'form-control' ~ (form_errors(form.matricule) ? ' is-invalid' : '')
+                                            }
+                                        }) }}
+                                        <div class="invalid-feedback">{{ form_errors(form.matricule) }}</div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         {{ form_label(form.cin, 'CIN') }}
-                                        {{ form_widget(form.cin, {'attr': {'class': 'form-control'}}) }}
-                                        {{ form_errors(form.cin) }}
+                                        {{ form_widget(form.cin, {
+                                            'attr': {
+                                                'class': 'form-control' ~ (form_errors(form.cin) ? ' is-invalid' : '')
+                                            }
+                                        }) }}
+                                        <div class="invalid-feedback">{{ form_errors(form.cin) }}</div>
+
                                     </div>
                                 </div>
                             {% endif %}
 
                             <div class="mb-3">
                                 {{ form_label(form.nom, 'Nom') }}
-                                {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.nom) }}
+                                {{ form_widget(form.nom, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.nom) ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.nom) }}</div>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     {{ form_label(form.email, 'Email') }}
-                                    {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.email) }}
+                                    {{ form_widget(form.email, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.email) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.email) }}</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     {{ form_label(form.tel, 'Téléphone') }}
-                                    {{ form_widget(form.tel, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.tel) }}
+                                    {{ form_widget(form.tel, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.tel) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.tel) }}</div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     {{ form_label(form.sit, 'Situation') }}
-                                    {{ form_widget(form.sit, {'attr': {'class': 'form-select'}}) }}
-                                    {{ form_errors(form.sit) }}
+                                    {{ form_widget(form.sit, {
+                                        'attr': {
+                                            'class': 'form-select' ~ (form_errors(form.sit) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.sit) }}</div>
+
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     {{ form_label(form.Nb_enfants, "Nombre d'enfants") }}
-                                    {{ form_widget(form.Nb_enfants, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.Nb_enfants) }}
+                                    {{ form_widget(form.Nb_enfants, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.Nb_enfants) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.Nb_enfants) }}</div>
+
                                 </div>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     {{ form_label(form.emploi, 'Emploi') }}
-                                    {{ form_widget(form.emploi, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.emploi) }}
+                                    {{ form_widget(form.emploi, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.emploi) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.emploi) }}</div>
+
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     {{ form_label(form.Matricule_cnss, 'Matricule CNSS') }}
-                                    {{ form_widget(form.Matricule_cnss, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.Matricule_cnss) }}
+                                    {{ form_widget(form.Matricule_cnss, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.Matricule_cnss) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.Matricule_cnss) }}</div>
+
                                 </div>
                             </div>
 
                             <div class="mb-3">
                                 {{ form_label(form.direction, 'Direction') }}
-                                {{ form_widget(form.direction, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.direction) }}
+                                {{ form_widget(form.direction, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.direction) ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.direction) }}</div>
+
                             </div>
 
                             <div class="mb-3">
                                 {{ form_label(form.imageFile, 'Photo') }}
-                                {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.imageFile) }}
+                                {{ form_widget(form.imageFile, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.imageFile) ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.imageFile) }}</div>
+
                             </div>
 
                             {% if is_granted('ROLE_ADMIN') %}
                                 <div class="form-check mb-3">
-                                    {{ form_widget(form.lastYear, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_widget(form.lastYear, {
+                                        'attr': {
+                                            'class': 'form-check-input' ~ (form_errors(form.lastYear) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
                                     {{ form_label(form.lastYear, "L'adhérent est-il sélectionné la dernière année ?", {'label_attr': {'class': 'form-check-label'}}) }}
-                                    {{ form_errors(form.lastYear) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.lastYear) }}</div>
+
                                 </div>
 
                                 <div class="form-check mb-3">
-                                    {{ form_widget(form.actif, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_widget(form.actif, {
+                                        'attr': {
+                                            'class': 'form-check-input' ~ (form_errors(form.actif) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
                                     {{ form_label(form.actif, 'Actif', {'label_attr': {'class': 'form-check-label'}}) }}
-                                    {{ form_errors(form.actif) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.actif) }}</div>
+
                                 </div>
                             {% endif %}
-
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                 <a href="{{ path('app_user_profile', {'id': user.id}) }}" class="btn btn-secondary me-md-2">Annuler</a>

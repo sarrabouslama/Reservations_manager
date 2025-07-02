@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints\Positive;
 use App\Repository\TicketRepository;
 
 
@@ -63,7 +64,7 @@ class UserTicketType extends AbstractType
                 'required' => true,
                 'constraints' => [
                     new NotBlank(['message' => 'Veuillez entrer une quantité']),
-                    new PositiveOrZero(['message' => 'La quantité doit être positive ou zéro']),
+                    new Positive(['message' => 'La quantité doit être supérieure à zéro']),
                 ],
             ])
             

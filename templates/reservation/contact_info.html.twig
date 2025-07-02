@@ -17,16 +17,20 @@
                                 <i class="fas fa-envelope me-1 text-secondary"></i>
                                 Email (optionnel)
                             </label>
-                            {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'Votre email'}}) }}
-                            {{ form_errors(form.email) }}
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form_errors(form.email) ? ' is-invalid' : ''), 'placeholder': 'Votre email'}}) }}
+                            <div class="invalid-feedback d-block" style="display: block;">
+                                {{ form_errors(form.email) }}
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="{{ form.tel.vars.id }}">
                                 <i class="fas fa-phone me-1 text-secondary"></i>
                                 Téléphone (obligatoire)
                             </label>
-                            {{ form_widget(form.tel, {'attr': {'class': 'form-control', 'placeholder': 'Votre numéro de téléphone'}}) }}
-                            {{ form_errors(form.tel) }}
+                            {{ form_widget(form.tel, {'attr': {'class': 'form-control' ~ (form_errors(form.tel) ? ' is-invalid' : ''), 'placeholder': 'Votre numéro de téléphone'}}) }}
+                            <div class="invalid-feedback d-block" style="display: block;">
+                                {{ form_errors(form.tel) }}
+                            </div>
                         </div>
                         <input type="hidden" name="dateDebut" value="{{ app.request.get('dateDebut') }}">
                         <input type="hidden" name="dateFin" value="{{ app.request.get('dateFin') }}">

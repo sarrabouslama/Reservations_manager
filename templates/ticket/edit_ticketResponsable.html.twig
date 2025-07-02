@@ -14,8 +14,10 @@
                         {{ form_start(form) }}
                             <div class="mb-3">
                                 {{ form_label(form.matricule, 'Matricule du responsable') }}
-                                {{ form_widget(form.matricule, {'attr': {'class': 'form-control', 'id': 'responsable_ticket_matricule'}}) }}
-                                {{ form_errors(form.matricule) }}
+                                {{ form_widget(form.matricule, {'attr': {'class': 'form-control' ~ (form_errors(form.matricule) ? ' is-invalid' : ''), 'id': 'responsable_ticket_matricule'}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.matricule) }}
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -25,14 +27,18 @@
 
                             <div class="mb-3">
                                 {{ form_label(form.localisation, 'localisation') }}
-                                {{ form_widget(form.localisation, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.localisation) }}
+                                {{ form_widget(form.localisation, {'attr': {'class': 'form-control' ~ (form_errors(form.localisation) ? ' is-invalid' : '')}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.localisation) }}
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 {{ form_label(form.qte, 'Quantité') }}
-                                {{ form_widget(form.qte, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.qte) }}
+                                {{ form_widget(form.qte, {'attr': {'class': 'form-control' ~ (form_errors(form.qte) ? ' is-invalid' : '')}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.qte) }}
+                                </div>
                             </div>
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">

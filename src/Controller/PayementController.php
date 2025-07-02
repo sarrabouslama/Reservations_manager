@@ -38,6 +38,8 @@ class PayementController extends AbstractController
         $payement->setReservation($reservation);
         $payement->setMontantGlobal($reservation->getHomePeriod()->getHome()->getPrix());
         $payement->setCodeOpposition('1041');
+        $payement->setDateDebut(new \DateTime('2025-09-01'));
+        $payement->setNbMois(6);
         $form = $this->createForm(PayementType::class, $payement);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {

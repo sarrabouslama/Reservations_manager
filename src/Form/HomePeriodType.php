@@ -9,6 +9,8 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Positive;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class HomePeriodType extends AbstractType
 {
@@ -37,6 +39,18 @@ class HomePeriodType extends AbstractType
                     'id' => 'dateDebut',
                     'class' => 'form-control datepicker',
                     'autocomplete' => 'off',
+                ],
+                'constraints' => [
+                    new Callback([
+                        'callback' => function ($value, ExecutionContextInterface $context) {
+                            $dateDebut = $context->getRoot()->get('dateDebut')->getData();
+                            if ($dateDebut && $value <= $dateDebut) {
+                                $context->addViolation("La date de fin doit être postérieure à dateDebut .", [
+                                    'dateDebut' => $dateDebut->format('d/m/Y'),
+                                ]);
+                            }
+                        },
+                    ]),
                 ],
             ]);
 

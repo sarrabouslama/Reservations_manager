@@ -84,8 +84,9 @@ class AdminController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $user->setCin(str_pad($form->get('cin')->getData(), 8, '0', STR_PAD_LEFT));
             // Hash the password
-            $user->setPassword($passwordHasher->hashPassword($user, $form->get('cin')->getData()));
+            $user->setPassword($passwordHasher->hashPassword($user, $user->getCin()));
 
             $user->setRoles(['ROLE_USER']);
             // Check if the user already exists

@@ -27,7 +27,6 @@ class HomePeriod
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotNull]
-    #[Assert\GreaterThan(propertyPath: "dateDebut")]
     private ?\DateTimeInterface $dateFin = null;
 
     #[ORM\OneToMany(mappedBy: 'homePeriod', targetEntity: Reservation::class, orphanRemoval: true)]
@@ -76,9 +75,6 @@ class HomePeriod
 
     public function setDateFin(?\DateTimeInterface $dateFin = null): static
     {
-        if ($dateFin && $this->dateDebut && $dateFin < $this->dateDebut) {
-            throw new \InvalidArgumentException('La date de fin doit être postérieure à la date de début.');
-        }
         if (!$dateFin){
             $this->dateFin = $this->dateDebut ? (clone $this->dateDebut)->add(new \DateInterval('P7D')) : null;
         }

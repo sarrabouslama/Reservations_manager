@@ -12,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
 use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\Positive;
 
 class TicketType extends AbstractType
 {
@@ -31,7 +32,7 @@ class TicketType extends AbstractType
                 'required' => true,
                 'constraints' => [
                     new NotBlank(['message' => 'Veuillez entrer une quantité']),
-                    new PositiveOrZero(['message' => 'La quantité doit être positive ou zéro']),
+                    new Positive(['message' => 'La quantité doit être supérieure à zéro']),
                 ],
             ])
             ->add('prixUnitaire', MoneyType::class, [
@@ -41,7 +42,7 @@ class TicketType extends AbstractType
                 'required' => true,
                 'constraints' => [
                     new NotBlank(['message' => 'Veuillez entrer un prix unitaire']),
-                    new PositiveOrZero(['message' => 'Le prix unitaire doit être positif ou zéro']),
+                    new Positive(['message' => 'Le prix unitaire doit être supérieur à zéro']),
                 ],
             ])
         ;

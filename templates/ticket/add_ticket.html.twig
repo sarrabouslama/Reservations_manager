@@ -15,20 +15,26 @@
 
                             <div class="mb-3">
                                 {{ form_label(form.localisation, 'localisation') }}
-                                {{ form_widget(form.localisation, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.localisation) }}
+                                {{ form_widget(form.localisation, {'attr': {'class': 'form-control' ~ (form_errors(form.localisation) ? ' is-invalid' : '')}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.localisation) }}
+                                </div>
                             </div>
                             
                             <div class="mb-3">
                                 {{ form_label(form.qte, 'Quantité totale') }}
-                                {{ form_widget(form.qte, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.qte) }}
+                                {{ form_widget(form.qte, {'attr': {'class': 'form-control' ~ (form_errors(form.qte) ? ' is-invalid' : '')}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.qte) }}
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 {{ form_label(form.prixUnitaire, 'Prix Unitaire') }}
-                                {{ form_widget(form.prixUnitaire, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.prixUnitaire) }}
+                                {{ form_widget(form.prixUnitaire, {'attr': {'class': 'form-control' ~ (form_errors(form.prixUnitaire) ? ' is-invalid' : '')}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.prixUnitaire) }}
+                                </div>
                             </div>
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">

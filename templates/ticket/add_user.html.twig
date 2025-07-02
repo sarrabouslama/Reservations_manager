@@ -14,8 +14,10 @@
                         {{ form_start(form) }}
                             <div class="mb-3">
                                 {{ form_label(form.matricule, 'Matricule adhérent') }}
-                                {{ form_widget(form.matricule, {'attr': {'class': 'form-control', 'id':'user_ticket_matricule'}}) }}
-                                {{ form_errors(form.matricule) }}
+                                {{ form_widget(form.matricule, {'attr': {'class': 'form-control' ~ (form_errors(form.matricule) ? ' is-invalid' : ''), 'id':'user_ticket_matricule'}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.matricule) }}
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -25,14 +27,18 @@
 
                             <div class="mb-3">
                                 {{ form_label(form.localisation, 'localisation') }}
-                                {{ form_widget(form.localisation, {'attr': {'class': 'form-control', 'id':'user_ticket_localisation'}}) }}
-                                {{ form_errors(form.localisation) }}
+                                {{ form_widget(form.localisation, {'attr': {'class': 'form-control' ~ (form_errors(form.localisation) ? ' is-invalid' : ''), 'id':'user_ticket_localisation'}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.localisation) }}
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 {{ form_label(form.nombre, 'Nombre de tickets') }}
-                                {{ form_widget(form.nombre, {'attr': {'class': 'form-control', 'id': 'user_ticket_nombre'}}) }}
-                                {{ form_errors(form.nombre) }}
+                                {{ form_widget(form.nombre, {'attr': {'class': 'form-control' ~ (form_errors(form.nombre) ? ' is-invalid' : ''), 'id': 'user_ticket_nombre'}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.nombre) }}
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -47,8 +53,10 @@
 
                             <div class="mb-3">
                                 {{ form_label(form.avance, 'Avance') }}
-                                {{ form_widget(form.avance, {'attr': {'class': 'form-control', 'id' : 'user_ticket_avance'}}) }}
-                                {{ form_errors(form.avance) }}
+                                {{ form_widget(form.avance, {'attr': {'class': 'form-control' ~ (form_errors(form.avance) ? ' is-invalid' : ''), 'id' : 'user_ticket_avance'}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.avance) }}
+                                </div>
                             </div>
 
                             <div class="mb-3">
@@ -58,31 +66,41 @@
 
                             <div class="mb-3">
                                 {{ form_label(form.nbMois, 'Nombre de Mois') }}
-                                {{ form_widget(form.nbMois, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.nbMois) }}
+                                {{ form_widget(form.nbMois, {'attr': {'class': 'form-control' ~ (form_errors(form.nbMois) ? ' is-invalid' : '')}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.nbMois) }}
+                                </div>
                             </div>
+
 
                             <div class="mb-3">
                                 {{ form_label(form.modeEcheance, 'Mode d\'Échéance') }}
-                                {{ form_widget(form.modeEcheance, {'attr': {'class': 'form-select'}}) }}
-                                {{ form_errors(form.modeEcheance) }}
+                                {{ form_widget(form.modeEcheance, {'attr': {'class': 'form-select' ~ (form_errors(form.modeEcheance) ? ' is-invalid' : '')}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.modeEcheance) }}
+                                </div>
                             </div>
+
 
                             <div class="mb-3">
                                 {{ form_label(form.codeOpposition, 'Code d\'Opposition') }}
-                                {{ form_widget(form.codeOpposition, {'attr': {'class': 'form-select'}}) }}
-                                {{ form_errors(form.codeOpposition) }}
+                                {{ form_widget(form.codeOpposition, {'attr': {'class': 'form-select' ~ (form_errors(form.codeOpposition) ? ' is-invalid' : '')}}) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.codeOpposition) }}
+                                </div>
                             </div>
 
                             <div class="mb-3">
                                 {{ form_label(form.dateDebut, 'Date de début') }}
                                 <div class="input-group" id="dateDebutPicker" data-td-target-input="nearest" data-td-target="#dateDebut">
-                                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control', 'data-td-target': '#dateDebut', 'id': 'dateDebut', 'autocomplete': 'off'}}) }}
+                                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control' ~ (form_errors(form.dateDebut) ? ' is-invalid' : ''), 'data-td-target': '#dateDebut', 'id': 'dateDebut', 'autocomplete': 'off'}}) }}
                                     <span class="input-group-text" data-td-target="#dateDebut" data-td-toggle="datetimepicker">
                                         <i class="fa-regular fa-calendar"></i>
                                     </span>
                                 </div>
-                                {{ form_errors(form.dateDebut) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.dateDebut) }}
+                                </div>
                             </div>
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                 <button type="submit" class="btn btn-primary">Ajouter l'opposition</button>

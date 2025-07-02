@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\Positive;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class PayementType extends AbstractType
@@ -28,7 +29,7 @@ class PayementType extends AbstractType
                 'required' => true,
                 'constraints' => [
                     new NotBlank(['message' => 'Veuillez entrer un montant global']),
-                    new PositiveOrZero(['message' => 'Le montant doit être positif ou zéro']),
+                    new Positive(['message' => 'Le montant doit être supérieur à zéro']),
                 ],
             ])
             ->add('avance', MoneyType::class, [

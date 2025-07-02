@@ -2,6 +2,16 @@
 
 {% block title %}Ajouter une nouvelle maison{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220,53,69,.15);
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <div class="container">
         <div class="row justify-content-center">
@@ -22,72 +32,108 @@
 
                             <div class="mb-3">
                                 {{ form_label(form.region, 'Région') }}
-                                {{ form_widget(form.region, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.region) }}
+                                {{ form_widget(form.region, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.region) ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.region) }}</div>
                             </div>
 
                             <div class="mb-3">
                                 {{ form_label(form.residence, 'Résidence') }}
-                                {{ form_widget(form.residence, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.residence) }}
+                                {{ form_widget(form.residence, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.residence) ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.residence) }}</div>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     {{ form_label(form.nombreChambres, 'Nombre de chambres') }}
-                                    {{ form_widget(form.nombreChambres, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.nombreChambres) }}
+                                    {{ form_widget(form.nombreChambres, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.nombreChambres) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.nombreChambres) }}</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     {{ form_label(form.distancePlage, 'Distance de la plage (km)') }}
-                                    {{ form_widget(form.distancePlage, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.distancePlage) }}
+                                    {{ form_widget(form.distancePlage, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.distancePlage) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.distancePlage) }}</div>
                                 </div>
                             </div>
 
                             <div class="mb-3">
                                 {{ form_label(form.prix, 'Prix') }}
-                                {{ form_widget(form.prix, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.prix) }}
+                                {{ form_widget(form.prix, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.prix) ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.prix) }}</div>
                             </div>
 
                             <div class="mb-3">
                                 {{ form_label(form.description, 'Description') }}
-                                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 5}}) }}
-                                {{ form_errors(form.description) }}
+                                {{ form_widget(form.description, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.description) ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.description) }}</div>
                             </div>
 
                             <div class="mb-3">
                                 {{ form_label(form.mapsUrl, 'Lien Google Maps') }}
-                                {{ form_widget(form.mapsUrl, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(form.mapsUrl) }}
+                                {{ form_widget(form.mapsUrl, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.mapsUrl) ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.mapsUrl) }}</div>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     {{ form_label(form.nomProp, 'Nom du propriétaire') }}
-                                    {{ form_widget(form.nomProp, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.nomProp) }}
+                                    {{ form_widget(form.nomProp, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.nomProp) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.nomProp) }}</div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     {{ form_label(form.telProp, 'Téléphone du propriétaire') }}
-                                    {{ form_widget(form.telProp, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.telProp) }}
+                                    {{ form_widget(form.telProp, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.telProp) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.telProp) }}</div>
                                 </div>
                             </div>
-                            
+
                             <div class="mb-4">
                                 {{ form_label(form.imageFiles, 'Ajouter des images ou vidéos') }}
                                 {{ form_widget(form.imageFiles, {
                                     'attr': {
-                                        'class': 'form-control',
+                                        'class': 'form-control' ~ (form_errors(form.imageFiles) ? ' is-invalid' : ''),
                                         'accept': 'image/* video/*',
                                         'multiple': 'multiple',
                                         'data-bs-toggle': 'tooltip',
                                         'title': 'Vous pouvez sélectionner plusieurs images ou vidéos'
                                     }
                                 }) }}
-                                {{ form_errors(form.imageFiles) }}
+                                <div class="invalid-feedback">{{ form_errors(form.imageFiles) }}</div>
                                 <small class="form-text text-muted">
                                     Formats acceptés: JPG, PNG, MP4.
                                 </small>

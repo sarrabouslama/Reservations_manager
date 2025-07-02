@@ -409,7 +409,8 @@ class TicketController extends AbstractController
         $userTicket->setDateSaisie(new \DateTime());
         $userTicket->setModeEcheance('1');
         $userTicket->setCodeOpposition('1031');
-        
+        $userTicket->setDateDebut(new \DateTime('2025-09-01'));
+        $userTicket->setNbMois(6);
         $form = $this->createForm(UserTicketType::class,$userTicket);
         $form->handleRequest($request);
 

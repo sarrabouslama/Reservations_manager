@@ -66,7 +66,9 @@ class UserController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->isGranted('ROLE_ADMIN')) {
-                $user->setPassword($passwordHasher->hashPassword($user, $form->get('cin')->getData()));
+                $user->setCin(str_pad($form->get('cin')->getData(), 8, '0', STR_PAD_LEFT));
+                // Hash the password
+                $user->setPassword($passwordHasher->hashPassword($user, $user->getCin()));
                 // Check if the user already exists
                 $existingUser = $userRepository->findOneBy(['matricule' => $user->getMatricule()]);
                 if ($existingUser && $existingUser->getId() !== $user->getId()) {
@@ -125,7 +127,7 @@ class UserController extends AbstractController
         ]);
     }
 
-
+/* 
     #[Route('/user/edit-password/{id}', name: 'app_user_edit-password')]
     #[IsGranted('ROLE_ADMIN')]
     public function editPassword(int $id, UserRepository $userRepository, EntityManagerInterface $entityManager, Request $request, UserPasswordHasherInterface $passwordHasher): Response
@@ -154,7 +156,7 @@ class UserController extends AbstractController
             'user' => $user,
         ]);
     }
-
+ */
     #[Route('/user/delete/{id}', name: 'user_delete_image', methods: ['POST'])]
     public function deleteImage(int $id,Request $request, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
     {

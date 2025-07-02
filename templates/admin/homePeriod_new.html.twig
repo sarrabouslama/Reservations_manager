@@ -2,6 +2,16 @@
 
 {% block title %}Ajouter une nouvelle Période{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220,53,69,.15);
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <div class="container">
         <div class="row justify-content-center">
@@ -15,30 +25,45 @@
                             {% if home is defined %}
                                 <div class="mb-3">
                                     {{ form_label(form.maxUsers, 'Nombre de maisons') }}
-                                    {{ form_widget(form.maxUsers, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.maxUsers) }}
+                                    {{ form_widget(form.maxUsers, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.maxUsers) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.maxUsers) }}</div>
                                 </div>
                             {% endif %}
 
                             <div class="mb-3">
                                 {{ form_label(form.dateDebut, 'Date de début') }}
                                 <div class="input-group" id="dateDebutPicker" data-td-target-input="nearest" data-td-target="#dateDebut">
-                                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control', 'data-td-target': '#dateDebut', 'id': 'dateDebut', 'autocomplete': 'off'}}) }}
+                                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control' ~ (form_errors(form.dateDebut) ? ' is-invalid' : ''), 'data-td-target': '#dateDebut', 'id': 'dateDebut', 'autocomplete': 'off'}}) }}
                                     <span class="input-group-text" data-td-target="#dateDebut" data-td-toggle="datetimepicker">
                                         <i class="fa-regular fa-calendar"></i>
                                     </span>
                                 </div>
-                                {{ form_errors(form.dateDebut) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.dateDebut) }}
+                                </div>
                             </div>
                             <div class="mb-3">
                                 {{ form_label(form.dateFin, 'Date de fin') }}
                                 <div class="input-group" id="dateFinPicker" data-td-target-input="nearest" data-td-target="#dateFin">
-                                    {{ form_widget(form.dateFin, {'attr': {'class': 'form-control', 'data-td-target': '#dateFin', 'id': 'dateFin', 'autocomplete': 'off'}}) }}
+                                    {{ form_widget(form.dateFin, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.dateFin) ? ' is-invalid' : ''), 
+                                            'data-td-target': '#dateFin', 
+                                            'id': 'dateFin', 
+                                            'autocomplete': 'off'
+                                        }
+                                    }) }}
                                     <span class="input-group-text" data-td-target="#dateFin" data-td-toggle="datetimepicker">
                                         <i class="fa-regular fa-calendar"></i>
                                     </span>
                                 </div>
-                                {{ form_errors(form.dateFin) }}
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.dateFin) }}
+                                </div>
                             </div>
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
