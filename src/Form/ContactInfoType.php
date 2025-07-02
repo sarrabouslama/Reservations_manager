@@ -10,6 +10,8 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Component\Validator\Constraints\Length as length;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints\Regex;
+
 
 
 class ContactInfoType extends AbstractType
@@ -31,11 +33,10 @@ class ContactInfoType extends AbstractType
                 'attr' => ['placeholder' => 'Entrer numéro de téléphone'],
                 'required' => true,
                 'constraints' => [
-                    new length([
-                        'min' => 8,
-                        'max' => 8,
-                        'minMessage' => 'Le numéro de téléphone doit comporter 8 chiffres',
-                        'maxMessage' => 'Le numéro de téléphone doit comporter 8 chiffres',
+                    new NotBlank(['message' => 'Veuillez entrer un numéro de téléphone']),
+                    new Regex([
+                        'pattern' => '/^\d{8}$/',
+                        'message' => 'Le numéro de téléphone doit comporter exactement 8 chiffres',
                     ]),
                 ],
             ]);

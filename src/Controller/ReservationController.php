@@ -105,7 +105,7 @@ class ReservationController extends AbstractController
         ]);
 
         if (!$homePeriod) {
-            $this->addFlash('error', 'Aucune période disponible pour ces dates.');
+            $this->addFlash('danger', 'Aucune période disponible pour ces dates.');
             return $this->redirectToRoute('app_home_show', ['id' => $home->getId()]);
         }
         
@@ -205,15 +205,15 @@ class ReservationController extends AbstractController
             throw $this->createNotFoundException('Réservation non trouvée ou accès refusé.');
         }
         if (!$reservation->isSelected()) {
-            $this->addFlash('error', 'Vous ne pouvez importer un reçu que pour une réservation sélectionnée.');
+            $this->addFlash('danger', 'Vous ne pouvez importer un reçu que pour une réservation sélectionnée.');
             return $this->redirectToRoute('user_reservations');
         }
         $file = $request->files->get('receipt');
         if ($file) {
-            $allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+            $allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg','image/gif','image/heic','image/bmp','image/webp'];
             if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
-                $this->addFlash('error', 'Format de fichier non supporté.');
-                return $this->redirectToRoute('user_reservations');
+                $this->addFlash('danger', 'Format de fichier non supporté.');
+                return $this->redirectToRoute('app_user_reservation', ['id' => $this->getUser()->getId()]);
             }
             $filename = 'receipt_' . $reservation->getId() . '_' . uniqid() . '.' . $file->guessExtension();
             $file->move($this->getParameter('receipts_directory'), $filename);
@@ -222,7 +222,7 @@ class ReservationController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', 'Reçu importé avec succès.');
         } else {
-            $this->addFlash('error', 'Aucun fichier reçu.');
+            $this->addFlash('danger', 'Aucun fichier reçu.');
         }
         return $this->redirectToRoute('app_user_reservation', ['id' => $this->getUser()->getId()]);
     }

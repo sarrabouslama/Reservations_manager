@@ -99,33 +99,43 @@ class ExportExcelController extends AbstractController
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1', 'Région');
-        $sheet->setCellValue('B1', 'Résidence');
-        $sheet->setCellValue('C1', 'Nombre de chambres');
-        $sheet->setCellValue('D1', 'Distance Plage');
-        $sheet->setCellValue('E1', 'Prix');
-        $sheet->setCellValue('F1', 'Description');
-        $sheet->setCellValue('G1', 'Nom Contact');
-        $sheet->setCellValue('H1', 'Telephone Contact');
-        $sheet->setCellValue('I1', 'Google Maps');
-        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->setCellValue('A1', 'Résidence');
+        $sheet->setCellValue('B1', 'Région');
+        $sheet->setCellValue('C1', 'S+');
+        $sheet->setCellValue('D1', 'Prix');
+        $sheet->setCellValue('E1', 'Description');
+        $sheet->setCellValue('F1', 'Périodes');
+        $sheet->setCellValue('G1', 'Nombre de Maisons');
+        $sheet->getStyle('A1:G1')->getFont()->setBold(true);
 
         $row = 2;
         foreach ($data as $item) {
-            $sheet->setCellValue('A' . $row, $item->getRegion());
-            $sheet->setCellValue('B' . $row, $item->getResidence());
-            $sheet->setCellValue('C' . $row, $item->getNombreChambres());
-            $sheet->setCellValue('D' . $row, $item->getDistancePlage() . ' km');
-            $sheet->setCellValue('E' . $row, $item->getPrix() . ' DT');
-            $sheet->setCellValue('F' . $row, $item->getDescription() ?? null);
-            $sheet->setCellValue('G' . $row, $item->getNomProp() ?? null);
-            $sheet->setCellValue('H' . $row, $item->getTelProp() ?? null);
-            $sheet->setCellValue('I' . $row, $item->getMapsUrl()  ?? null);
-            $row++;
+            $periods = $item->getHomePeriods();
+            $periodCount = count($periods);
+            $first = true;
+            foreach ($periods as $period) {
+                if ($first) {
+                    $sheet->setCellValue('A' . $row, $item->getResidence());
+                    $sheet->setCellValue('B' . $row, $item->getRegion());
+                    $sheet->setCellValue('C' . $row, $item->getNombreChambres());
+                    $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+                    $sheet->setCellValue('D' . $row, $item->getPrix() . ' DT');
+                    $sheet->setCellValue('E' . $row, $item->getDescription() ?? null);
+                    $first = false;
+                }
+                $sheet->setCellValue('F' . $row, $period->getDateDebut()->format('d-m-Y') . ' au ' . $period->getDateFin()->format('d-m-Y'));
+                $sheet->setCellValue('G' . $row, $period->getMaxUsers() ?? 0);
+                $row++;
+            }
+            // Merge cells for home info if there are multiple periods
+            if ($periodCount > 1) {
+                foreach (['A','B','C','D','E'] as $col) {
+                    $sheet->mergeCells("{$col}" . ($row - $periodCount) . ":{$col}" . ($row - 1));
+                }
+            }
         }
 
         $writer = new Xlsx($spreadsheet);
-
         $response = new Response();
         $disposition = $response->headers->makeDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
@@ -133,13 +143,10 @@ class ExportExcelController extends AbstractController
         );
         $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         $response->headers->set('Content-Disposition', $disposition);
-
         ob_start();
         $writer->save('php://output');
         $content = ob_get_clean();
-
         $response->setContent($content);
-
         return $response;
     }
 

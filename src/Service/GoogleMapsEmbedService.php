@@ -13,15 +13,39 @@ class GoogleMapsEmbedService
         $curlError = curl_error($ch);
         curl_close($ch);
 
-        if (preg_match('#/maps/search/([\\d\\.\\-]+)[,\\+ ]+([\\d\\.\\-]+)#', $finalUrl, $matches)) {            
+        // Try to extract coordinates from /maps/search/lat,lng
+        if (preg_match('#/maps/search/([\\d\\.\-]+)[,\+ ]+([\\d\\.\-]+)#', $finalUrl, $matches)) {
             $lat = $matches[1];
             $lng = $matches[2];
             return "https://www.google.com/maps?q=$lat,$lng&hl=fr&z=16&output=embed";
         }
-        if (preg_match('#/maps/search/([\\d\\.\\-]+)[,\\+ ]+([\\d\\.\\-]+)#', $finalUrl, $matches)) {            
+        // Try to extract coordinates from /@lat,lng,zoomz
+        if (preg_match('#/maps/@([\\d\\.\-]+),([\\d\\.\-]+),#', $finalUrl, $matches)) {
             $lat = $matches[1];
             $lng = $matches[2];
             return "https://www.google.com/maps?q=$lat,$lng&hl=fr&z=16&output=embed";
+        }
+        // Try to extract place name from /maps/place/PLACE_NAME
+        if (preg_match('#/maps/place/([^/]+)#', $finalUrl, $matches)) {
+            $place = urldecode($matches[1]);
+            $place = str_replace(['+', '%20'], ' ', $place);
+            $place = trim($place);
+            $place = urlencode($place);
+            return "https://www.google.com/maps?q=$place&hl=fr&z=16&output=embed";
+        }
+        // Try to extract coordinates from ?q=lat,lng
+        if (preg_match('#[?&]q=([\\d\\.\-]+),([\\d\\.\-]+)#', $finalUrl, $matches)) {
+            $lat = $matches[1];
+            $lng = $matches[2];
+            return "https://www.google.com/maps?q=$lat,$lng&hl=fr&z=16&output=embed";
+        }
+        // Try to extract place name from ?q=PLACE_NAME
+        if (preg_match('#[?&]q=([^&]+)#', $finalUrl, $matches)) {
+            $place = urldecode($matches[1]);
+            $place = str_replace(['+', '%20'], ' ', $place);
+            $place = trim($place);
+            $place = urlencode($place);
+            return "https://www.google.com/maps?q=$place&hl=fr&z=16&output=embed";
         }
         return null;
     }

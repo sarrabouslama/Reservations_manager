@@ -18,7 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 
 #[Route('/homes')]
-#[IsGranted('ROLE_User','ROLE_ADMIN')]
+#[IsGranted('ROLE_USER','ROLE_ADMIN')]
 class HomeController extends AbstractController
 {
     #[Route('', name: 'app_home_index')]

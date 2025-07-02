@@ -19,6 +19,7 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class UserType extends AbstractType
 {
@@ -45,11 +46,9 @@ class UserType extends AbstractType
                 'attr' => ['placeholder' => 'Entrer numéro de téléphone'],
                 'required' => false,
                 'constraints' => [
-                    new length([
-                        'min' => 8,
-                        'max' => 8,
-                        'minMessage' => 'Le numéro de téléphone doit comporter 8 chiffres',
-                        'maxMessage' => 'Le numéro de téléphone doit comporter 8 chiffres',
+                    new Regex([
+                        'pattern' => '/^\d{8}$/',
+                        'message' => 'Le numéro de téléphone doit comporter exactement 8 chiffres',
                     ]),
                 ],
             ])
@@ -103,6 +102,10 @@ class UserType extends AbstractType
                         'mimeTypes' => [
                             'image/jpeg',
                             'image/png',
+                            'image/gif',
+                            'image/webp',
+                            'image/heic',
+                            'image/heif',
                         ],
                         'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPEG ou PNG)',
                     ])

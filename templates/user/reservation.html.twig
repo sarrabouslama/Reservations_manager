@@ -44,7 +44,7 @@
                                     <div class="mb-3">
                                         <strong>Reçu :</strong>
                                         {% set ext = reservation.receiptFilename|split('.')|last|lower %}
-                                        {% if ext in ['jpg','jpeg','png','gif','bmp','webp'] %}
+                                        {% if ext in ['jpg','jpeg','png','gif','heic','bmp','webp'] %}
                                             <a href="/uploads/receipts/{{ reservation.receiptFilename }}" target="_blank">
                                                 <img src="/uploads/receipts/{{ reservation.receiptFilename }}" alt="Reçu" style="max-width:200px;max-height:200px;" class="img-thumbnail mt-2">
                                             </a>
@@ -97,7 +97,7 @@
                                     {% endif %}
                                     <form action="{{ path('app_reservation_cancel', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Supprimer définitivement cette réservation ?');">
                                         <button type="submit" class="btn btn-danger btn-lg">
-                                            <i class="fa-solid fa-trash"></i> Supprimer
+                                            <i class="fa-solid fa-trash"></i> Annuler réservation
                                         </button>
                                     </form>
                                 </div>

@@ -70,13 +70,13 @@ class UserController extends AbstractController
                 // Check if the user already exists
                 $existingUser = $userRepository->findOneBy(['matricule' => $user->getMatricule()]);
                 if ($existingUser && $existingUser->getId() !== $user->getId()) {
-                    $this->addFlash('error', 'Un adhérent avec ce matricule existe déjà.');
+                    $this->addFlash('danger', 'Un adhérent avec ce matricule existe déjà.');
                     return $this->redirectToRoute('app_user_edit', ['id' => $user->getId()]);
                 }
                 // Check if the user already exists by CIN
                 $existingUserByCin = $userRepository->findOneBy(['cin' => $user->getCin()]);
                 if ($existingUserByCin && $existingUserByCin->getId() !== $user->getId()) {
-                    $this->addFlash('error', 'Un adhérent avec ce CIN existe déjà.');
+                    $this->addFlash('danger', 'Un adhérent avec ce CIN existe déjà.');
                     return $this->redirectToRoute('app_user_edit', ['id' => $user->getId()]);
                 }
             }
@@ -94,7 +94,7 @@ class UserController extends AbstractController
                         $newFilename
                     );
                 } catch (FileException $e) {
-                    $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image');
+                    $this->addFlash('danger', 'Une erreur est survenue lors du téléchargement de l\'image');
                     return $this->redirectToRoute('app_user_edit', ['id' => $user->getId()]);
                 }
 
@@ -139,7 +139,7 @@ class UserController extends AbstractController
             $newPassword = $request->request->get('new_password');
             $confirmPassword = $request->request->get('confirm_password');
             if (!$newPassword || $newPassword !== $confirmPassword) {
-                $this->addFlash('error', 'Passwords do not match.');
+                $this->addFlash('danger', 'Passwords do not match.');
                 return $this->redirectToRoute('app_user_edit-password', ['id' => $user->getId()]);
             }
             else{

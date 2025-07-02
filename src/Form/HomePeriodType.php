@@ -8,30 +8,24 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Positive;
 
 class HomePeriodType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('maxUsers', IntegerType::class, [
-                'label' => 'Nombre de maisons',
-                'required' => true,
-                'attr' => [
-                    'min' => 0,
-                ],
-            ])
             ->add('dateDebut', DateType::class, [
-                'widget' => 'single_text',
-                'label' => 'Date de début',
-                'required' => true,
-                'format' => 'dd/MM/yyyy',
-                'html5' => false,
-                'attr' => [
-                    'id' => 'dateDebut',
-                    'class' => 'form-control datepicker',
-                    'autocomplete' => 'off',
-                ],
+            'widget' => 'single_text',
+            'label' => 'Date de début',
+            'required' => true,
+            'format' => 'dd/MM/yyyy',
+            'html5' => false,
+            'attr' => [
+                'id' => 'dateDebut',
+                'class' => 'form-control datepicker',
+                'autocomplete' => 'off',
+            ],
             ])
             ->add('dateFin', DateType::class, [
                 'widget' => 'single_text',
@@ -45,7 +39,16 @@ class HomePeriodType extends AbstractType
                     'autocomplete' => 'off',
                 ],
             ]);
-            
+
+            if ($options['one_period']){
+                $builder->add('maxUsers', IntegerType::class, [
+                    'label' => 'Nombre de maisons',
+                    'required' => true,
+                    'attr' => [
+                        'min' => 1,
+                    ],
+                ]);
+            }
             
     }
 
@@ -53,6 +56,7 @@ class HomePeriodType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => HomePeriod::class,
+            'one_period' => true, 
         ]);
     }
 } 

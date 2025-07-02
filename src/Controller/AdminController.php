@@ -94,13 +94,13 @@ class AdminController extends AbstractController
 
             $existingUser = $userRepository->findOneBy(['matricule' => $user->getMatricule()]);
             if ($existingUser) {
-                $this->addFlash('error', 'Un adhérent avec ce matricule existe déjà.');
+                $this->addFlash('danger', 'Un adhérent avec ce matricule existe déjà.');
                 return $this->redirectToRoute('admin_user_new');
             }
             // Check if the user already exists by CIN
             $existingUserByCin = $userRepository->findOneBy(['cin' => $user->getCin()]);
             if ($existingUserByCin) {
-                $this->addFlash('error', 'Un adhérent avec ce CIN existe déjà.');
+                $this->addFlash('danger', 'Un adhérent avec ce CIN existe déjà.');
                 return $this->redirectToRoute('admin_user_new');
             }
             // If the user has an image, handle the file upload
@@ -116,7 +116,7 @@ class AdminController extends AbstractController
                         $newFilename
                     );
                 } catch (FileException $e) {
-                    $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image');
+                    $this->addFlash('danger', 'Une erreur est survenue lors du téléchargement de l\'image');
                     return $this->redirectToRoute('admin_user_new');
                 }
 
@@ -769,7 +769,7 @@ class AdminController extends AbstractController
                             $newFilename
                         );
                     } catch (FileException $e) {
-                        $this->addFlash('error', 'Erreur lors du téléchargement d\'une image/vidéo');
+                        $this->addFlash('danger', 'Erreur lors du téléchargement d\'une image/vidéo');
                         continue;
                     }
 
@@ -831,7 +831,7 @@ class AdminController extends AbstractController
                                 $newFilename
                             );
                         } catch (FileException $e) {
-                            $this->addFlash('error', 'Erreur lors du téléchargement d\'une image');
+                            $this->addFlash('danger', 'Erreur lors du téléchargement d\'une image');
                             continue;
                         }
     
@@ -860,7 +860,7 @@ class AdminController extends AbstractController
             }
             else {
 
-                $this->addFlash('error', 'Form invalide. Veuillez vérifier les données saisies.');
+                $this->addFlash('danger', 'Form invalide. Veuillez vérifier les données saisies.');
             }
         }
         
@@ -910,7 +910,7 @@ class AdminController extends AbstractController
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
                 ]);
-                $this->addFlash('error', 'Erreur lors de la suppression: ' . $e->getMessage());
+                $this->addFlash('danger', 'Erreur lors de la suppression: ' . $e->getMessage());
             }
         }
 
@@ -954,7 +954,9 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_homes');
         }
         
-        $form = $this->createForm(HomePeriodType::class);
+        $form = $this->createForm(HomePeriodType::class, null, [
+            'one_period' => false,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -963,7 +965,7 @@ class AdminController extends AbstractController
                 $homePeriod->setHome($home);
                 $homePeriod->setDateDebut($form->get('dateDebut')->getData());
                 $homePeriod->setDateFin($form->get('dateFin')->getData());
-                $homePeriod->setMaxUsers($form->get('maxUsers')->getData());
+                $homePeriod->setMaxUsers(0);
 
                 // Check if the period overlaps with existing periods
                 foreach ($home->getHomePeriods() as $period) {
@@ -1125,7 +1127,7 @@ class AdminController extends AbstractController
                 $this->addFlash('success', 'La période a été supprimée avec succès');
 
             } catch (\Exception $e) {
-                $this->addFlash('error', 'Erreur lors de la suppression de la période: ' . $e->getMessage());
+                $this->addFlash('danger', 'Erreur lors de la suppression de la période: ' . $e->getMessage());
             }
         }
 
