@@ -7,17 +7,42 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Form\ContactInfoType;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
+
 
 class MainController extends AbstractController
 {
 
     #[Route('/', name: 'app_home_main')]
-    public function main(): Response
+    public function main(Request $request, EntityManagerInterface $entityManager): Response
     {
-        if ($this->getUser()) {
-            return $this->render('main/index.html.twig');
+        $user = $this->getUser();
+        if (!$user){
+            return $this->redirectToRoute('app_login');
         }
-        return $this->redirectToRoute('app_login');
+        if (!$user->getTel()) {
+            $form = $this->createForm(ContactInfoType::class, [
+                'email' => $user->getEmail(),
+                'tel' => $user->getTel(),
+            ]);
+            $form->handleRequest($request);
+            
+            if ($form->isSubmitted() && $form->isValid()) {
+                $data = $form->getData();
+                $user->setEmail($data['email']);
+                $user->setTel($data['tel']);
+                $entityManager->persist($user);
+                $entityManager->flush();        
+            }
+            
+            return $this->render('reservation/contact_info.html.twig', [
+                'form' => $form->createView(),
+            ]);
+        }
+        return $this->render('main/index.html.twig');
+
     }
 
     #[Route('/hotels', name: 'app_hotels')]

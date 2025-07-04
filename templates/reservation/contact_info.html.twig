@@ -13,16 +13,6 @@
                     </h4>
                     {{ form_start(form) }}
                         <div class="mb-3">
-                            <label class="form-label" for="{{ form.email.vars.id }}">
-                                <i class="fas fa-envelope me-1 text-secondary"></i>
-                                Email (optionnel)
-                            </label>
-                            {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form_errors(form.email) ? ' is-invalid' : ''), 'placeholder': 'Votre email'}}) }}
-                            <div class="invalid-feedback d-block" style="display: block;">
-                                {{ form_errors(form.email) }}
-                            </div>
-                        </div>
-                        <div class="mb-3">
                             <label class="form-label" for="{{ form.tel.vars.id }}">
                                 <i class="fas fa-phone me-1 text-secondary"></i>
                                 Téléphone (obligatoire)
@@ -30,6 +20,16 @@
                             {{ form_widget(form.tel, {'attr': {'class': 'form-control' ~ (form_errors(form.tel) ? ' is-invalid' : ''), 'placeholder': 'Votre numéro de téléphone'}}) }}
                             <div class="invalid-feedback d-block" style="display: block;">
                                 {{ form_errors(form.tel) }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ form.email.vars.id }}">
+                                <i class="fas fa-envelope me-1 text-secondary"></i>
+                                Email (optionnel)
+                            </label>
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form_errors(form.email) ? ' is-invalid' : ''), 'placeholder': 'Votre email'}}) }}
+                            <div class="invalid-feedback d-block" style="display: block;">
+                                {{ form_errors(form.email) }}
                             </div>
                         </div>
                         <input type="hidden" name="dateDebut" value="{{ app.request.get('dateDebut') }}">

@@ -41,6 +41,11 @@
                 {% endif %}
                 {% for ticket in tickets %}
                     <ul class="list-group list-group-flush mb-5 fs-4">
+                        {% if ticket.image %}
+                            <li class="list-group-item">
+                                <img src="{{ asset('uploads/ticket_images/' ~ ticket.image) }}" class="card-img-top" id='existing_image' style="border: 1px solid #ddd; border-radius: 4px; padding: 5px; width: 150px;">
+                            </li>
+                        {% endif %}
                         <li class="list-group-item"><strong>Localisation :</strong> {{ ticket.localisation }}</li>
                         <li class="list-group-item"><strong>Quantité :</strong> {{ ticket.qte }}</li>
                         <li class="list-group-item"><strong>prix Unitaire :</strong> {{ ticket.prixUnitaire|number_format(0, '', ' ') }} TND</li>

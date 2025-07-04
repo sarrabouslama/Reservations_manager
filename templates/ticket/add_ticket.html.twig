@@ -37,6 +37,17 @@
                                 </div>
                             </div>
 
+                            <div class="mb-3">
+                                {{ form_label(form.imageFile, 'Photo') }}
+                                {{ form_widget(form.imageFile, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.imageFile) ? ' is-invalid' : ''),
+                                        'id': 'ticket_imageFile'
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.imageFile) }}</div>
+                            </div>
+
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                 <a href="{{ path('admin_tickets') }}" class="btn btn-secondary me-md-2">Annuler</a>
                                 <button type="submit" class="btn btn-primary">Ajouter</button>
@@ -48,4 +59,32 @@
         </div>
     </div>
 
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var imageInput = document.getElementById('ticket_imageFile');
+            if (imageInput) {
+                imageInput.addEventListener('change', function(e) {
+                    var file = e.target.files[0];
+                    var existingImage = document.getElementById('image');
+                    if (existingImage) {
+                        existingImage.remove();
+                    }
+                    if (file) {
+                        var reader = new FileReader();
+                        reader.onload = function(evt) {
+                            var image = document.createElement('div');
+                            image.className = 'mb-3';
+                            image.id = 'image';
+                            image.innerHTML = '<img src="' + evt.target.result + '" class="card-img-top" style="border: 1px solid #ddd; border-radius: 4px; padding: 5px; width: 150px;">';
+                            imageInput.parentElement.parentElement.appendChild(image);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}

@@ -41,7 +41,8 @@ class ExportExcelController extends AbstractController
         $sheet->setCellValue('F1', 'Date de fin');
         $sheet->setCellValue('G1', 'Maison 2024');
         $sheet->setCellValue('H1', 'Statut de réservation');
-        $sheet->getStyle('A1:H1')->getFont()->setBold(true);     
+        $sheet->setCellValue('I1', 'date de réservation');
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
 
         $row = 2;
         foreach ($data as $item) {
@@ -49,8 +50,26 @@ class ExportExcelController extends AbstractController
             $sheet->setCellValue('B' . $row, $item->getUser()->getNom());
             $sheet->setCellValue('C' . $row, $item->getHomePeriod()->getHome()->getRegion());
             $sheet->setCellValue('D' . $row, $item->getHome()->getNom());
-            $sheet->setCellValue('E' . $row, $item->getHomePeriod()->getDateDebut()->format('d-m-Y'));
-            $sheet->setCellValue('F' . $row, $item->getHomePeriod()->getDateFin()->format('d-m-Y'));
+            $dateDebut = $item->getHomePeriod()->getDateDebut();
+            if ($dateDebut instanceof \DateTimeInterface) {
+                $excelDateValue = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($dateDebut);
+                $sheet->setCellValue('E' . $row, $excelDateValue);
+                $sheet->getStyle('E' . $row)
+                    ->getNumberFormat()
+                    ->setFormatCode('dd-mm-yyyy');
+            } else {
+                $sheet->setCellValue('E' . $row, '');
+            }
+            $dateFin = $item->getHomePeriod()->getDateFin();
+            if ($dateFin instanceof \DateTimeInterface) {
+                $excelDateValue = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($dateFin);
+                $sheet->setCellValue('F' . $row, $excelDateValue);
+                $sheet->getStyle('F' . $row)
+                    ->getNumberFormat()
+                    ->setFormatCode('dd-mm-yyyy');
+            } else {
+                $sheet->setCellValue('F' . $row, '');
+            }
             $sheet->setCellValue('G' . $row, $item->getUser()->isLastYear() ? 'Oui' : 'Non');
             $status = $item->isConfirmed() ? 'Confirmée' : ($item->isSelected() ? 'Réservée' : 'En attente');
             $sheet->setCellValue('H' . $row, $status);
@@ -64,6 +83,16 @@ class ExportExcelController extends AbstractController
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()
                     ->setARGB('FF90EE90'); 
+            }
+            $dateReservation = $item->getDateReservation();
+            if ($dateReservation instanceof \DateTimeInterface) {
+                $excelDateValue = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($dateReservation);
+                $sheet->setCellValue('I' . $row, $excelDateValue);
+                $sheet->getStyle('I' . $row)
+                    ->getNumberFormat()
+                    ->setFormatCode('dd-mm-yyyy');
+            } else {
+                $sheet->setCellValue('I' . $row, '');
             }
             $row++;
         }

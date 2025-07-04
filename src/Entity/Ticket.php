@@ -36,6 +36,11 @@ class Ticket
     #[ORM\OneToMany(targetEntity: ResponsableTicket::class, mappedBy: 'ticket', orphanRemoval: true)]
     private Collection $responsableTickets;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image = null;
+
+    private ?File $imageFile = null;
+
     public function __construct()
     {
         $this->responsableTickets = new ArrayCollection();
@@ -145,6 +150,29 @@ class Ticket
             }
         }
 
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+    
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageFile(?File $imageFile): static
+    {
+        $this->imageFile = $imageFile;
         return $this;
     }
 }

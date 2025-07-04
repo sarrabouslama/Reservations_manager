@@ -13,6 +13,9 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\PositiveOrZero;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\Positive;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\File;
 
 class TicketType extends AbstractType
 {
@@ -43,6 +46,24 @@ class TicketType extends AbstractType
                 'constraints' => [
                     new NotBlank(['message' => 'Veuillez entrer un prix unitaire']),
                     new Positive(['message' => 'Le prix unitaire doit être supérieur à zéro']),
+                ],
+            ])
+            ->add('imageFile', FileType::class, [
+                'required' => false,
+                'mapped' => false,
+                'constraints' => [
+                    new File([
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/gif',
+                            'image/webp',
+                            'image/heic',
+                            'image/heif',
+                            'image/jfif',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez télécharger une image valide',
+                    ])
                 ],
             ])
         ;

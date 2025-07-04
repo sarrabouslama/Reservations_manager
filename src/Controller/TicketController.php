@@ -53,6 +53,31 @@ class TicketController extends AbstractController
             $ticket->setQte($form->get('qte')->getData());
             $ticket->setPrixUnitaire($form->get('prixUnitaire')->getData());
             $ticket->setLocalisation($form->get('localisation')->getData());
+            $imageFile = $form->get('imageFile')->getData();
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = preg_replace('/[^a-zA-Z0-9_\-]/', '', $originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+
+                try {
+                    $imageFile->move(
+                        $this->getParameter('tickets_images_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    $this->addFlash('danger', 'Une erreur est survenue lors du téléchargement de l\'image');
+                    return $this->redirectToRoute('admin_add_ticket');
+                }
+
+                // Delete old image if exists
+                if ($ticket->getImage()) {
+                    $oldImagePath = $this->getParameter('tickets_images_directory').'/'.$ticket->getImage();
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+                $ticket->setImage($newFilename);
+            } 
             $entityManager->persist($ticket);
             $entityManager->flush();
             $this->addFlash('success', 'Le ticket a été mis à jour avec succès.');
@@ -94,13 +119,38 @@ class TicketController extends AbstractController
             $ticket->setQte($form->get('qte')->getData());
             $ticket->setPrixUnitaire($form->get('prixUnitaire')->getData());
             $ticket->setLocalisation($form->get('localisation')->getData());
+            $imageFile = $form->get('imageFile')->getData();
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = preg_replace('/[^a-zA-Z0-9_\-]/', '', $originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+
+                try {
+                    $imageFile->move(
+                        $this->getParameter('tickets_images_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    $this->addFlash('danger', 'Une erreur est survenue lors du téléchargement de l\'image');
+                    return $this->redirectToRoute('admin_edit_ticket', ['id' => $id]);
+                }
+
+                // Delete old image if exists
+                if ($ticket->getImage()) {
+                    $oldImagePath = $this->getParameter('tickets_images_directory').'/'.$ticket->getImage();
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+                $ticket->setImage($newFilename);
+            } 
             $entityManager->persist($ticket);
             $entityManager->flush();
             $this->addFlash('success', 'Le ticket a été mis à jour avec succès.');
             return $this->redirectToRoute('admin_tickets');
         }
 
-        return $this->render('ticket/add_ticket.html.twig', [
+        return $this->render('ticket/edit_ticket.html.twig', [
             'ticket' => $ticket,
             'form' => $form->createView(),
         ]);
@@ -610,12 +660,17 @@ class TicketController extends AbstractController
     }
 
 
-    
-    #[Route('/ticket/prix-by-localisation/{localisation}', name: 'ticket_prix_by_localisation')]
-    public function prixByLocalisation(string $localisation, TicketRepository $ticketRepository): JsonResponse
+    #[Route('/ticket/by-localisation/{localisation}', name: 'ticket_by_localisation')]
+    public function imageByLocalisation(string $localisation, TicketRepository $ticketRepository): JsonResponse
     {
         $ticket = $ticketRepository->findOneBy(['localisation' => $localisation]);
-        return new JsonResponse(['prix' => $ticket ? $ticket->getPrixUnitaire() : '']);
+        if (!$ticket) {
+            return new JsonResponse(['error' => 'Ticket not found'], 404);
+        }
+        return new JsonResponse([
+            'prix' => $ticket->getPrixUnitaire(),
+            'image' => $ticket->getImage(),
+        ]);
     }
 
 }

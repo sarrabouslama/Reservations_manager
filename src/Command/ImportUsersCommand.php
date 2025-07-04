@@ -62,14 +62,16 @@ class ImportUsersCommand extends Command
                 $user->setNom($row[1] ?? ''); // Nom
                 $user->setCin(str_pad($row[2], 8, '0', STR_PAD_LEFT)); // CIN
                 $user->setActif($row[3] === 'true' || $row[3] === 1 || $row[3] === '1' || $row[3] === 'Oui'); // Actif
-                $user->setTel($row[4] ?? null); // Téléphone
-                $user->setSit($row[5] ?? ''); // Situation
-                $user->setNbEnfants((int)($row[6] ?? 0)); // Nombre d'enfants
-                $user->setEmploi($row[7] ?? ''); // Emploi
-                $user->setMatriculeCnss($row[8] ?? ''); // Matricule CNSS
-                $user->setDirection($row[9] ?? ''); // Direction
-                $user->setEmail($row[10] ?? null); // Email
-                $user->setLastYear($row[11] === 'true' || $row[11] === 1 || $row[11] === '1' || $row[11] === 'Oui');
+                if (!empty($row[4])) {
+                    $user->setTel($row[4]); // Téléphone
+                }
+                $user->setSit($row[6] ?? ''); // Situation
+                $user->setNbEnfants((int)($row[7] ?? 0)); // Nombre d'enfants
+                $user->setEmploi($row[8] ?? ''); // Emploi
+                $user->setMatriculeCnss($row[9] ?? ''); // Matricule CNSS
+                $user->setDirection($row[10] ?? ''); // Direction
+                //$user->setEmail($row[11] ?? null); // Email
+                //$user->setLastYear($row[12] === 'true' || $row[12] === 1 || $row[12] === '1' || $row[12] === 'Oui');
                 $user->setPassword($this->passwordHasher->hashPassword($user, $user->getCin())); // Hash CIN as password
                 $user->setRoles(['ROLE_USER']); // Default role
                 $this->entityManager->persist($user);

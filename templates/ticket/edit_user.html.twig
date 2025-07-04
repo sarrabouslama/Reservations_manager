@@ -12,28 +12,32 @@
                     </div>
                     <div class="card-body">
                         {{ form_start(form) }}
-                            <div class="mb-3">
-                                {{ form_label(form.matricule, 'Matricule adhérent') }}
-                                {{ form_widget(form.matricule, {'attr': {'class': 'form-control' ~ (form_errors(form.matricule) ? ' is-invalid' : ''), 'id':'user_ticket_matricule'}}) }}
-                                <div class="invalid-feedback d-block" style="display: block;">
-                                    {{ form_errors(form.matricule) }}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.matricule, 'Matricule adhérent') }}
+                                    {{ form_widget(form.matricule, {'attr': {'class': 'form-control' ~ (form_errors(form.matricule) ? ' is-invalid' : ''), 'id':'user_ticket_matricule'}}) }}
+                                    <div class="invalid-feedback d-block" style="display: block;">
+                                        {{ form_errors(form.matricule) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="nom" class="form-label" style="line-height: 0.6;">Nom de l'adhérent</label>
+                                    <input class="form-control" type="text" aria-label="Nom de l'adhérent" disabled readonly id="nom">
                                 </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="nom" class="form-label">Nom de l'adhérent</label>
-                                <input class="form-control" type="text" value="{{ userTicket.user.nom }}" aria-label="Nom de l'adhérent" disabled readonly id="nom">
-                            </div>
 
-                            <div class="mb-3">
-                                {{ form_label(form.localisation, 'localisation') }}
-                                {% if date|date('d-m-Y') == userTicket.dateSaisie|date('d-m-Y') %}
-                                    {{ form_widget(form.localisation, {'attr': {'class': 'form-control' ~ (form_errors(form.localisation) ? ' is-invalid' : ''), 'id':'user_ticket_localisation'}}) }}
-                                {% else %} 
-                                    {{ form_widget(form.localisation, {'attr': {'class': 'form-control' ~ (form_errors(form.localisation) ? ' is-invalid' : ''), 'id':'user_ticket_localisation', 'readonly': 'readonly'}}) }}
-                                {% endif %}
-                                <div class="invalid-feedback d-block" style="display: block;">
-                                    {{ form_errors(form.localisation) }}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.localisation, 'localisation') }}
+                                    {% if date|date('d-m-Y') == userTicket.dateSaisie|date('d-m-Y') %}
+                                        {{ form_widget(form.localisation, {'attr': {'class': 'form-control' ~ (form_errors(form.localisation) ? ' is-invalid' : ''), 'id':'user_ticket_localisation'}}) }}
+                                    {% else %} 
+                                        {{ form_widget(form.localisation, {'attr': {'class': 'form-control' ~ (form_errors(form.localisation) ? ' is-invalid' : ''), 'id':'user_ticket_localisation', 'readonly': 'readonly'}}) }}
+                                    {% endif %}
+                                    <div class="invalid-feedback d-block" style="display: block;">
+                                        {{ form_errors(form.localisation) }}
+                                    </div>
                                 </div>
                             </div>
 
@@ -119,6 +123,9 @@
                                 <button type="submit" class="btn btn-primary">Modifier l'opposition</button>
                             </div>
                         {{ form_end(form) }}
+                        {% if userTicket.responsable.ticket.image %}
+                            <img src="{{ asset('uploads/ticket_images/' ~ userTicket.responsable.ticket.image) }}" class="card-img-top" id='existing_image' style="border: 1px solid #ddd; border-radius: 4px; padding: 5px; width: 150px;">
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -221,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (localisationInput && prixUnitaireInput){
             const localisation = localisationInput.value || '';
             if (localisation.length > 0) {
-            fetch('/ticket/prix-by-localisation/' + encodeURIComponent(localisation))
+            fetch('/ticket/by-localisation/' + encodeURIComponent(localisation))
                 .then(response => response.json())
                 .then(data => {
                     prixUnitaireInput.value = data.prix || '';
@@ -241,6 +248,39 @@ document.addEventListener('DOMContentLoaded', function() {
         localisationInput.addEventListener('change', updatePrix, updateTotal);
         updatePrix();
         updateTotal();
+    }
+
+    function addImage() {
+        var localisationInput = document.getElementById('user_ticket_localisation');
+        if (localisationInput) {
+            var ticket_image = document.createElement('div');
+            ticket_image.className = 'col-md-6 mb-3';
+            ticket_image.id = 'ticket_image';
+            var existingImage = document.getElementById('ticket_image');
+            if (existingImage) {
+                existingImage.remove();
+            }
+            var oldImage = document.getElementById('existing_image');
+            if (oldImage) {
+                oldImage.remove();
+            }
+            var localisationValue = localisationInput.value;
+            if (localisationValue) {
+                fetch('/ticket/by-localisation/' + encodeURIComponent(localisationValue))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.image) {
+                            ticket_image.innerHTML = '<img src="/uploads/ticket_images/' + data.image + '" alt="Photo" class="card-img-top" style="border: 1px solid #ddd; border-radius: 4px; padding: 5px; width: 150px;"></div>';
+                            localisationInput.parentElement.parentElement.appendChild(ticket_image);
+                        }
+                    });
+            }
+        }
+    }
+
+    if (localisationInput){
+        localisationInput.addEventListener('change', addImage);
+        addImage();
     }
 
 });
