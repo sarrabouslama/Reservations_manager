@@ -27,7 +27,7 @@ class GenerateRandomReservationsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('count', 'c', InputOption::VALUE_REQUIRED, 'Number of reservations to generate', 10);
+            ->addOption('count', 'c', InputOption::VALUE_REQUIRED, 'Number of reservations to generate', 1000);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

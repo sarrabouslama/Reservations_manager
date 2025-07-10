@@ -4,120 +4,244 @@
 
 {% block body %}
     <div class="container my-5">
-        {% if reservation %}
-            <div class="row justify-content-center">
-                <div class="col-lg-10">
-                        <div class="card shadow-lg mb-5 border-0" style="font-size: 1.2rem;">
-                            <div class="card-body p-5">
-                                <div class="d-flex align-items-center mb-4">
-                                    <i class="fa-solid fa-house fa-3x text-primary me-4"></i>
-                                    <div>
-                                        <h3 class="mb-1 fw-bold">{{ reservation.homePeriod.home.nom }}</h3>
-                                        <span class="text-muted fs-5">{{ reservation.homePeriod.home.region }}</span>
+        {% if not reservation and not piscineReservation %}
+            <div class="alert alert-info mt-5 text-center fs-4">Vous n'avez pas de réservation en cours.</div>
+        {% else %}
+            {% if reservation %}
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                            <div class="card shadow-lg mb-5 border-0" style="font-size: 1.2rem;">
+                                <div class="card-body p-5">
+                                    <div class="d-flex align-items-center mb-4">
+                                        <i class="fa-solid fa-house fa-3x text-primary me-4"></i>
+                                        <div>
+                                            <a href="{{ path('app_home_show', {'id' : reservation.homePeriod.home.id }) }}" class="link-secondary">
+                                                <h3 class="mb-1 fw-bold">{{ reservation.homePeriod.home.nom }}</h3>
+                                            </a>
+                                            <span class="text-muted fs-5">{{ reservation.homePeriod.home.region }}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <ul class="list-group list-group-flush mb-4 fs-5">
-                                    <li class="list-group-item px-0 py-2">
-                                        <strong>Période :</strong>
-                                        {{ reservation.homePeriod.dateDebut|date('d/m/Y') }} - {{ reservation.homePeriod.dateFin|date('d/m/Y') }}
-                                    </li>
-                                    <li class="list-group-item px-0 py-2">
-                                        <strong>État :</strong>
-                                        {% if reservation.isConfirmed %}
-                                            <span class="badge bg-success fs-6 py-2 px-3">Confirmée</span>
-                                        {% elseif reservation.isSelected %}
-                                            <span class="badge bg-primary fs-6 py-2 px-3">Réservée</span>
-                                        {% else %}
-                                            <span class="badge bg-warning text-dark fs-6 py-2 px-3">En attente</span>
-                                        {% endif %}
-                                    </li>
-                                    {% if is_granted('ROLE_ADMIN') %}
+                                    <ul class="list-group list-group-flush mb-4 fs-5">
                                         <li class="list-group-item px-0 py-2">
-                                            <strong>Adhérent :</strong>
-                                            <a href="{{ path('app_user_profile', {'id': reservation.user.id}) }}" class="fw-bold">
-                                                {{ reservation.user.nom }} {{ reservation.user.matricule }}
-                                            </a>
+                                            <strong>Période :</strong>
+                                            {{ reservation.homePeriod.dateDebut|date('d/m/Y') }} - {{ reservation.homePeriod.dateFin|date('d/m/Y') }}
                                         </li>
-                                    {% endif %}
-                                </ul>
-                                {% if reservation.receiptFilename %}
-                                    <div class="mb-3">
-                                        <strong>Reçu :</strong>
-                                        {% set ext = reservation.receiptFilename|split('.')|last|lower %}
-                                        {% if ext in ['jpg','jpeg','png','gif','heic','bmp','webp'] %}
-                                            <a href="/uploads/receipts/{{ reservation.receiptFilename }}" target="_blank">
-                                                <img src="/uploads/receipts/{{ reservation.receiptFilename }}" alt="Reçu" style="max-width:200px;max-height:200px;" class="img-thumbnail mt-2">
-                                            </a>
-                                        {% elseif ext == 'pdf' %}
-                                            <a href="/uploads/receipts/{{ reservation.receiptFilename }}" target="_blank" class="btn btn-outline-secondary mt-2">
-                                                <i class="fa-solid fa-file-pdf"></i> Voir le reçu PDF
-                                            </a>
-                                        {% else %}
-                                            <a href="/uploads/receipts/{{ reservation.receiptFilename }}" target="_blank" class="btn btn-outline-secondary mt-2">
-                                                <i class="fa-solid fa-file"></i> Télécharger le reçu
-                                            </a>
+                                        <li class="list-group-item px-0 py-2">
+                                            <strong>État :</strong>
+                                            {% if reservation.isConfirmed %}
+                                                <span class="badge bg-success fs-6 py-2 px-3">Confirmée</span>
+                                            {% elseif reservation.isSelected %}
+                                                <span class="badge bg-primary fs-6 py-2 px-3">Réservée</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark fs-6 py-2 px-3">En attente</span>
+                                            {% endif %}
+                                        </li>
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            <li class="list-group-item px-0 py-2">
+                                                <strong>Adhérent :</strong>
+                                                <a href="{{ path('app_user_profile', {'id': reservation.user.id}) }}" class="fw-bold">
+                                                    {{ reservation.user.nom }} {{ reservation.user.matricule }}
+                                                </a>
+                                            </li>
                                         {% endif %}
-                                    </div>
-                                {% endif %}
+                                    </ul>
+                                    {% if reservation.receiptFilename %}
+                                        <div class="mb-3">
+                                            <strong>Reçu :</strong>
+                                            {% set ext = reservation.receiptFilename|split('.')|last|lower %}
+                                            {% if ext in ['jpg','jpeg','png','gif','heic','bmp','webp'] %}
+                                                <a href="/uploads/receipts/{{ reservation.receiptFilename }}" target="_blank">
+                                                    <img src="/uploads/receipts/{{ reservation.receiptFilename }}" alt="Reçu" style="max-width:200px;max-height:200px;" class="img-thumbnail mt-2">
+                                                </a>
+                                            {% elseif ext == 'pdf' %}
+                                                <a href="/uploads/receipts/{{ reservation.receiptFilename }}" target="_blank" class="btn btn-outline-secondary mt-2">
+                                                    <i class="fa-solid fa-file-pdf"></i> Voir le reçu PDF
+                                                </a>
+                                            {% else %}
+                                                <a href="/uploads/receipts/{{ reservation.receiptFilename }}" target="_blank" class="btn btn-outline-secondary mt-2">
+                                                    <i class="fa-solid fa-file"></i> Télécharger le reçu
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
 
 
-                                <div class="d-flex flex-wrap gap-3 justify-content-end mt-4">
-                                    {% if is_granted('ROLE_ADMIN') %}
-                                        {% if not reservation.isSelected %}
-                                            <form action="{{ path('app_reservation_select', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('sélectionner cette réservation ?');">
-                                                <button type="submit" class="btn btn-outline-primary btn-lg">
-                                                    <i class="fa-solid fa-plus"></i> Sélectionner
-                                                </button>
-                                            </form>
-                                        {% else %}
-                                            {% if not reservation.isConfirmed %}
-                                                <form action="{{ path('app_new_payement', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('confirmer cette réservation ?');">
-                                                    <button type="submit" class="btn btn-outline-success btn-lg">
-                                                        <i class="fas fa-check"></i> Confirmer
-                                                    </button>
-                                                </form>
-                                                <form action="{{ path('app_reservation_reject', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Annuler cette réservation ?');">
-                                                    <button type="submit" class="btn btn-outline-danger btn-lg">
-                                                        <i class="fa-solid fa-xmark"></i> Annuler
+                                    <div class="d-flex flex-wrap gap-3 justify-content-end mt-4">
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            {% if not reservation.isSelected %}
+                                                <form action="{{ path('app_reservation_select', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('sélectionner cette réservation ?');">
+                                                    <button type="submit" class="btn btn-outline-primary btn-lg">
+                                                        <i class="fa-solid fa-plus"></i> Sélectionner
                                                     </button>
                                                 </form>
                                             {% else %}
-                                                <form action="{{ path('app_edit_payement', {'id': reservation.id}) }}" method="post" class="d-inline">
-                                                    <button type="submit" class="btn btn-outline-primary btn-lg">
-                                                        <i class="fas fa-edit"></i> Modifier Opposition
-                                                    </button>
-                                                </form>
-                                                <form action="{{ path('app_delete_payement', {'id': reservation.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette opposition ?');">
-                                                    <button type="submit" class="btn btn-outline-danger btn-lg">
-                                                        <i class="fas fa-xmark"></i> Annuler confirmation
-                                                    </button>
-                                                </form>
+                                                {% if not reservation.isConfirmed %}
+                                                    <form action="{{ path('app_new_payement', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('confirmer cette réservation ?');">
+                                                        <button type="submit" class="btn btn-outline-success btn-lg">
+                                                            <i class="fas fa-check"></i> Confirmer
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ path('app_reservation_reject', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Annuler cette réservation ?');">
+                                                        <button type="submit" class="btn btn-outline-danger btn-lg">
+                                                            <i class="fa-solid fa-xmark"></i> Annuler
+                                                        </button>
+                                                    </form>
+                                                {% else %}
+                                                    <form action="{{ path('app_edit_payement', {'id': reservation.id}) }}" method="post" class="d-inline">
+                                                        <button type="submit" class="btn btn-outline-primary btn-lg">
+                                                            <i class="fas fa-edit"></i> Modifier Opposition
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ path('app_delete_payement', {'id': reservation.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette opposition ?');">
+                                                        <button type="submit" class="btn btn-outline-danger btn-lg">
+                                                            <i class="fas fa-xmark"></i> Annuler confirmation
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
                                             {% endif %}
                                         {% endif %}
+                                        <form action="{{ path('app_reservation_cancel', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Supprimer définitivement cette réservation ?');">
+                                            <button type="submit" class="btn btn-danger btn-lg">
+                                                <i class="fa-solid fa-trash"></i> Annuler réservation
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% if reservation.isSelected and not reservation.isConfirmed %}
+                                        <form action="{{ path('app_upload_receipt', {'id': reservation.id}) }}" method="post" enctype="multipart/form-data" class="mb-3">
+                                            <div class="mb-2">
+                                                <label for="receipt_{{ reservation.id }}" class="form-label fw-bold">Importer le reçu de paiement (PDF ou image) :</label>
+                                                <input type="file" name="receipt" id="receipt_{{ reservation.id }}" accept="application/pdf,image/*" class="form-control" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-upload"></i> Envoyer
+                                            </button>
+                                        </form>
                                     {% endif %}
-                                    <form action="{{ path('app_reservation_cancel', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Supprimer définitivement cette réservation ?');">
-                                        <button type="submit" class="btn btn-danger btn-lg">
-                                            <i class="fa-solid fa-trash"></i> Annuler réservation
-                                        </button>
-                                    </form>
                                 </div>
-                                {% if reservation.isSelected and not reservation.isConfirmed %}
-                                    <form action="{{ path('app_upload_receipt', {'id': reservation.id}) }}" method="post" enctype="multipart/form-data" class="mb-3">
-                                        <div class="mb-2">
-                                            <label for="receipt_{{ reservation.id }}" class="form-label fw-bold">Importer le reçu de paiement (PDF ou image) :</label>
-                                            <input type="file" name="receipt" id="receipt_{{ reservation.id }}" accept="application/pdf,image/*" class="form-control" required>
-                                        </div>
-                                        <button type="submit" class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-upload"></i> Envoyer
-                                        </button>
-                                    </form>
-                                {% endif %}
                             </div>
-                        </div>
+                    </div>
                 </div>
-            </div>
-        {% else %}
-            <div class="alert alert-info mt-5 text-center fs-4">Vous n'avez pas de réservation en cours.</div>
+            {% endif %}
+
+            {% if piscineReservation %}
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                            <div class="card shadow-lg mb-5 border-0" style="font-size: 1.2rem;">
+                                <div class="card-body p-5">
+                                    <div class="d-flex align-items-center mb-4">
+                                        <i class="fa-solid fa-person-swimming fa-3x text-primary me-4"></i>
+                                        <div>
+                                            <h3 class="mb-1 fw-bold">{{ piscineReservation.piscine.hotel }}</h3>
+                                            <span class="text-muted fs-5">{{ piscineReservation.piscine.region }}</span>
+                                        </div>
+                                    </div>
+                                    <ul class="list-group list-group-flush mb-4 fs-5">
+                                        <li class="list-group-item px-0 py-2">
+                                            <strong>prix :</strong>{{ piscineReservation.piscine.prixFinal }} DT   
+                                        </li>
+                                        <li class="list-group-item px-0 py-2">
+                                            <strong>Consommation :</strong>{{ piscineReservation.piscine.consommation }} DT   
+                                        </li>
+                                        <li class="list-group-item px-0 py-2">
+                                            <strong>Nombre de personnes :</strong>{{ piscineReservation.piscine.nbPersonnes }}
+                                        </li>
+                                        <li class="list-group-item px-0 py-2">
+                                            <strong>État :</strong>
+                                            {% if piscineReservation.isConfirmed %}
+                                                <span class="badge bg-success fs-6 py-2 px-3">Confirmée</span>
+                                            {% elseif piscineReservation.isSelected %}
+                                                <span class="badge bg-primary fs-6 py-2 px-3">Réservée</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark fs-6 py-2 px-3">En attente</span>
+                                            {% endif %}
+                                        </li>
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            <li class="list-group-item px-0 py-2">
+                                                <strong>Adhérent :</strong>
+                                                <a href="{{ path('app_user_profile', {'id': piscineReservation.user.id}) }}" class="fw-bold">
+                                                    {{ piscineReservation.user.nom }} {{ piscineReservation.user.matricule }}
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+
+                                    {% if piscineReservation.receiptFilename %}
+                                        <div class="mb-3">
+                                            <strong>Reçu :</strong>
+                                            {% set ext = piscineReservation.receiptFilename|split('.')|last|lower %}
+                                            {% if ext in ['jpg','jpeg','png','gif','heic','bmp','webp'] %}
+                                                <a href="/uploads/receipts/{{ piscineReservation.receiptFilename }}" target="_blank">
+                                                    <img src="/uploads/receipts/{{ piscineReservation.receiptFilename }}" alt="Reçu" style="max-width:200px;max-height:200px;" class="img-thumbnail mt-2">
+                                                </a>
+                                            {% elseif ext == 'pdf' %}
+                                                <a href="/uploads/receipts/{{ piscineReservation.receiptFilename }}" target="_blank" class="btn btn-outline-secondary mt-2">
+                                                    <i class="fa-solid fa-file-pdf"></i> Voir le reçu PDF
+                                                </a>
+                                            {% else %}
+                                                <a href="/uploads/receipts/{{ piscineReservation.receiptFilename }}" target="_blank" class="btn btn-outline-secondary mt-2">
+                                                    <i class="fa-solid fa-file"></i> Télécharger le reçu
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+
+
+                                    <div class="d-flex flex-wrap gap-3 justify-content-end mt-4">
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            {% if not piscineReservation.isSelected %}
+                                                <form action="{{ path('admin_piscine_reservation_select', {'id': piscineReservation.id}) }}" method="post" onsubmit="return confirm('sélectionner cette réservation ?');">
+                                                    <button type="submit" class="btn btn-outline-primary btn-lg">
+                                                        <i class="fa-solid fa-plus"></i> Sélectionner
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                {% if not piscineReservation.isConfirmed %}
+                                                    <form action="{{ path('app_payement_piscine', {'id': piscineReservation.id}) }}" method="post" onsubmit="return confirm('confirmer cette réservation ?');">
+                                                        <button type="submit" class="btn btn-outline-success btn-lg">
+                                                            <i class="fas fa-check"></i> Confirmer
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ path('admin_piscine_reservation_reject', {'id': piscineReservation.id}) }}" method="post" onsubmit="return confirm('Annuler cette réservation ?');">
+                                                        <button type="submit" class="btn btn-outline-danger btn-lg">
+                                                            <i class="fa-solid fa-xmark"></i> Annuler
+                                                        </button>
+                                                    </form>
+                                                {% else %}
+                                                    <form action="{{ path('app_edit_payement_piscine', {'id': piscineReservation.id}) }}" method="post" class="d-inline">
+                                                        <button type="submit" class="btn btn-outline-primary btn-lg">
+                                                            <i class="fas fa-edit"></i> Modifier Opposition
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ path('app_delete_payement_piscine', {'id': piscineReservation.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette opposition ?');">
+                                                        <button type="submit" class="btn btn-outline-danger btn-lg">
+                                                            <i class="fas fa-xmark"></i> Annuler confirmation
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endif %}
+                                        <form action="{{ path('app_piscine_cancel', {'id': piscineReservation.id}) }}" method="post" onsubmit="return confirm('Supprimer définitivement cette réservation ?');">
+                                            <button type="submit" class="btn btn-danger btn-lg">
+                                                <i class="fa-solid fa-trash"></i> Annuler réservation
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% if piscineReservation.isSelected and not piscineReservation.isConfirmed %}
+                                        <form action="{{ path('app_upload_receipt_piscine', {'id': piscineReservation.id}) }}" method="post" enctype="multipart/form-data" class="mb-3">
+                                            <div class="mb-2">
+                                                <label for="receipt_{{ piscineReservation.id }}" class="form-label fw-bold">Importer le reçu de paiement (PDF ou image) :</label>
+                                                <input type="file" name="receipt" id="receipt_{{ piscineReservation.id }}" accept="application/pdf,image/*" class="form-control" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-upload"></i> Envoyer
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 {% endblock %}

@@ -1,0 +1,214 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}accès piscine{% endblock %}
+
+{% block body %}
+<div class="container">
+                <h1>Gestion des accès piscine</h1>
+                <div class="row mb-4">  
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Filtrer</h5>
+                            <form method="get" class="row g-3" id="filterform">
+                                <div class="col-md-3">
+                                    <label for="region" class="form-label">Region</label>
+                                        <select class="form-select" id="region" name="region">
+                                        <option value="">Tous</option>
+                                        {% for Region in allRegions %}
+                                            <option value="{{ Region|join('') }}" {% if app.request.get('region') == Region|join('') %}selected{% endif %}>{{ Region|join('') }}</option>
+
+                                        {% endfor %}
+                                    </select>                        
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="hotel" class="form-label">Hôtel</label>
+                                        <select class="form-select" id="hotel" name="hotel">
+                                        <option value="">Tous</option>
+                                        {% for Hotel in allHotels %}
+                                            <option value="{{ Hotel|join('') }}" {% if app.request.get('hotel') == Hotel|join('') %}selected{% endif %}>{{ Hotel|join('') }}</option>
+                                        {% endfor %}
+                                    </select>                        
+                                </div>
+                                
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="button" class="btn btn-secondary w-100" onclick="window.location.href='{{ path(app.request.attributes.get('_route')) }}'">
+                                    Réinitialiser
+                                </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+    <div class="card text-center">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{path('admin_reservations')}}">Maisons</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{path('admin_piscine_reservations')}}">Piscines</a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            
+            <a href="{{ path('export_excel_piscine_reservations') }}" class="btn btn-outline-success col-md-12">
+                <i class="fa-solid fa-download"></i> Télécharger excel
+            </a>
+
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Matricule adhérent</th>
+                            <th>Nom adhérent</th>
+                            <th>Hotel</th>
+                            <th>Région</th>
+                            <th>Prix Final</th>
+                            <th>Actions</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reservation in reservations %}
+                            <tr>
+                                <td>
+                                    {% if reservation.isConfirmed %}
+                                        <span class="badge bg-primary">Confirmée</span>
+                                    {% elseif reservation.isSelected %}
+                                        <span class="badge bg-success">Réservée</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">En attente</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if reservation.user is defined %}
+                                        <a href="{{ path('app_user_profile', {'id': reservation.user.id}) }}" class="link-secondary">
+                                            {{ reservation.user.matricule }} 
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>           
+                                <td>{{ reservation.user.nom }}</td>
+                                <td>{{ reservation.piscine.hotel }}</td>
+                                <td>{{ reservation.piscine.region }}</td>
+                                <td>{{ reservation.piscine.prixFinal }} DT</td>
+                                <td>
+                                    <div class="btn-group">
+                                        {% if not reservation.isSelected %}
+                                            <form action="{{ path('admin_piscine_reservation_select',{'id': reservation.id} )}}" method="post" onsubmit="return confirm('sélectionner cette réservation ?');">
+                                                <button type="submit" class="btn btn-outline-primary btn-sm ">
+                                                    <i class="fa-solid fa-plus"></i>
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            {% if not reservation.isConfirmed %}
+                                                <form action="{{ path('app_payement_piscine', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('confirmer cette réservation ?');">
+                                                    <button type="submit" class="btn btn-outline-success btn-sm">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ path('admin_piscine_reservation_reject', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Annuler cette réservation ?');">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                </form>
+                                            
+                                            {% else %}
+                                                <form action="{{ path('app_delete_payement_piscine', {'id': reservation.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette opposition ?');">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                        <i class="fas fa-xmark"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <form action="{{ path('app_piscine_cancel', {'id': reservation.id}) }}" method="post" onsubmit="return confirm('Supprimer définitivement cette réservation ?');">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="100%" class="text-center">Aucun résultat trouvée</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+    </div>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage > 1 %}{{ path('admin_piscine_reservations', {page: currentPage-1}) }}{% else %}#{% endif %}" tabindex="-1">Previous</a>
+                </li>
+
+                {# Always show first page #}
+                <li class="page-item {% if 1 == currentPage %}active{% endif %}">
+                    <a class="page-link" href="{{ path('admin_piscine_reservations', {page: 1}) }}">1</a>
+                </li>
+
+                {# Show ... if needed #}
+                {% if currentPage > 3 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+
+                {# Show currentPage-1 if it's not 1 or last #}
+                {% if currentPage-1 > 1 and currentPage-1 < totalPages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('admin_piscine_reservations', {page: currentPage-1}) }}">{{ currentPage-1 }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show currentPage if it's not 1 or last #}
+                {% if currentPage != 1 and currentPage != totalPages %}
+                    <li class="page-item active">
+                        <a class="page-link" href="{{ path('admin_piscine_reservations', {page: currentPage}) }}">{{ currentPage }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show currentPage+1 if it's not 1 or last #}
+                {% if currentPage+1 < totalPages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path('admin_piscine_reservations', {page: currentPage+1}) }}">{{ currentPage+1 }}</a>
+                    </li>
+                {% endif %}
+
+                {# Show ... if needed #}
+                {% if currentPage < totalPages-2 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+
+                {# Always show last page if more than 1 #}
+                {% if totalPages > 1 %}
+                    <li class="page-item {% if totalPages == currentPage %}active{% endif %}">
+                        <a class="page-link" href="{{ path('admin_piscine_reservations', {page: totalPages}) }}">{{ totalPages }}</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage < totalPages %}{{ path('admin_piscine_reservations', {page: currentPage+1}) }}{% else %}#{% endif %}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.querySelectorAll('#filterform select').forEach(function(select) {
+            select.addEventListener('change', function() {
+                document.getElementById('filterform').submit();
+            });
+        });
+    </script>
+{% endblock %}

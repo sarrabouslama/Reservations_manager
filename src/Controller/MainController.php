@@ -46,9 +46,23 @@ class MainController extends AbstractController
     }
 
     #[Route('/hotels', name: 'app_hotels')]
-    #[IsGranted('ROLE_USER', 'ROLE_ADMIN')]
+    #[IsGranted('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SEMIADMIN')]
     public function hotels(): Response
     {
         return $this->render('main/hotels.html.twig');
+    }
+
+    #[Route('/bloque', name: 'app_block')]
+    #[IsGranted('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SEMIADMIN')]
+    public function block(): Response
+    {
+        return $this->render('main/block.html.twig');
+    }
+
+    #[Route('/bloque/hotels', name: 'app_block_hotels')]
+    #[IsGranted('ROLE_USER', 'ROLE_ADMIN', 'ROLE_SEMIADMIN')]
+    public function blockHotels(): Response
+    {
+        return $this->render('main/block_hotels.html.twig');
     }
 } 

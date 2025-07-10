@@ -143,13 +143,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const dateDebutPicker = new tempusDominus.TempusDominus(dateDebutElement, pickerOptions);
 
-        dateDebutElement.addEventListener('change.td', function(event) {
-            const startDateObject = event.detail.date;
-            // Add any logic here if you need to react to date changes
-            if (startDateObject) {
-                // console.log('Date selected:', startDateObject.toDate());
-            }
-        });
     }
 
     // --- Total Calculation Logic ---

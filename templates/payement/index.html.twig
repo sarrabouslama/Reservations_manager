@@ -24,121 +24,136 @@
         </div>
     </div>
 
-    <a href="{{ path('export_excel_payements')}}" class="btn btn-outline-success col-md-12">Télécharger Excel</a>
-    
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Matricule</th>
-                    <th>Nom et Prenom</th>
-                    <th>Réservation</th>
-                    <th>Aff</th>
-                    <th>Montant Global</th>
-                    <th>Nb mois</th>
-                    <th>Mensuel</th>
-                    <th>Mode Echéance</th>
-                    <th>Code Opposition</th>
-                    <th>Date Début</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if payements is not empty %}
-                    {%for payement in payements %}
-                        <tr>
-                            <td>
-                                <a href="{{ path('app_user_profile', {'id': payement.reservation.user.id}) }}" class="link-secondary">
-                                    {{ payement.reservation.user.matricule }} 
-                                </a>
-                            </td>
-                            <td>{{ payement.reservation.user.nom}}</td>
-                            <td>
-                                <a href="{{ path('app_user_reservation', {'id': payement.reservation.user.id}) }}" class="link-secondary">
-                                    {{ payement.reservation.id }} 
-                                </a>
-                            </td>
-                            <td> {{ payement.reservation.user.emploi }} </td>
-                            <td> {{ payement.montantGlobal - payement.avance }} </td>
-                            <td> {{ payement.nbMois }} </td>
-                            <td> {{( payement.montantGlobal - payement.avance ) / payement.nbMois }} </td>
-                            <td> {{ payement.modeEcheance }} </td>
-                            <td> {{ payement.codeOpposition }} </td>
-                            <td> {{ payement.dateDebut|date('d/m/Y') }} </td>  
-                            <td>
-                                <div class="btn-group">
-                                    <a href="{{ path('app_edit_payement', {'id': payement.reservation.id}) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ path('app_delete_payement', {'id': payement.reservation.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette opposition ?');">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>                      
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="100%" class="text-center">Aucune opposition.</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-        <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-center">
-                <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
-                    <a class="page-link" href="{% if currentPage > 1 %}{{ path('app_show_payements', {page: currentPage-1}) }}{% else %}#{% endif %}" tabindex="-1">Previous</a>
+    <div class="card text-center">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{path('app_show_payements')}}">Maisons</a>
                 </li>
-
-                {# Always show first page #}
-                <li class="page-item {% if 1 == currentPage %}active{% endif %}">
-                    <a class="page-link" href="{{ path('app_show_payements', {page: 1}) }}">1</a>
-                </li>
-
-                {# Show ... if needed #}
-                {% if currentPage > 3 %}
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                {% endif %}
-
-                {# Show currentPage-1 if it's not 1 or last #}
-                {% if currentPage-1 > 1 and currentPage-1 < totalPages %}
-                    <li class="page-item">
-                        <a class="page-link" href="{{ path('app_show_payements', {page: currentPage-1}) }}">{{ currentPage-1 }}</a>
-                    </li>
-                {% endif %}
-
-                {# Show currentPage if it's not 1 or last #}
-                {% if currentPage != 1 and currentPage != totalPages %}
-                    <li class="page-item active">
-                        <a class="page-link" href="{{ path('app_show_payements', {page: currentPage}) }}">{{ currentPage }}</a>
-                    </li>
-                {% endif %}
-
-                {# Show currentPage+1 if it's not 1 or last #}
-                {% if currentPage+1 < totalPages %}
-                    <li class="page-item">
-                        <a class="page-link" href="{{ path('app_show_payements', {page: currentPage+1}) }}">{{ currentPage+1 }}</a>
-                    </li>
-                {% endif %}
-
-                {# Show ... if needed #}
-                {% if currentPage < totalPages-2 %}
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                {% endif %}
-
-                {# Always show last page if more than 1 #}
-                {% if totalPages > 1 %}
-                    <li class="page-item {% if totalPages == currentPage %}active{% endif %}">
-                        <a class="page-link" href="{{ path('app_show_payements', {page: totalPages}) }}">{{ totalPages }}</a>
-                    </li>
-                {% endif %}
-
-                <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
-                    <a class="page-link" href="{% if currentPage < totalPages %}{{ path('app_show_payements', {page: currentPage+1}) }}{% else %}#{% endif %}">Next</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{path('app_show_payements_piscine')}}">Piscines</a>
                 </li>
             </ul>
-        </nav>
+        </div>
+        <div class="card-body">
+
+            <a href="{{ path('export_excel_payements')}}" class="btn btn-outline-success col-md-12">Télécharger Excel</a>
+            
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Matricule</th>
+                            <th>Nom et Prenom</th>
+                            <th>Réservation</th>
+                            <th>Aff</th>
+                            <th>Montant Global</th>
+                            <th>Nb mois</th>
+                            <th>Mensuel</th>
+                            <th>Mode Echéance</th>
+                            <th>Code Opposition</th>
+                            <th>Date Début</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if payements is not empty %}
+                            {%for payement in payements %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('app_user_profile', {'id': payement.reservation.user.id}) }}" class="link-secondary">
+                                            {{ payement.reservation.user.matricule }} 
+                                        </a>
+                                    </td>
+                                    <td>{{ payement.reservation.user.nom}}</td>
+                                    <td>
+                                        <a href="{{ path('app_user_reservation', {'id': payement.reservation.user.id}) }}" class="link-secondary">
+                                            {{ payement.reservation.id }} 
+                                        </a>
+                                    </td>
+                                    <td> {{ payement.reservation.user.emploi }} </td>
+                                    <td> {{ payement.montantGlobal - payement.avance }} </td>
+                                    <td> {{ payement.nbMois }} </td>
+                                    <td> {{( payement.montantGlobal - payement.avance ) / payement.nbMois }} </td>
+                                    <td> {{ payement.modeEcheance }} </td>
+                                    <td> {{ payement.codeOpposition }} </td>
+                                    <td> {{ payement.dateDebut|date('d/m/Y') }} </td>  
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ path('app_edit_payement', {'id': payement.reservation.id}) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form action="{{ path('app_delete_payement', {'id': payement.reservation.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette opposition ?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>                      
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="100%" class="text-center">Aucune opposition.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                            <a class="page-link" href="{% if currentPage > 1 %}{{ path('app_show_payements', {page: currentPage-1}) }}{% else %}#{% endif %}" tabindex="-1">Previous</a>
+                        </li>
+
+                        {# Always show first page #}
+                        <li class="page-item {% if 1 == currentPage %}active{% endif %}">
+                            <a class="page-link" href="{{ path('app_show_payements', {page: 1}) }}">1</a>
+                        </li>
+
+                        {# Show ... if needed #}
+                        {% if currentPage > 3 %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+
+                        {# Show currentPage-1 if it's not 1 or last #}
+                        {% if currentPage-1 > 1 and currentPage-1 < totalPages %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ path('app_show_payements', {page: currentPage-1}) }}">{{ currentPage-1 }}</a>
+                            </li>
+                        {% endif %}
+
+                        {# Show currentPage if it's not 1 or last #}
+                        {% if currentPage != 1 and currentPage != totalPages %}
+                            <li class="page-item active">
+                                <a class="page-link" href="{{ path('app_show_payements', {page: currentPage}) }}">{{ currentPage }}</a>
+                            </li>
+                        {% endif %}
+
+                        {# Show currentPage+1 if it's not 1 or last #}
+                        {% if currentPage+1 < totalPages %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ path('app_show_payements', {page: currentPage+1}) }}">{{ currentPage+1 }}</a>
+                            </li>
+                        {% endif %}
+
+                        {# Show ... if needed #}
+                        {% if currentPage < totalPages-2 %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+
+                        {# Always show last page if more than 1 #}
+                        {% if totalPages > 1 %}
+                            <li class="page-item {% if totalPages == currentPage %}active{% endif %}">
+                                <a class="page-link" href="{{ path('app_show_payements', {page: totalPages}) }}">{{ totalPages }}</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item {% if currentPage == totalPages %}disabled{% endif %}">
+                            <a class="page-link" href="{% if currentPage < totalPages %}{{ path('app_show_payements', {page: currentPage+1}) }}{% else %}#{% endif %}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
     </div>
 {% endblock %}

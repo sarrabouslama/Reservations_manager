@@ -42,7 +42,8 @@ class ExportExcelController extends AbstractController
         $sheet->setCellValue('G1', 'Maison 2024');
         $sheet->setCellValue('H1', 'Statut de réservation');
         $sheet->setCellValue('I1', 'date de réservation');
-        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->setCellValue('K1', 'Téléphone');
+        $sheet->getStyle('A1:K1')->getFont()->setBold(true);
 
         $row = 2;
         foreach ($data as $item) {
@@ -94,6 +95,7 @@ class ExportExcelController extends AbstractController
             } else {
                 $sheet->setCellValue('I' . $row, '');
             }
+            $sheet->setCellValue('K' . $row, $item->getUser()->getTel());
             $row++;
         }
 
@@ -169,6 +171,84 @@ class ExportExcelController extends AbstractController
         $disposition = $response->headers->makeDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             'homes.xlsx'
+        );
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', $disposition);
+        ob_start();
+        $writer->save('php://output');
+        $content = ob_get_clean();
+        $response->setContent($content);
+        return $response;
+    }
+
+    #[Route('/export/excel/available/homes', name: 'export_excel_available_homes')]
+    public function exportExcelAvailableHomes(): Response
+    {
+        $repository = $this->entityManager->getRepository('App\Entity\Home');
+        $data = $repository->findAll();
+        if (!$data) {
+            return new Response('Aucune donnée à exporter.', 404);
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'Résidence');
+        $sheet->setCellValue('B1', 'Région');
+        $sheet->setCellValue('C1', 'S+');
+        $sheet->setCellValue('D1', 'Prix');
+        $sheet->setCellValue('E1', 'Périodes');
+        $sheet->setCellValue('F1', 'Nb disponible');
+        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+
+        $row = 2;
+        foreach ($data as $item) {
+            $periods = $item->getHomePeriods();
+            $availablePeriods = [];
+            foreach ($periods as $period) {
+                $nbDispo = $period->getMaxUsers() - $period->getReservations()->count();
+                if ($nbDispo > 0) {
+                    $availablePeriods[] = [
+                        'period' => $period,
+                        'nbDispo' => $nbDispo
+                    ];
+                }
+            }
+            $periodCount = count($availablePeriods);
+            if ($periodCount === 0) {
+                continue; // No available periods for this home
+            }
+            $first = true;
+            $startRow = $row;
+            foreach ($availablePeriods as $ap) {
+                $period = $ap['period'];
+                $nbDispo = $ap['nbDispo'];
+                if ($first) {
+                    $sheet->setCellValue('A' . $row, $item->getResidence());
+                    $sheet->setCellValue('B' . $row, $item->getRegion());
+                    $sheet->setCellValue('C' . $row, $item->getNombreChambres());
+                    $sheet->getStyle('C' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+                    $sheet->setCellValue('D' . $row, $item->getPrix() . ' DT');
+                    $first = false;
+                }
+                $sheet->setCellValue('E' . $row, $period->getDateDebut()->format('d-m-Y') . ' au ' . $period->getDateFin()->format('d-m-Y'));
+                $sheet->setCellValue('F' . $row, $nbDispo);
+                $row++;
+            }
+            // Merge cells for home info if there are multiple available periods and the range is valid
+            $endRow = $row - 1;
+            if ($periodCount > 1 && $endRow > $startRow) {
+                foreach (['A','B','C','D'] as $col) {
+                    $sheet->mergeCells("{$col}{$startRow}:{$col}{$endRow}");
+                }
+            }
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $response = new Response();
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'maisons_disponibles.xlsx'
         );
         $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         $response->headers->set('Content-Disposition', $disposition);
@@ -256,7 +336,10 @@ class ExportExcelController extends AbstractController
     public function exportExcelPayements(): Response
     {
         $repository = $this->entityManager->getRepository('App\Entity\Payement');
-        $data = $repository->findAll();
+        $query = $repository->createQueryBuilder('p')
+            ->where('p.reservation IS NOT NULL')
+            ->getQuery();
+        $data = $query->getResult();
         if (!$data) {
             return new Response('Aucune donnée à exporter.', 404);
         }
@@ -274,8 +357,8 @@ class ExportExcelController extends AbstractController
         $sheet->setCellValue('H1', 'Code Opposition');
         $sheet->setCellValue('I1', 'Date Début');
         $sheet->setCellValue('J1', 'Date Saisie');
-        $sheet->setCellValue('K1', '');
-        $sheet->getStyle('A1:J1')->getFont()->setBold(true);
+        $sheet->setCellValue('K1', 'Téléphone');
+        $sheet->getStyle('A1:K1')->getFont()->setBold(true);
 
         $row = 2;
         foreach ($data as $item) {
@@ -290,6 +373,7 @@ class ExportExcelController extends AbstractController
             $sheet->setCellValue('H' . $row, $item->getCodeOpposition());
             $sheet->setCellValue('I' . $row, $item->getDateDebut()->format('d-m-Y'));
             $sheet->setCellValue('J' . $row, $item->getDateSaisie()->format('d-m-Y'));
+            $sheet->setCellValue('K' . $row, $item->getReservation()->getUser()->getTel());
             $row++;
         }
         $writer = new Xlsx($spreadsheet);
@@ -332,7 +416,8 @@ class ExportExcelController extends AbstractController
         $sheet->setCellValue('K1', 'Code Opposition');
         $sheet->setCellValue('L1', 'Date début');
         $sheet->setCellValue('M1', 'Date Saisie');
-        $sheet->getStyle('A1:M1')->getFont()->setBold(true);
+        $sheet->setCellValue('N1', 'Téléphone');
+        $sheet->getStyle('A1:N1')->getFont()->setBold(true);
 
         $row = 2;
         foreach ($data as $item) {
@@ -350,6 +435,7 @@ class ExportExcelController extends AbstractController
             $sheet->setCellValue('K' . $row, $item->getCodeOpposition());
             $sheet->setCellValue('L' . $row, $item->getDateDebut()->format('d-m-Y'));
             $sheet->setCellValue('M' . $row, $item->getDateSaisie()->format('d-m-Y'));
+            $sheet->setCellValue('N' . $row, $item->getUser()->getTel());
             $row++;
         }
         $writer = new Xlsx($spreadsheet);
@@ -366,4 +452,174 @@ class ExportExcelController extends AbstractController
         $response->setContent($content);
         return $response;
     }
+
+    #[Route('/export/excel/piscines', name: 'export_excel_piscines')]
+    public function exportExcelPiscines(): Response {
+        $repository = $this->entityManager->getRepository('App\Entity\Piscine');
+        $data = $repository->findAll();
+        if (!$data) {
+            return new Response('Aucune donnée à exporter.', 404);
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'Hotel');
+        $sheet->setCellValue('B1', 'Région');
+        $sheet->setCellValue('C1', 'Prix initial');
+        $sheet->setCellValue('D1', 'consommation');
+        $sheet->setCellValue('E1', 'Réduction');
+        $sheet->setCellValue('F1', 'Prix final');
+        $sheet->setCellValue('G1', 'nombre de personnes');
+        $sheet->setCellValue('H1', 'nombre d\'enfants');
+        $sheet->setCellValue('I1', 'nombre d\'adultes');
+        $sheet->setCellValue('J1', 'description');
+        $sheet->getStyle('A1:J1')->getFont()->setBold(true);
+
+        $row = 2;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $item->getHotel());
+            $sheet->setCellValue('B' . $row, $item->getRegion());
+            $sheet->setCellValue('C' . $row, number_format($item->getPrixInitial(),0, ',', ' ') . ' DT');
+            $sheet->setCellValue('D' . $row, number_format($item->getConsommation(), 0, ',', ' ') . ' DT'); 
+            $sheet->setCellValue('E' . $row, number_format($item->getAmicale(), 0, ',', ' ') . ' DT');
+            $sheet->setCellValue('F' . $row, number_format($item->getPrixFinal(), 0, ',', ' ') . ' DT');
+            $sheet->setCellValue('G' . $row, $item->getNbPersonnes());
+            $sheet->setCellValue('H' . $row, $item->getNbEnfants());
+            $sheet->setCellValue('I' . $row, $item->getNbAdultes());
+            $sheet->setCellValue('J' . $row, $item->getDescription());
+            $row++;
+        }
+        $writer = new Xlsx($spreadsheet);
+        $response = new Response();
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'piscine.xlsx'
+        );
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', $disposition);
+        ob_start();
+        $writer->save('php://output');
+        $content = ob_get_clean();
+        $response->setContent($content);
+        return $response;
+    }
+
+    #[Route('/export/excel/piscine_reservations', name: 'export_excel_piscine_reservations')]
+    public function exportExcelPiscineReservations(): Response {
+        $repository = $this->entityManager->getRepository('App\Entity\PiscineReservation');
+        $data = $repository->findAll();
+        if (!$data) {
+            return new Response('Aucune donnée à exporter.', 404);
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'Matricule Adhérent');
+        $sheet->setCellValue('B1', 'Nom et Prenom');
+        $sheet->setCellValue('C1', 'Hotel');
+        $sheet->setCellValue('D1', 'Région');
+        $sheet->setCellValue('E1', 'Prix final');
+        $sheet->setCellValue('F1', 'Status');
+        $sheet->setCellValue('G1', 'Téléphone');
+        $sheet->getStyle('A1:G1')->getFont()->setBold(true);
+
+        $row = 2;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $item->getUser()->getMatricule());
+            $sheet->setCellValue('B' . $row, $item->getUser()->getNom());
+            $sheet->setCellValue('C' . $row, $item->getPiscine()->getHotel());
+            $sheet->setCellValue('D' . $row, $item->getPiscine()->getRegion());
+            $sheet->setCellValue('E' . $row, number_format($item->getPiscine()->getPrixFinal(), 0, ',', ' ') . ' DT');
+            $status = $item->isConfirmed() ? 'Confirmée' : ($item->isSelected() ? 'Réservée' : 'En attente');
+            $sheet->setCellValue('F' . $row, $status);
+            if ($status === 'Réservée') {
+                $sheet->getStyle('F' . $row)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()
+                    ->setARGB('FFADD8E6'); 
+            } elseif ($status === 'Confirmée') {
+                $sheet->getStyle('F' . $row)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()
+                    ->setARGB('FF90EE90'); 
+            }
+            $sheet->setCellValue('G' . $row, $item->getUser()->getTel());
+            $row++;
+        }
+        $writer = new Xlsx($spreadsheet);
+        $response = new Response();
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'piscine_reservations.xlsx'
+        );
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', $disposition);
+
+        ob_start();
+        $writer->save('php://output');
+        $content = ob_get_clean();
+        $response->setContent($content);
+        return $response;
+    }
+
+    #[Route('/export/excel/payements_piscine', name: 'export_excel_payements_piscine')]
+    public function exportExcelPayementsPiscine(): Response {
+        $repository = $this->entityManager->getRepository('App\Entity\Payement');
+        $query = $repository->createQueryBuilder('p')
+            ->where('p.piscineReservation IS NOT NULL')
+            ->getQuery();
+        $data = $query->getResult();
+        if (!$data) {
+            return new Response('Aucune donnée à exporter.', 404);
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'Matricule Adhérent');
+        $sheet->setCellValue('B1', 'Nom et Prenom');
+        $sheet->setCellValue('C1', 'Montant');
+        $sheet->setCellValue('D1', 'Aff');
+        $sheet->setCellValue('E1', 'Nb mois');
+        $sheet->setCellValue('F1', 'Mensuel');
+        $sheet->setCellValue('G1', 'Mode echéance');
+        $sheet->setCellValue('H1', 'Code Opposition');
+        $sheet->setCellValue('I1', 'Date Début');
+        $sheet->setCellValue('J1', 'Date Saisie');
+        $sheet->setCellValue('K1', 'Téléphone');
+        $sheet->getStyle('A1:K1')->getFont()->setBold(true);
+
+        $row = 2;
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $item->getReservation()->getUser()->getMatricule());
+            $sheet->setCellValue('B' . $row, $item->getReservation()->getUser()->getNom());
+            $reste = $item->getMontantGlobal() - $item->getAvance();
+            $sheet->setCellValue('C' . $row, number_format($reste, 0, ',', ' ') . ' DT');
+            $sheet->setCellValue('D' . $row, number_format($reste, 0, ',', ' ') . ' DT');
+            $sheet->setCellValue('E' . $row, $item->getNbMois());
+            $sheet->setCellValue('F' . $row, number_format($reste / $item->getNbMois(), 0, ',', ' ') . ' DT');
+            $sheet->setCellValue('G' . $row, $item->getModeEcheance());
+            $sheet->setCellValue('H' . $row, $item->getCodeOpposition());
+            $sheet->setCellValue('I' . $row, $item->getDateDebut()->format('d-m-Y'));
+            $sheet->setCellValue('J' . $row, $item->getDateSaisie()->format('d-m-Y'));
+            $sheet->setCellValue('K' . $row, $item->getReservation()->getUser()->getTel());
+            $row++;
+        }
+        $writer = new Xlsx($spreadsheet);
+        $response = new Response();
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'oppositions_piscine.xlsx'
+        );
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', $disposition);
+        ob_start();
+        $writer->save('php://output');
+        $content = ob_get_clean();
+        $response->setContent($content);
+        return $response;
+    }
+
 }

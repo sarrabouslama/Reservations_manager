@@ -171,96 +171,9 @@ class AdminController extends AbstractController
 
         return $this->redirectToRoute('admin_users');
     }
+
     
 
-
-
-    #[Route('/reservations', name: 'admin_reservations', methods: ['GET'])]
-    public function Reservations(Request $request, ReservationRepository $reservationRepository, HomeRepository $homeRepository, HomePeriodRepository $homePeriodRepository, LoggerInterface $logger): Response
-    {
-        $page = max(1, $request->query->getInt('page', 1));
-        $pageSize = 10;
-
-        $filters = [
-            'region' => $request->query->get('region'),
-            'residence' => $request->query->get('residence'),
-            'nombreChambres' => $request->query->get('nombreChambres'),
-        ];
-        $filters = array_filter($filters);
-        
-        $sort = [
-            'field'  => $request->query->get('sortField'),
-            'direction' => $request->query->get('sortDirection'),
-        ];
-
-
-        
-        $selectedHomePeriodId = $request->query->get('homePeriod');
-        $allPeriods = [];
-        if (isset($filters['residence'])  && isset($filters['region']) && isset($filters['nombreChambres'])) {
-            $homes = $homeRepository->findByFilters($filters,$sort);
-            $homeIds = array_map(fn($h) => $h->getId(), $homes);
-            if ($homeIds) {
-                foreach ($homeIds as $hid) {
-                    $allPeriods = array_merge($allPeriods, $homePeriodRepository->findByHome($hid));
-                }
-            }
-        } else {
-            $allPeriods = $homePeriodRepository->findAll();
-        }
-        if (!isset($sort['field']) || !isset($sort['direction'])) {
-            
-            $session = $request->getSession();
-            $shuffledIds = $session->get('shuffled_reservation_ids');
-        }
-
-        $reservations = [];
-        $totalReservations = 0;
-        $totalPages = 1;
-        $allReservations = $reservationRepository->findByFilters($filters, $sort);
-        if ($selectedHomePeriodId) {
-            $allReservations = array_filter($allReservations, function ($reservation) use ($selectedHomePeriodId) {
-                return $reservation->getHomePeriod() && $reservation->getHomePeriod()->getId() == $selectedHomePeriodId;
-            });
-        }
-        if (isset($shuffledIds)) {
-            $reservationMap = [];
-            foreach ($allReservations as $r) {
-                $reservationMap[$r->getId()] = $r;
-            }
-            $orderedReservations = [];
-            foreach ($shuffledIds as $id) {
-                if (isset($reservationMap[$id])) {
-                    $orderedReservations[] = $reservationMap[$id];
-                    unset($reservationMap[$id]);
-                }
-            }
-            $orderedReservations = array_merge($orderedReservations, array_values($reservationMap));
-            $totalReservations = count($orderedReservations);
-            $reservations = array_slice($orderedReservations, ($page - 1) * $pageSize, $pageSize);
-        } else {
-            $totalReservations = count($allReservations);
-            $reservations = array_slice($allReservations, ($page - 1) * $pageSize, $pageSize);
-        }
-        $totalPages = ceil($totalReservations / $pageSize);
-
-        return $this->render('admin/reservations.html.twig', [
-            'reservations' => $reservations,
-            'homes' => $homeRepository->findByFilters($filters,$sort),
-            'allResidences' => $homeRepository->findAllResidences($filters),
-            'allRegions' => $homeRepository->findAllRegions($filters),
-            'allNbChambres' => $homeRepository->findAllNbChambres($filters),
-            'residence' => $filters['residence'] ?? null,
-            'region' => $filters['region'] ?? null,
-            'nombreChambres' => $filters['nombreChambres'] ?? null,
-            'sortField' => $sort['field'],
-            'sortDirection' => $sort['direction'],
-            'currentPage' => $page,
-            'totalPages' => $totalPages,
-            'allPeriods' => $allPeriods,
-            'selectedHomePeriodId' => $selectedHomePeriodId,
-        ]);
-    }
 
     #[Route('/reservations/random-selection', name: 'admin_random_selection', methods: ['GET'])]
     public function randomSelection(
@@ -448,234 +361,34 @@ class AdminController extends AbstractController
         return $finalShuffledIds;
     }
 
-    #[Route('/{id}/select', name: 'app_reservation_select', methods: ['POST'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function select(int $id,Request $request, EntityManagerInterface $entityManager, ReservationRepository $reservationRepository,LoggerInterface $logger): Response
+    #[Route('/unselect', name: 'admin_reservations_unselect', methods: ['GET'])]
+    public function unselect(Request $request, EntityManagerInterface $entityManager, ReservationRepository $reservationRepository): Response
     {
-        $page = max(1, $request->query->getInt('page', 1));
-        $pageSize = 10;
+        $filters = [
+            'residence' => $request->query->get('residence'),
+            'region' => $request->query->get('region'),
+            'nombreChambres' => $request->query->get('nombreChambres'),
+        ];
 
+        $reservations = $reservationRepository->findByFilters($filters);
 
-
-        $residence = $request->query->get('residence');
-        $region = $request->query->get('region');
-        $nombreChambres = $request->query->get('nombreChambres');
-
-        $reservation = $reservationRepository->find($id);
-        if (!$reservation) {
-            $this->addFlash('danger','Réservation non trouvée.');
-            return $this->redirectToRoute('admin_reservations', [
-                'residence' => $residence,
-                'region' => $region,
-                'nombreChambres' => $nombreChambres,
-                'page' => $page,
-            ]);
+        foreach ($reservations as $reservation) {
+            $reservation->setIsSelected(false);
+            $reservation->setDateSelection(null);
+            $reservation->setIsConfirmed(false);
+            $entityManager->persist($reservation);
         }
-        if ($reservation->isSelected()) {
-            $this->addFlash('danger','Cette réservation a déjà été sélectionnée.');
-            return $this->redirectToRoute('admin_reservations', [
-                'residence' => $residence,
-                'region' => $region,
-                'nombreChambres' => $nombreChambres,
-                'page' => $page,
-            ]);
-        }
-        if ($reservation->isConfirmed()) {
-            $this->addFlash('danger','Cette réservation est déjà confirmée.');
-            return $this->redirectToRoute('admin_reservations', [
-                'residence' => $residence,
-                'region' => $region,
-                'nombreChambres' => $nombreChambres,
-                'page' => $page,
-            ]);
-        }
-        if ($reservation->getHomePeriod()->getMaxUsers() <= count($reservation->getHomePeriod()->getReservations()->filter(fn($r) => $r->isSelected()))) {
-            $this->addFlash('danger','Cette période de réservation est déjà complète.');
-            return $this->redirectToRoute('admin_reservations', [
-                'residence' => $residence,
-                'region' => $region,
-                'nombreChambres' => $nombreChambres,
-                'page' => $page,
-            ]);
-        }
-
-        $reservation->setIsSelected(true);
-        $reservation->setDateSelection(new \DateTime());
-        $entityManager->persist($reservation);
-        $ResName = $reservation->getHomePeriod()->getHome()->getNom();
-
-        // Notify the user
-        $notification = new Notification();
-        $notification->setMessage("Votre réservation à {{ $ResName }} a été sélectionnée par l'admin!");
-        $notification->setCreatedAt(new \DateTime());
-        $notification->setType('user');
-        $notification->setUser($reservation->getUser());
-        $entityManager->persist($notification);
-
+        
         $entityManager->flush();
 
-        $filters = [
-            'residence' => $residence,
-            'region' => $region,
-            'nombreChambres' => $nombreChambres,
-        ];
-        $allReservationsAfterChange = $reservationRepository->findByFilters($filters);
-        $finalShuffledIds = $this->getFinalShuffledIds($allReservationsAfterChange);
-        $request->getSession()->set('shuffled_reservation_ids', $finalShuffledIds);
-
-        $this->addFlash('success', 'Le réservation a été sélectionnée.');
         return $this->redirectToRoute('admin_reservations', [
-            'residence' => $residence,
-            'region' => $region,
-            'nombreChambres' => $nombreChambres,
-            'page' => $page,
+            'region' => $request->query->get('region'),
+            'nombreChambres' => $request->query->get('nombreChambres'),
+            'residence' => $request->query->get('residence'),
         ]);
     }
 
-    #[Route('/{id}/confirm', name: 'app_reservation_confirm', methods: ['POST'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function confirm(int $id,Request $request, EntityManagerInterface $entityManager, ReservationRepository $reservationRepository): Response
-    {
-        $page = max(1, $request->query->getInt('page', 1));
-        $pageSize = 10;
-
-        $residence = $request->query->get('residence');
-        $region = $request->query->get('region');
-        $nombreChambres = $request->query->get('nombreChambres');
-
-        $reservation = $reservationRepository->find($id);
-        if (!$reservation) {
-            $this->addFlash('danger','Réservation non trouvée.');
-            return $this->redirectToRoute('admin_reservations', [
-                'residence' => $residence,
-                'region' => $region,
-                'nombreChambres' => $nombreChambres,
-                'page' => $page,
-            ]);
-        }
-        if (!$reservation->isSelected()) {
-            $this->addFlash('danger',"Cette réservation n'est pas sélectionnée.");
-            return $this->redirectToRoute('admin_reservations', [
-                'residence' => $residence,
-                'region' => $region,
-                'nombreChambres' => $nombreChambres,
-                'page' => $page,
-            ]);
-        }
-        if ($reservation->isConfirmed()) {
-            $this->addFlash('danger','Cette réservation est déjà confirmée.');
-            return $this->redirectToRoute('admin_reservations', [
-                'residence' => $residence,
-                'region' => $region,
-                'nombreChambres' => $nombreChambres,
-                'page' => $page,
-            ]);
-        }
-        $reservation->setIsConfirmed(true);
-        $reservation->setDateSelection(new \DateTime());
-        $entityManager->persist($reservation);
-
-        // Notify the user
-        $notification = new Notification();
-        $notification->setMessage('Votre réservation a été confirmée !');
-        $notification->setCreatedAt(new \DateTime());
-        $notification->setType('user');
-        $notification->setUser($reservation->getUser());
-        $entityManager->persist($notification);
-
-        $entityManager->flush();
-
-        // Update shuffled_reservation_ids session after any change
-        $filters = [
-            'residence' => $residence,
-            'region' => $region,
-            'nombreChambres' => $nombreChambres,
-        ];
-        $allReservationsAfterChange = $reservationRepository->findByFilters($filters);
-        $finalShuffledIds = $this->getFinalShuffledIds($allReservationsAfterChange);
-        $request->getSession()->set('shuffled_reservation_ids', $finalShuffledIds);
-
-        $this->addFlash('success', 'Le réservation a été confirmée.');
-        return $this->redirectToRoute('admin_reservations', [
-            'residence' => $residence,
-            'region' => $region,
-            'nombreChambres' => $nombreChambres,
-            'page' => $page,
-        ]);
-    }
-
-    #[Route('/{id}/reject', name: 'app_reservation_reject', methods: ['POST'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function reject(
-        int $id, 
-        EntityManagerInterface $entityManager, 
-        ReservationRepository $reservationRepository,
-        Request $request
-    ): Response {
-        $page = max(1, $request->query->getInt('page', 1));
-        $pageSize = 10;
-
-        $residence = $request->query->get('residence');
-        $region = $request->query->get('region');
-        $nombreChambres = $request->query->get('nombreChambres');
-
-        $reservation = $reservationRepository->find($id);
-        if (!$reservation) {
-            $this->addFlash('danger','Réservation non trouvée.');
-            return $this->redirectToRoute('admin_reservations', [
-                'residence' => $residence,
-                'region' => $region,
-                'nombreChambres' => $nombreChambres,
-                'page' => $page,
-            ]);
-
-        }
-
-        if (!$reservation->isSelected()) {
-            $this->addFlash('danger',"Cette réservation n'est pas sélectionée.");
-            return $this->redirectToRoute('admin_reservations', [
-                'residence' => $residence,
-                'region' => $region,
-                'nombreChambres' => $nombreChambres,
-                'page' => $page,
-            ]);
-        }
-
-        $reservation->setIsSelected(false);
-        $reservation->setIsConfirmed(false);
-        $reservation->setDateSelection(null);
-        $entityManager->persist($reservation);
-
-        // Notify the user
-        $notification = new Notification();
-        $notification->setMessage('Votre réservation a été rejetée.');
-        $notification->setCreatedAt(new \DateTime());
-        $notification->setType('user');
-        $notification->setUser($reservation->getUser());
-        $entityManager->persist($notification);
-
-        $entityManager->flush();
-
-        // Update shuffled_reservation_ids session after any change
-        $filters = [
-            'residence' => $residence,
-            'region' => $region,
-            'nombreChambres' => $nombreChambres,
-        ];
-        $allReservationsAfterChange = $reservationRepository->findByFilters($filters);
-        $finalShuffledIds = $this->getFinalShuffledIds($allReservationsAfterChange);
-        $request->getSession()->set('shuffled_reservation_ids', $finalShuffledIds);
-
-        $this->addFlash('success', 'La réservation a été rejetée.');
-        return $this->redirectToRoute('admin_reservations',[
-            'residence' => $residence,
-            'region' => $region,
-            'nombreChambres' => $nombreChambres,
-            'page' => $page,
-        ]);
-    }
-
-
+    
 
 
     #[Route('/homes', name: 'admin_homes', methods: ['GET'])]

@@ -1,0 +1,172 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Piscines{% endblock %}
+
+{% block body %}
+    {{ parent() }}
+    <style>
+        .card-piscine {
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+        .card-piscine:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+        }
+        .price-badge {
+            font-size: 1rem;
+            font-weight: 500;
+            background: #fff;
+            color: #007bff;
+            border: 1px solid #007bff;
+            border-radius: 0.75rem;
+            border-length: 100%;
+            padding: 0.25em 0.8em;
+            z-index: 2;
+            box-shadow: none;
+            opacity: 0.95;
+        }
+    </style>
+
+    <div class="row mb-4">  
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Filtrer</h5>
+                    <form method="get" class="row g-3" id="filterform">
+                        <div class="col-md-3">
+                            <label for="region" class="form-label">Region</label>
+                                <select class="form-select" id="region" name="region">
+                                <option value="">Tous</option>
+                                {% for Region in allRegions %}
+                                    <option value="{{ Region|join('') }}" {% if app.request.get('region') == Region|join('') %}selected{% endif %}>{{ Region|join('') }}</option>
+
+                                {% endfor %}
+                            </select>                        
+                        </div>
+                        <div class="col-md-3">
+                            <label for="hotel" class="form-label">Hôtel</label>
+                                <select class="form-select" id="hotel" name="hotel">
+                                <option value="">Tous</option>
+                                {% for Hotel in allHotels %}
+                                    <option value="{{ Hotel|join('') }}" {% if app.request.get('hotel') == Hotel|join('') %}selected{% endif %}>{{ Hotel|join('') }}</option>
+                                {% endfor %}
+                            </select>                        
+                        </div>
+                        
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-secondary w-100" onclick="window.location.href='{{ path(app.request.attributes.get('_route')) }}'">
+                            Réinitialiser
+                        </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        {% if is_granted('ROLE_ADMIN') %}
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Gestion des accès piscine</h1>
+                <div class='btn-group gap-3 md-6 w-50'>
+                    <a href="{{ path('export_excel_piscines') }}" class="btn btn-outline-success flex-fill">
+                        <i class="fa-solid fa-download"></i> Télécharger excel
+                    </a>
+                    <a href="{{ path('admin_piscine_new') }}" class="btn btn-outline-primary flex-fill">
+                        <i class="fas fa-plus"></i> Ajouter
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        {% if piscines is not empty %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for piscine in piscines %}
+                    <div class="col">
+                        {% if not is_granted('ROLE_ADMIN') %}
+                        <form action="{{ path('app_piscine_reserver', {'id': piscine.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir obtenir cet accès piscine ?');">
+                            <button type="submit" class="p-0 border-0 bg-transparent w-100 text-start" style="all:unset;cursor:pointer;width:100%;display:block;">
+                        {% endif %}
+                                <div class="card card-piscine h-100 border-0 position-relative">
+                                    <div class="card-body pb-2">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h5 class="card-title mb-0">{{ piscine.hotel }}</h5><br>
+                                            <span class="price-badge">
+                                                {{ piscine.prixFinal|number_format(0, '.', ' ') }} DT
+                                            </span>
+                                        </div>
+                                        <ul class="list-unstyled mb-3" style="text-align: center;">
+                                            <li><i class="fas fa-map-marker-alt text-danger"></i> <strong>Région:</strong> {{ piscine.region }}</li>
+                                            {% if is_granted('ROLE_ADMIN') %}
+                                                <li><i class="fa-solid fa-dollar-sign"></i> <strong>Prix initial:</strong> {{ piscine.prixInitial }} DT</li>
+                                            {% endif %}
+                                            <li><i class="fa-solid fa-utensils text-primary"></i> <strong>Consommation:</strong> {{ piscine.consommation }} DT</li>
+                                            {% if piscine.nbAdultes %}
+                                                <li><i class="fas fa-person"></i> <strong>Adultes:</strong> {{ piscine.nbAdultes }}</li>
+                                            {% endif %}
+                                            {% if piscine.nbEnfants %}
+                                                <li><i class="fas fa-child"></i> <strong>Enfants:</strong> {{ piscine.nbEnfants }}</li>
+                                            {% endif %}
+                                            {% if piscine.nbPersonnes and not piscine.nbAdultes %}
+                                                <li><i class="fas fa-person"></i> <strong>Personnes:</strong> {{ piscine.nbPersonnes }}</li>
+                                            {% endif %}
+                                            {% if piscine.dateLimite %}
+                                                <li><i class="fa-solid fa-calendar-days text-success"></i> <strong>Validité:</strong> {{ piscine.dateLimite|date('d-m-y') }}</li>
+                                            {% endif %}
+                                            {% if piscine.entree %}
+                                                <li><i class="fa-solid fa-sun text-warning"></i> <strong>Entrée:</strong> {{ piscine.entree|date('H:i') }}</li>
+                                            {% endif %}
+                                            {% if piscine.sortie %}
+                                                <li><i class="fa-solid fa-moon"></i> <strong>Sortie:</strong> {{ piscine.sortie|date('H:i') }}</li>
+                                            {% endif %}
+                                            {% if piscine.description %}
+                                                <li><i class="fas fa-comment text-info"></i> <strong>Remarques:</strong> {{ piscine.description }}</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                    {% if not is_granted('ROLE_ADMIN') %}
+                                        <div class="card-footer bg-white border-0 pt-0 pb-3">
+                                            <span class="btn btn-outline-primary w-100">
+                                                <i class="fa-solid fa-eye"></i> Obtenir
+                                            </span>
+                                        </div>
+                                    {% else %}
+                                        <div class="btn-group w-100" role="group">
+                                            <a href="{{ path('admin_piscine_edit', {'id': piscine.id}) }}" class="btn btn-outline-primary flex-fill">
+                                                <i class="fas fa-edit"></i>Modifier
+                                            </a>
+                                            <form action="{{ path('admin_piscine_delete', {'id': piscine.id}) }}" method="post" class="flex-fill p-0" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette gatégorie ?');">
+                                                <button type="submit" class="btn btn-outline-danger w-100">
+                                                    <i class="fas fa-trash"></i>Supprimer
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                        {% if not is_granted('ROLE_ADMIN') %}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    Aucun résultat ne correspond à vos critères de recherche.
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.querySelectorAll('#filterform select').forEach(function(select) {
+            select.addEventListener('change', function() {
+                document.getElementById('filterform').submit();
+            });
+        });
+    </script>
+{% endblock %}

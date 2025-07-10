@@ -9,11 +9,9 @@
             <h1>Gestion des maisons</h1>
             <div class='btn-group gap-3'>
                 <a href="{{ path('export_excel_homes') }}" class="btn btn-outline-success">Télécharger Excel</a>
+                <a href="{{ path('export_excel_available_homes') }}" class="btn btn-outline-success">Télécharger Maisons disponibles</a>
                 <a href="{{ path('admin_home_new') }}" class="btn btn-outline-primary">
                     <i class="fas fa-plus"></i> Ajouter une maison
-                </a>
-                <a href="{{ path('admin_add_all_periods') }}" class="btn btn-outline-primary">
-                    <i class="fas fa-plus"></i> Ajouter une période pour toutes les maisons
                 </a>
             </div>
         </div>

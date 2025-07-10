@@ -1,0 +1,278 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}accès piscine{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220,53,69,.15);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="h3 mb-0">{{ type }} un accès piscine</h1>
+                    </div>
+                    {% if form.vars.errors|length > 0 %}
+                        <div class="alert alert-danger">
+                            {% for error in form.vars.errors %}
+                                {{ error.message }}<br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.hotel, 'Hotel') }}
+                                    {{ form_widget(form.hotel, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.hotel) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.hotel) }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.region, 'Région') }}
+                                    {{ form_widget(form.region, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.region) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.region) }}</div>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.prixInitial, 'Prix initial') }}
+                                    {{ form_widget(form.prixInitial, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.prixInitial) ? ' is-invalid' : ''),
+                                            'id': 'piscine_prixInitial'
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.prixInitial) }}</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.consommation, 'Consommation') }}
+                                    {{ form_widget(form.consommation, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.consommation) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.consommation) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.amicale, 'Réduction de l\'amicale') }}
+                                    {{ form_widget(form.amicale, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.amicale) ? ' is-invalid' : ''),
+                                            'id': 'piscine_amicale'
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.amicale) }}</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="prixFinal" class="form-label" style="line-height: 0.6;">Prix Final</label>
+                                    <input class="form-control" type="text" value="{{ (form.prixInitial.vars.value|default(0) + 0.0) - (form.amicale.vars.value|default(0) + 0.0) }}" aria-label="prix Final" disabled readonly id="prixFinal">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.avance, 'Avance par défaut') }}
+                                {{ form_widget(form.avance, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.avance) ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.avance) }}</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.nbAdultes, 'nombre d\'adultes') }}
+                                    {{ form_widget(form.nbAdultes, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.nbAdultes) ? ' is-invalid' : ''),
+                                            'id': 'piscine_nbAdultes'
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.nbAdultes) }}</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.nbEnfants, 'Nombre d\'enfants') }}
+                                    {{ form_widget(form.nbEnfants, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.nbEnfants) ? ' is-invalid' : ''),
+                                            'id': 'piscine_nbEnfants'
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.nbEnfants) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.nbPersonnes, 'Nombre de Personnes') }}
+                                {{ form_widget(form.nbPersonnes, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.nbPersonnes) ? ' is-invalid' : ''),
+                                        'id': 'piscine_nbPersonnes'
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.nbPersonnes) }}</div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.dateLimite, 'Date limite') }}
+                                <div class="input-group" id="dateLimitePicker" data-td-target-input="nearest" data-td-target="#dateLimite">
+                                    {{ form_widget(form.dateLimite, {'attr': {'class': 'form-control' ~ (form_errors(form.dateLimite) ? ' is-invalid' : ''), 'data-td-target': '#dateLimite', 'id': 'dateLimite', 'autocomplete': 'off'}}) }}
+                                    <span class="input-group-text" data-td-target="#dateLimite" data-td-toggle="datetimepicker">
+                                        <i class="fa-regular fa-calendar"></i>
+                                    </span>
+                                </div>
+                                <div class="invalid-feedback d-block" style="display: block;">
+                                    {{ form_errors(form.dateLimite) }}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.entree, 'heure d\'entrée') }}
+                                    {{ form_widget(form.entree, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.entree) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.entree) }}</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.sortie, 'heure de sortie') }}
+                                    {{ form_widget(form.sortie, {
+                                        'attr': {
+                                            'class': 'form-control' ~ (form_errors(form.sortie) ? ' is-invalid' : '')
+                                        }
+                                    }) }}
+                                    <div class="invalid-feedback">{{ form_errors(form.sortie) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.description, 'Remarques') }}
+                                {{ form_widget(form.description, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.description) ? ' is-invalid' : '')
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">{{ form_errors(form.description) }}</div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ path('app_piscine') }}" class="btn btn-secondary me-md-2">Annuler</a>
+                                <button type="submit" class="btn btn-primary">{{ type }}</button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const dateLimiteElement = document.getElementById('dateLimitePicker');
+
+            // Only proceed with picker initialization if the element exists
+            if (dateLimiteElement) {
+                const pickerOptions = {
+                    localization: {
+                        format: 'dd/MM/yyyy'
+                    },
+                    display: {
+                        components: {
+                            clock: false
+                        }
+                    },
+                    useCurrent: false
+                };
+
+                const dateLimitePicker = new tempusDominus.TempusDominus(dateLimiteElement, pickerOptions);
+
+                
+            }
+
+
+            const personnesInput = document.getElementById('piscine_nbPersonnes');
+            const enfantsInput = document.getElementById('piscine_nbEnfants');
+            const adultesInput = document.getElementById('piscine_nbAdultes');
+
+            function updatePersonnes() {
+                if (personnesInput && enfantsInput && adultesInput){
+                    const enfants = enfantsInput.value || 0;
+                    const adultes = adultesInput.value || 0;
+                    const personnes = parseInt(enfants) + parseInt(adultes);
+                    personnesInput.value = personnes;
+                }
+            }
+
+            if (personnesInput && enfantsInput && adultesInput){
+                enfantsInput.addEventListener('input', updatePersonnes);
+                adultesInput.addEventListener('input', updatePersonnes);
+            }
+
+            const finalInput = document.getElementById('prixFinal');
+            const initialInput = document.getElementById('piscine_prixInitial');
+            const amicaleInput = document.getElementById('piscine_amicale');
+
+            function updateFinal() {
+                if (finalInput && initialInput && amicaleInput){
+                    const initial = initialInput.value || 0;
+                    const amicale = amicaleInput.value || 0;
+                    const final = parseFloat(initial) - parseFloat(amicale);
+                    finalInput.value = final;
+                }
+            }
+
+            if (finalInput && initialInput && amicaleInput){
+                initialInput.addEventListener('input', updateFinal);
+                amicaleInput.addEventListener('input', updateFinal);
+                updateFinal();
+            }
+
+            // Format time fields: if user enters 'xx', convert to 'xx:00'
+            function formatTimeInput(e) {
+                let val = e.target.value;
+                // Only format if not already in hh:mm and is a 1 or 2 digit number
+                if (/^\d{1,2}$/.test(val)) {
+                    e.target.value = val + ':00';
+                }
+            }
+
+            const entreeInput = document.getElementById('piscine_entree');
+            const sortieInput = document.getElementById('piscine_sortie');
+            if (entreeInput) {
+                entreeInput.addEventListener('blur', formatTimeInput);
+            }
+            if (sortieInput) {
+                sortieInput.addEventListener('blur', formatTimeInput);
+            }
+
+        });
+    </script>
+{% endblock %}

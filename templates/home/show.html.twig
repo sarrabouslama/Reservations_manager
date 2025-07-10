@@ -138,38 +138,47 @@
                                 </thead>
                                 <tbody>
                                     {% for period in home.homePeriods|sort((a, b) => a.dateDebut <=> b.dateDebut) %}
-                                        <tr>
-                                            <td style="width: 80px;">
-                                            {% if is_granted('ROLE_ADMIN') %}
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a href="{{path('admin_edit_period', {'id' : period.id}) }}" class="btn btn-sm btn-outline-success px-2 py-1">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <form action="{{ path('admin_delete_period', {'id': period.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette période ?');">
-                                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ period.id) }}">
-                                                            <button type="submit" class="btn btn-sm btn-outline-danger px-2 py-1">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
+                                        {% if not is_granted('ROLE_ADMIN') %}
+                                            {% set maxUsers = period.maxUsers is defined ? period.maxUsers : (period.getMaxUsers is defined ? period.getMaxUsers() : 0) %}
+                                            {% set nbReservations = period.reservations is defined ? period.reservations|length : 0 %}
+                                        {% else %}
+                                            {% set maxUsers = 1 %}
+                                            {% set nbReservations = 0 %}
+                                        {% endif %}
+                                            {% if maxUsers > nbReservations %}
+                                            <tr>
+                                                <td style="width: 80px;">
+                                                {% if is_granted('ROLE_ADMIN') %}
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a href="{{path('admin_edit_period', {'id' : period.id}) }}" class="btn btn-sm btn-outline-success px-2 py-1">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <form action="{{ path('admin_delete_period', {'id': period.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette période ?');">
+                                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ period.id) }}">
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger px-2 py-1">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    {% else %}
+                                                        <form method="post" action="{{ path('app_reservation_new', {'id': home.id}) }}" class="d-inline reserve-form" data-period-id="{{ period.id }}" onsubmit="return confirm('Êtes-vous sûr de vouloir réserver {{ home.nom }} de {{ period.dateDebut|date('d/m/Y') }} à {{ period.dateFin|date('d/m/Y') }} ?');">
+                                                            <input type="hidden" name="dateDebut" value="{{ period.dateDebut|date('d/m/Y') }}">
+                                                            <input type="hidden" name="dateFin" value="{{ period.dateFin|date('d/m/Y') }}">
+                                                            <button type="submit" class="btn btn-sm btn-primary px-2 py-1">Réserver</button>
                                                         </form>
-                                                    </div>
-                                                {% else %}
-                                                    <form method="post" action="{{ path('app_reservation_new', {'id': home.id}) }}" class="d-inline reserve-form" data-period-id="{{ period.id }}" onsubmit="return confirm('Êtes-vous sûr de vouloir réserver {{ home.nom }} de {{ period.dateDebut|date('d/m/Y') }} à {{ period.dateFin|date('d/m/Y') }} ?');">
-                                                        <input type="hidden" name="dateDebut" value="{{ period.dateDebut|date('d/m/Y') }}">
-                                                        <input type="hidden" name="dateFin" value="{{ period.dateFin|date('d/m/Y') }}">
-                                                        <button type="submit" class="btn btn-sm btn-primary px-2 py-1">Réserver</button>
-                                                    </form>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {{ period.dateDebut|date('d/m/Y') }} - {{ period.dateFin|date('d/m/Y') }}
-                                            </td>
-                                            <td id="reservation-count-{{ period.id }}">
-                                                {{ period.reservations|length }} 
-                                            </td>
-                                            <td>
-                                                {{ period.getMaxUsers() }}
-                                            </td>
-                                        </tr>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {{ period.dateDebut|date('d/m/Y') }} - {{ period.dateFin|date('d/m/Y') }}
+                                                </td>
+                                                <td id="reservation-count-{{ period.id }}">
+                                                    {{ period.reservations|length }} 
+                                                </td>
+                                                <td>
+                                                    {{ period.getMaxUsers() }}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
                                     {% endfor %}
                                 </tbody>
                             </table>

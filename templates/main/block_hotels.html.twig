@@ -1,0 +1,23 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Section indisponible{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+        <div class="col-md-8 text-center">
+            <div class="card shadow-lg border-0">
+                <div class="card-body py-5">
+                    <h1 class="display-4 mb-4 text-danger"><i class="fas fa-ban"></i> Section indisponible</h1>
+                    <p class="lead mb-4">Avis au adhérent <br>
+                        Nous portons à votre connaissance que le site de réservation des hotels n’est plus accessible.
+                        Cette fermeture est due à l’épuisement de la subvention allouée à l’action des hôtels tout en sachant que les maisons sont toujours disponibles.
+                        <br>Merci pour votre compréhension.<br></p>
+                    <a href="{{ path('app_home_main') }}" class="btn btn-primary btn-lg mt-3"><i class="fas fa-home me-2"></i>Retour à l'accueil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -39,6 +39,9 @@ class Payement
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateSaisie = null;
 
+    #[ORM\OneToOne(inversedBy: 'payement', cascade: ['persist', 'remove'])]
+    private ?PiscineReservation $piscineReservation = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -138,6 +141,18 @@ class Payement
     public function setDateSaisie(\DateTimeInterface $dateSaisie): static
     {
         $this->dateSaisie = $dateSaisie;
+
+        return $this;
+    }
+
+    public function getPiscineReservation(): ?PiscineReservation
+    {
+        return $this->piscineReservation;
+    }
+
+    public function setPiscineReservation(?PiscineReservation $piscineReservation): static
+    {
+        $this->piscineReservation = $piscineReservation;
 
         return $this;
     }

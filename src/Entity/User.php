@@ -83,6 +83,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: ResponsableTicket::class, mappedBy: 'responsable')]
     private Collection $responsableTickets;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?PiscineReservation $piscineReservation = null;
+
     public function __construct()
     {
         $this->notifications = new ArrayCollection();
@@ -394,5 +397,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getPiscineReservation(): ?PiscineReservation
+    {
+        return $this->piscineReservation;
+    }
+
+    public function setPiscineReservation(PiscineReservation $piscineReservation): static
+    {
+        // set the owning side of the relation if necessary
+        if ($piscineReservation->getUser() !== $this) {
+            $piscineReservation->setUser($this);
+        }
+
+        $this->piscineReservation = $piscineReservation;
+
+        return $this;
+    }
+
+    
 
 }

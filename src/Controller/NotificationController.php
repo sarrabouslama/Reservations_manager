@@ -10,7 +10,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Entity\Notification;
 use Doctrine\ORM\EntityManagerInterface;
 
-#[IsGranted('ROLE_User','ROLE_ADMIN')]
+#[IsGranted('ROLE_USER','ROLE_ADMIN', 'ROLE_SEMIADMIN')]
 class NotificationController extends AbstractController
 {
     #[Route('/notification', name: 'app_notification')]

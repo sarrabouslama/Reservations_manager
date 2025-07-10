@@ -18,12 +18,15 @@ use Doctrine\ORM\EntityManagerInterface;
 
 
 #[Route('/homes')]
-#[IsGranted('ROLE_USER','ROLE_ADMIN')]
 class HomeController extends AbstractController
 {
+    
     #[Route('', name: 'app_home_index')]
     public function index(Request $request, HomeRepository $homeRepository, EntityManagerInterface $entityManager): Response
     {
+        if (!$this->isGranted('ROLE_USER')) {
+            return $this->redirectToRoute('app_login');
+        }
         $residence = $request->query->get('residence');
         $region = $request->query->get('region');
         $nombreChambres = $request->query->get('nombreChambres');
@@ -59,12 +62,14 @@ class HomeController extends AbstractController
             'region' => $region,
             'nombreChambres' => $nombreChambres,
         ]);
-        
     }
 
     #[Route('/detail/{id}', name: 'app_home_show')]
     public function show(int $id, ReservationRepository $reservationRepository, HomeRepository $homeRepository, LoggerInterface $logger): Response
     {
+        if (!$this->isGranted('ROLE_USER')) {
+            return $this->redirectToRoute('app_login');
+        }
         $home = $homeRepository->find($id);
         if (!$home) {
             throw $this->createNotFoundException('Home not found');
